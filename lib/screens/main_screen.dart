@@ -50,7 +50,7 @@ class MainScreenState extends State<MainScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _navItem(Icons.home_rounded, 'Home', 0),
-                _navItem(Icons.history_rounded, 'History', 1),
+                _navItem(Icons.schedule_rounded, 'History', 1),
                 _navItem(Icons.people_rounded, 'Connections', 2),
                 _navItem(Icons.settings_rounded, 'Settings', 3),
               ],
