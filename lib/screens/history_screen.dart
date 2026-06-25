@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/connection_model.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import 'subscription_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   final VoidCallback? onGoHome;
@@ -121,39 +122,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _showSubscriptionPrompt() {
-    showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.star_rounded, size: 64, color: Color(0xFFF39C12)),
-              const SizedBox(height: 16),
-              const Text('Upgrade to Premium', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50))),
-              const SizedBox(height: 8),
-              const Text('Connect up to 5 people and\nmonitor all of them at once.',
-                textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Color(0xFF7F8C8D), height: 1.4)),
-              const SizedBox(height: 8),
-              const Text('\$5 / month', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFFF39C12))),
-              const SizedBox(height: 24),
-              SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
-                onPressed: () => Navigator.pop(ctx),
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF39C12), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                child: const Text('Coming Soon', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              )),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Not now', style: TextStyle(fontSize: 16, color: Color(0xFF95A5A6))),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => SubscriptionScreen(onGoHome: () {
+        Navigator.pop(context);
+        widget.onGoHome?.call();
+      }),
+    ));
   }
 
   void _showBigMessage(String title, String message, Color color) {
