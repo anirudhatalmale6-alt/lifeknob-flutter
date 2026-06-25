@@ -8,25 +8,29 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainScreen> createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    HistoryScreen(),
-    ConnectionsScreen(),
-    SettingsScreen(),
-  ];
+  void goHome() {
+    setState(() => _currentIndex = 0);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      const HomeScreen(),
+      HistoryScreen(onGoHome: goHome),
+      ConnectionsScreen(onGoHome: goHome),
+      SettingsScreen(onGoHome: goHome),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -46,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _navItem(Icons.home_rounded, 'Home', 0),
-                _navItem(Icons.notifications_rounded, 'Alerts', 1),
+                _navItem(Icons.history_rounded, 'History', 1),
                 _navItem(Icons.people_rounded, 'Connections', 2),
                 _navItem(Icons.settings_rounded, 'Settings', 3),
               ],

@@ -8,6 +8,7 @@ class User {
   final int maxConnections;
   final int usedConnections;
   final String? sosNumber;
+  final String? sosName;
   final bool quietHoursEnabled;
   final String? quietHoursStart;
   final String? quietHoursEnd;
@@ -23,6 +24,7 @@ class User {
     this.maxConnections = 1,
     this.usedConnections = 0,
     this.sosNumber,
+    this.sosName,
     this.quietHoursEnabled = false,
     this.quietHoursStart,
     this.quietHoursEnd,
@@ -40,6 +42,7 @@ class User {
       maxConnections: json['max_connections'] ?? 1,
       usedConnections: json['used_connections'] ?? 0,
       sosNumber: json['sos_number'],
+      sosName: json['sos_name'],
       quietHoursEnabled: json['quiet_hours_enabled'] == true || json['quiet_hours_enabled'] == 1,
       quietHoursStart: json['quiet_hours_start'],
       quietHoursEnd: json['quiet_hours_end'],
@@ -58,6 +61,7 @@ class User {
       'max_connections': maxConnections,
       'used_connections': usedConnections,
       'sos_number': sosNumber,
+      'sos_name': sosName,
       'quiet_hours_enabled': quietHoursEnabled,
       'quiet_hours_start': quietHoursStart,
       'quiet_hours_end': quietHoursEnd,

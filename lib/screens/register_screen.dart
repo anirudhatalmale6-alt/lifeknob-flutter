@@ -116,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Name
                 _buildField(
                   controller: _nameController,
-                  label: 'Full Name',
+                  label: 'Name',
                   icon: Icons.person_outlined,
                   maxLength: 50,
                   validator: (v) => (v == null || v.isEmpty) ? 'Please enter your name' : null,
