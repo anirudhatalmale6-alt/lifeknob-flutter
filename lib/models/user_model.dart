@@ -11,6 +11,7 @@ class User {
   final bool quietHoursEnabled;
   final String? quietHoursStart;
   final String? quietHoursEnd;
+  final String? avatar;
 
   User({
     required this.id,
@@ -25,6 +26,7 @@ class User {
     this.quietHoursEnabled = false,
     this.quietHoursStart,
     this.quietHoursEnd,
+    this.avatar,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class User {
       quietHoursEnabled: json['quiet_hours_enabled'] == true || json['quiet_hours_enabled'] == 1,
       quietHoursStart: json['quiet_hours_start'],
       quietHoursEnd: json['quiet_hours_end'],
+      avatar: json['avatar'],
     );
   }
 
@@ -58,6 +61,7 @@ class User {
       'quiet_hours_enabled': quietHoursEnabled,
       'quiet_hours_start': quietHoursStart,
       'quiet_hours_end': quietHoursEnd,
+      'avatar': avatar,
     };
   }
 

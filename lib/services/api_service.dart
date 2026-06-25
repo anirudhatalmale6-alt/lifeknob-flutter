@@ -120,6 +120,23 @@ class ApiService {
     );
     return _handleResponse(response);
   }
+
+  Future<Map<String, dynamic>> uploadAvatar(List<int> bytes, String filename) async {
+    final token = await AuthService().getToken();
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse(ApiConfig.getUrl('uploadAvatar')),
+    );
+    request.headers['Authorization'] = 'Bearer $token';
+    request.files.add(http.MultipartFile.fromBytes(
+      'avatar',
+      bytes,
+      filename: filename,
+    ));
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+    return _handleResponse(response);
+  }
 }
 
 class ApiException implements Exception {

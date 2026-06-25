@@ -118,6 +118,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _nameController,
                   label: 'Full Name',
                   icon: Icons.person_outlined,
+                  maxLength: 50,
                   validator: (v) => (v == null || v.isEmpty) ? 'Please enter your name' : null,
                 ),
                 const SizedBox(height: 14),
@@ -128,6 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label: 'Email',
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
+                  maxLength: 100,
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Please enter your email';
                     if (!v.contains('@')) return 'Please enter a valid email';
@@ -142,6 +144,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label: 'Phone Number',
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
+                  maxLength: 20,
                   validator: (v) => (v == null || v.isEmpty) ? 'Please enter your phone number' : null,
                 ),
                 const SizedBox(height: 14),
@@ -150,10 +153,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  maxLength: 50,
                   style: const TextStyle(fontSize: 18),
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: const TextStyle(fontSize: 16),
+                    counterText: '',
                     prefixIcon: const Icon(Icons.lock_outlined, size: 24),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -179,6 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label: 'Confirm Password',
                   icon: Icons.lock_outlined,
                   obscureText: true,
+                  maxLength: 50,
                   validator: (v) {
                     if (v != _passwordController.text) return 'Passwords do not match';
                     return null;
@@ -245,16 +251,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     required IconData icon,
     TextInputType? keyboardType,
     bool obscureText = false,
+    int? maxLength,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
+      maxLength: maxLength,
       style: const TextStyle(fontSize: 18),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(fontSize: 16),
+        counterText: '',
         prefixIcon: Icon(icon, size: 24),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),

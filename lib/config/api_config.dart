@@ -18,6 +18,7 @@ class ApiConfig {
     'updateSettings': '/settings',
     'alerts': '/alerts',
     'activeAlerts': '/alerts/active',
+    'uploadAvatar': '/profile/avatar',
   };
 
   static String getUrl(String endpoint) {

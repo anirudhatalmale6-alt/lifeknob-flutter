@@ -123,10 +123,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  maxLength: 100,
                   style: const TextStyle(fontSize: 18),
                   decoration: InputDecoration(
                     labelText: 'Email',
                     labelStyle: const TextStyle(fontSize: 16),
+                    counterText: '',
                     prefixIcon: const Icon(Icons.email_outlined, size: 24),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
@@ -143,10 +145,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  maxLength: 50,
                   style: const TextStyle(fontSize: 18),
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: const TextStyle(fontSize: 16),
+                    counterText: '',
                     prefixIcon: const Icon(Icons.lock_outlined, size: 24),
                     suffixIcon: IconButton(
                       icon: Icon(

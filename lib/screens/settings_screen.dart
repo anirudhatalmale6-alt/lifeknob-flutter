@@ -264,8 +264,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         TextField(
                           controller: _sosController,
                           keyboardType: TextInputType.phone,
+                          maxLength: 20,
                           style: const TextStyle(fontSize: 18),
                           decoration: InputDecoration(
+                            counterText: '',
                             hintText: 'Enter phone number',
                             hintStyle: TextStyle(fontSize: 16, color: Colors.grey[300]),
                             prefixIcon: const Icon(Icons.phone, color: Color(0xFFE74C3C), size: 22),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../widgets/ok_button.dart';
@@ -18,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _userCode;
   String? _userName;
   String? _sosNumber;
+  String? _avatarUrl;
   bool _isStatusSafe = true;
 
   @override
@@ -33,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _userCode = user.userCode;
         _userName = user.name;
         _sosNumber = user.sosNumber;
+        _avatarUrl = user.avatar;
       });
     }
 
@@ -43,9 +46,44 @@ class _HomeScreenState extends State<HomeScreen> {
           _userCode = freshUser.userCode;
           _userName = freshUser.name;
           _sosNumber = freshUser.sosNumber;
+          _avatarUrl = freshUser.avatar;
         });
       }
     } catch (_) {}
+  }
+
+  Future<void> _pickAvatar() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery, maxWidth: 512, maxHeight: 512, imageQuality: 80);
+    if (image == null) return;
+
+    try {
+      final bytes = await image.readAsBytes();
+      final result = await ApiService().uploadAvatar(bytes, image.name);
+      final newUrl = result['avatar_url'] as String?;
+      if (newUrl != null && mounted) {
+        await AuthService().refreshProfile();
+        setState(() => _avatarUrl = newUrl);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Photo updated!', style: TextStyle(fontSize: 14)),
+            backgroundColor: Color(0xFF27AE60),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not upload: $e', style: const TextStyle(fontSize: 14)),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _doCheckIn() async {
@@ -161,25 +199,54 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: const Color(0xFF27AE60).withValues(alpha: 0.15),
-                      border: Border.all(color: const Color(0xFF27AE60), width: 2),
-                    ),
-                    child: Center(
-                      child: Text(
-                        _userName != null && _userName!.isNotEmpty
-                            ? _userName![0].toUpperCase()
-                            : '?',
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF27AE60),
+                  GestureDetector(
+                    onTap: _pickAvatar,
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF27AE60).withValues(alpha: 0.15),
+                            border: Border.all(color: const Color(0xFF27AE60), width: 2),
+                            image: _avatarUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage('https://lifeknob.com$_avatarUrl'),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: _avatarUrl == null
+                              ? Center(
+                                  child: Text(
+                                    _userName != null && _userName!.isNotEmpty
+                                        ? _userName![0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF27AE60),
+                                    ),
+                                  ),
+                                )
+                              : null,
                         ),
-                      ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFF27AE60),
+                              border: Border.all(color: Colors.white, width: 1.5),
+                            ),
+                            child: const Icon(Icons.camera_alt, size: 10, color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 14),

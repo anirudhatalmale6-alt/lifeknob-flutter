@@ -93,6 +93,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
               controller: codeController,
               autofocus: true,
               textCapitalization: TextCapitalization.characters,
+              maxLength: 8,
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
