@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'history_screen.dart';
-import 'connections_screen.dart';
 import 'settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -23,7 +22,6 @@ class MainScreenState extends State<MainScreen> {
     final List<Widget> screens = [
       const HomeScreen(),
       HistoryScreen(onGoHome: goHome),
-      ConnectionsScreen(onGoHome: goHome),
       SettingsScreen(onGoHome: goHome),
     ];
 
@@ -45,14 +43,13 @@ class MainScreenState extends State<MainScreen> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _navItem(Icons.home_rounded, 'Home', 0),
                 _navItem(Icons.schedule_rounded, 'History', 1),
-                _navItem(Icons.people_rounded, 'Connections', 2),
-                _navItem(Icons.settings_rounded, 'Settings', 3),
+                _navItem(Icons.settings_rounded, 'Settings', 2),
               ],
             ),
           ),
@@ -67,20 +64,20 @@ class MainScreenState extends State<MainScreen> {
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 72,
+        width: 80,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 26,
+              size: 28,
               color: isSelected ? const Color(0xFF27AE60) : const Color(0xFFBDC3C7),
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected ? const Color(0xFF27AE60) : const Color(0xFFBDC3C7),
               ),
