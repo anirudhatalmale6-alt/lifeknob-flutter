@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
@@ -17,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _userCode;
   String? _userName;
   String? _sosNumber;
+  bool _isStatusSafe = true;
 
   @override
   void initState() {
@@ -34,7 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-    // Try to refresh from server
     try {
       final freshUser = await AuthService().refreshProfile();
       if (mounted) {
@@ -44,9 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _sosNumber = freshUser.sosNumber;
         });
       }
-    } catch (_) {
-      // Offline - use cached data
-    }
+    } catch (_) {}
   }
 
   Future<void> _doCheckIn() async {
@@ -56,11 +55,13 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           _lastCheckIn = 'Just now';
+          _isStatusSafe = true;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Check-in sent! Your connections have been notified.', style: TextStyle(fontSize: 16)),
             backgroundColor: Color(0xFF27AE60),
+            behavior: SnackBarBehavior.floating,
             duration: Duration(seconds: 2),
           ),
         );
@@ -71,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SnackBar(
             content: Text('Could not check in: $e', style: const TextStyle(fontSize: 16)),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -79,20 +81,62 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _callSOS() async {
+  Future<void> _callHelp() async {
     final number = _sosNumber;
     if (number == null || number.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('No SOS number set. Go to Settings to add one.', style: TextStyle(fontSize: 16)),
+          content: Text('No emergency number set. Go to Settings to add one.', style: TextStyle(fontSize: 16)),
           backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
-
     final uri = Uri(scheme: 'tel', path: number);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Future<void> _callAmbulance() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Color(0xFFE74C3C), size: 28),
+            SizedBox(width: 8),
+            Text('Call Ambulance?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: const Text(
+          'This will dial emergency services. Only use in a real emergency.',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE74C3C),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Call Now', style: TextStyle(fontSize: 16)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final uri = Uri(scheme: 'tel', path: '000');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
@@ -101,174 +145,225 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
         child: Column(
           children: [
-            // Top bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            // Profile header
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Hi, ${_userName ?? ''}',
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFF27AE60).withValues(alpha: 0.15),
+                      border: Border.all(color: const Color(0xFF27AE60), width: 2),
+                    ),
+                    child: Center(
+                      child: Text(
+                        _userName != null && _userName!.isNotEmpty
+                            ? _userName![0].toUpperCase()
+                            : '?',
                         style: const TextStyle(
-                          fontSize: 22,
+                          fontSize: 26,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C3E50),
+                          color: Color(0xFF27AE60),
                         ),
                       ),
-                      if (_lastCheckIn != null)
-                        Text(
-                          'Last check-in: $_lastCheckIn',
-                          style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                        ),
-                    ],
+                    ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.settings, size: 28, color: Color(0xFF2C3E50)),
-                    onPressed: () => Navigator.pushNamed(context, '/settings').then((_) => _loadUserData()),
-                  ),
-                ],
-              ),
-            ),
-
-            // User code card
-            if (_userCode != null && _userCode!.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0FAF4),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF27AE60).withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.qr_code, color: Color(0xFF27AE60), size: 28),
-                    const SizedBox(width: 12),
-                    Column(
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Your Code',
-                          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                        ),
-                        Text(
-                          _userCode!,
+                          (_userName ?? '').toUpperCase(),
                           style: const TextStyle(
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF27AE60),
-                            letterSpacing: 3,
+                            color: Color(0xFF2C3E50),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const Text(
+                          'Welcome Back!',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Color(0xFF7F8C8D),
                           ),
                         ),
                       ],
                     ),
-                    const Spacer(),
-                    Text(
-                      'Share this\nwith family',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                      textAlign: TextAlign.right,
+                  ),
+                  if (_userCode != null)
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: _userCode!));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Code copied!', style: TextStyle(fontSize: 14)),
+                            backgroundColor: Color(0xFF27AE60),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0FAF4),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFF27AE60).withValues(alpha: 0.3)),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              _userCode!,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF27AE60),
+                                letterSpacing: 2,
+                              ),
+                            ),
+                            const Text(
+                              'YOUR CODE',
+                              style: TextStyle(fontSize: 9, color: Color(0xFF7F8C8D)),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
+            ),
 
-            // Main OK button area
+            // Main content area
             Expanded(
-              child: Center(
-                child: OkButton(
-                  onPressed: _doCheckIn,
-                  isLoading: _isCheckingIn,
-                  lastCheckInTime: _lastCheckIn,
-                ),
-              ),
-            ),
-
-            // SOS button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton.icon(
-                  onPressed: _callSOS,
-                  icon: const Icon(Icons.phone, size: 24),
-                  label: const Text('SOS - Call Emergency Contact'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE74C3C),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Bottom navigation buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: _navButton(
-                      icon: Icons.history,
-                      label: 'History',
-                      onTap: () => Navigator.pushNamed(context, '/history'),
+                  // OK Button
+                  OkButton(
+                    onPressed: _doCheckIn,
+                    isLoading: _isCheckingIn,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Hint text
+                  const Text(
+                    'Press if everything is fine',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF95A5A6),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _navButton(
-                      icon: Icons.people,
-                      label: 'Connections',
-                      onTap: () => Navigator.pushNamed(context, '/connections'),
+
+                  const SizedBox(height: 24),
+
+                  // Status card
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _isStatusSafe ? Icons.check_circle : Icons.warning,
+                              size: 20,
+                              color: _isStatusSafe ? const Color(0xFF27AE60) : const Color(0xFFE74C3C),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _isStatusSafe ? 'Your status is currently safe.' : 'Status needs attention.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: _isStatusSafe ? const Color(0xFF2C3E50) : const Color(0xFFE74C3C),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_lastCheckIn != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Last check-in: $_lastCheckIn',
+                            style: const TextStyle(fontSize: 13, color: Color(0xFF95A5A6)),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _navButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[200]!),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: const Color(0xFF2C3E50), size: 24),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF2C3E50),
+            // Action buttons
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Row(
+                children: [
+                  // I Need Help
+                  Expanded(
+                    child: SizedBox(
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: _callHelp,
+                        icon: const Icon(Icons.health_and_safety_rounded, size: 22),
+                        label: const Text('I NEED HELP'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3498DB),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Call Ambulance
+                  Expanded(
+                    child: SizedBox(
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: _callAmbulance,
+                        icon: const Icon(Icons.local_hospital_rounded, size: 22),
+                        label: const Text('CALL\nAMBULANCE', textAlign: TextAlign.center),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE74C3C),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5, height: 1.2),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

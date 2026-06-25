@@ -66,6 +66,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
             style: const TextStyle(fontSize: 16),
           ),
           backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -75,7 +76,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
     final code = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           'Add Connection',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -84,28 +85,36 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Enter the person\'s code to connect with them.',
-              style: TextStyle(fontSize: 16, color: Color(0xFF7F8C8D)),
+              'Enter the person\'s code to connect.',
+              style: TextStyle(fontSize: 15, color: Color(0xFF7F8C8D)),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             TextField(
               controller: codeController,
               autofocus: true,
               textCapitalization: TextCapitalization.characters,
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 4,
+                letterSpacing: 5,
+                color: Color(0xFF27AE60),
               ),
               textAlign: TextAlign.center,
               decoration: InputDecoration(
                 hintText: 'CODE',
                 hintStyle: TextStyle(
-                  fontSize: 24,
+                  fontSize: 28,
                   color: Colors.grey[300],
-                  letterSpacing: 4,
+                  letterSpacing: 5,
                 ),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF27AE60), width: 2),
+                ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
@@ -114,7 +123,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+            child: Text('Cancel', style: TextStyle(fontSize: 16, color: Colors.grey[500])),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, codeController.text.trim()),
@@ -122,8 +131,9 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
               backgroundColor: const Color(0xFF27AE60),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: const Text('Connect', style: TextStyle(fontSize: 16)),
+            child: const Text('Connect', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -136,8 +146,9 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Connected successfully!', style: TextStyle(fontSize: 16)),
+            content: Text('Connected!', style: TextStyle(fontSize: 16)),
             backgroundColor: Color(0xFF27AE60),
+            behavior: SnackBarBehavior.floating,
           ),
         );
         _loadConnections();
@@ -148,6 +159,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
           SnackBar(
             content: Text('Could not connect: $e', style: const TextStyle(fontSize: 16)),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -158,21 +170,21 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text('Disconnect?', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: Text(
-          'Are you sure you want to disconnect from ${conn.name}?\n\nYou will no longer see their check-ins.',
+          'Disconnect from ${conn.name}?\nYou will no longer see their check-ins.',
           style: const TextStyle(fontSize: 16),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+            child: Text('Cancel', style: TextStyle(fontSize: 16, color: Colors.grey[500])),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: const Color(0xFFE74C3C),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -191,6 +203,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
           const SnackBar(
             content: Text('Disconnected.', style: TextStyle(fontSize: 16)),
             backgroundColor: Color(0xFF27AE60),
+            behavior: SnackBarBehavior.floating,
           ),
         );
         _loadConnections();
@@ -201,6 +214,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
           SnackBar(
             content: Text('Error: $e', style: const TextStyle(fontSize: 16)),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -210,109 +224,124 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF2C3E50), size: 28),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Connections',
-          style: TextStyle(
-            color: Color(0xFF2C3E50),
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      floatingActionButton: FloatingActionButton.extended(
+      backgroundColor: const Color(0xFFF5F6FA),
+      floatingActionButton: FloatingActionButton(
         onPressed: _addConnection,
         backgroundColor: const Color(0xFF27AE60),
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.person_add, size: 24),
-        label: const Text('Add Connection', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        child: const Icon(Icons.person_add_rounded, size: 26),
       ),
-      body: Column(
-        children: [
-          // Plan info bar
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FA),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[200]!),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _plan == 'free' ? Icons.lock_outline : Icons.star,
-                  color: _plan == 'free' ? Colors.grey[500] : const Color(0xFFF39C12),
-                  size: 22,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  _plan == 'free' ? 'Free Plan' : 'Paid Plan',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${_connections.length}/$_maxConnections used',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: _connections.length >= _maxConnections ? Colors.red : Colors.grey[500],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Connection list
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF27AE60)))
-                : _error != null
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.people_rounded, color: Color(0xFF27AE60), size: 28),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Connections',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2C3E50),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _plan == 'free'
+                              ? const Color(0xFFF8F9FA)
+                              : const Color(0xFFFFF8E1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _plan == 'free' ? Colors.grey[300]! : const Color(0xFFF39C12),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.cloud_off, size: 60, color: Colors.grey[300]),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: _loadConnections,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF27AE60),
-                                foregroundColor: Colors.white,
+                            Icon(
+                              _plan == 'free' ? Icons.lock_outline : Icons.star,
+                              size: 14,
+                              color: _plan == 'free' ? Colors.grey[500] : const Color(0xFFF39C12),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${_connections.length}/$_maxConnections',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: _connections.length >= _maxConnections
+                                    ? const Color(0xFFE74C3C)
+                                    : const Color(0xFF2C3E50),
                               ),
-                              child: const Text('Retry'),
                             ),
                           ],
                         ),
-                      )
-                    : _connections.isEmpty
-                        ? _buildEmpty()
-                        : RefreshIndicator(
-                            color: const Color(0xFF27AE60),
-                            onRefresh: _loadConnections,
-                            child: ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-                              itemCount: _connections.length,
-                              separatorBuilder: (_, _) => const SizedBox(height: 8),
-                              itemBuilder: (context, index) {
-                                return _buildConnectionCard(_connections[index]);
-                              },
-                            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Content
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF27AE60)))
+                  : _error != null
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.cloud_off_rounded, size: 60, color: Colors.grey[300]),
+                              const SizedBox(height: 16),
+                              ElevatedButton.icon(
+                                onPressed: _loadConnections,
+                                icon: const Icon(Icons.refresh, size: 20),
+                                label: const Text('Retry'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF27AE60),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              ),
+                            ],
                           ),
-          ),
-        ],
+                        )
+                      : _connections.isEmpty
+                          ? _buildEmpty()
+                          : RefreshIndicator(
+                              color: const Color(0xFF27AE60),
+                              onRefresh: _loadConnections,
+                              child: ListView.builder(
+                                padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+                                itemCount: _connections.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: _buildConnectionCard(_connections[index]),
+                                  );
+                                },
+                              ),
+                            ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -322,29 +351,35 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isOverdue ? const Color(0xFFFDF0EF) : const Color(0xFFF0FAF4),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isOverdue
-              ? const Color(0xFFE74C3C).withValues(alpha: 0.3)
-              : const Color(0xFF27AE60).withValues(alpha: 0.3),
-        ),
+        border: isOverdue
+            ? Border.all(color: const Color(0xFFE74C3C).withValues(alpha: 0.3))
+            : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          // Avatar
           Container(
             width: 52,
             height: 52,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isOverdue ? const Color(0xFFE74C3C) : const Color(0xFF27AE60),
+              color: isOverdue
+                  ? const Color(0xFFE74C3C).withValues(alpha: 0.15)
+                  : const Color(0xFF27AE60).withValues(alpha: 0.15),
             ),
             child: Center(
               child: Text(
                 conn.name.isNotEmpty ? conn.name[0].toUpperCase() : '?',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: isOverdue ? const Color(0xFFE74C3C) : const Color(0xFF27AE60),
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -359,25 +394,25 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
                 Text(
                   conn.name,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF2C3E50),
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     Icon(
-                      isOverdue ? Icons.warning_amber : Icons.check_circle,
-                      size: 16,
+                      isOverdue ? Icons.warning_amber_rounded : Icons.check_circle_rounded,
+                      size: 15,
                       color: isOverdue ? const Color(0xFFE74C3C) : const Color(0xFF27AE60),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       isOverdue ? 'Overdue - ${conn.lastCheckInText}' : conn.lastCheckInText,
                       style: TextStyle(
-                        fontSize: 14,
-                        color: isOverdue ? const Color(0xFFE74C3C) : Colors.grey[500],
+                        fontSize: 13,
+                        color: isOverdue ? const Color(0xFFE74C3C) : const Color(0xFF95A5A6),
                         fontWeight: isOverdue ? FontWeight.w600 : FontWeight.normal,
                       ),
                     ),
@@ -386,9 +421,8 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
               ],
             ),
           ),
-          // Disconnect button
           IconButton(
-            icon: const Icon(Icons.close, color: Color(0xFF95A5A6), size: 22),
+            icon: const Icon(Icons.close_rounded, color: Color(0xFFBDC3C7), size: 20),
             onPressed: () => _disconnect(conn),
           ),
         ],
@@ -401,20 +435,25 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
-          const SizedBox(height: 16),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.grey[100],
+            ),
+            child: Icon(Icons.people_outline_rounded, size: 40, color: Colors.grey[350]),
+          ),
+          const SizedBox(height: 20),
           Text(
             'No connections yet',
-            style: TextStyle(fontSize: 20, color: Colors.grey[500], fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 20, color: Colors.grey[500], fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              'Tap "Add Connection" and enter\nsomeone\'s code to get started.',
-              style: TextStyle(fontSize: 16, color: Colors.grey[400]),
-              textAlign: TextAlign.center,
-            ),
+          Text(
+            'Tap + to enter someone\'s code\nand start monitoring.',
+            style: TextStyle(fontSize: 15, color: Colors.grey[400]),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

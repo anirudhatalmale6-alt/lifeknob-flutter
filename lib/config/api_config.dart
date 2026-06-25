@@ -6,11 +6,18 @@ class ApiConfig {
     'register': '/auth/register',
     'checkIn': '/checkin',
     'history': '/checkin/history',
-    'connect': '/connections/connect',
-    'disconnect': '/connections/disconnect',
-    'connections': '/connections',
-    'profile': '/user/profile',
-    'updateSettings': '/user/settings',
+    'latestConnections': '/checkin/connections',
+    'connect': '/connection/connect',
+    'disconnect': '/connection/disconnect',
+    'connections': '/connection/mine',
+    'watchers': '/connection/watchers',
+    'connectionInfo': '/connection/info',
+    'profile': '/profile',
+    'updateProfile': '/profile',
+    'settings': '/settings',
+    'updateSettings': '/settings',
+    'alerts': '/alerts',
+    'activeAlerts': '/alerts/active',
   };
 
   static String getUrl(String endpoint) {

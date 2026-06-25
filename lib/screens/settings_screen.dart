@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 
@@ -47,13 +48,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'sos_number': _sosController.text.trim(),
         'quiet_hours_enabled': _quietHoursEnabled,
       });
-      // Refresh the user profile to pick up changes
       await AuthService().refreshProfile();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Settings saved!', style: TextStyle(fontSize: 16)),
             backgroundColor: Color(0xFF27AE60),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -63,6 +64,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SnackBar(
             content: Text('Could not save: $e', style: const TextStyle(fontSize: 16)),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -75,7 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text('Log Out?', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: const Text(
           'You will need to sign in again to use LifeKnob.',
@@ -84,12 +86,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+            child: Text('Cancel', style: TextStyle(fontSize: 16, color: Colors.grey[500])),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: const Color(0xFFE74C3C),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -116,223 +118,296 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF2C3E50), size: 28),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Settings',
-          style: TextStyle(
-            color: Color(0xFF2C3E50),
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+      backgroundColor: const Color(0xFFF5F6FA),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Account info section
-            _sectionHeader('Account'),
-            const SizedBox(height: 8),
-            _infoCard([
-              _infoRow(Icons.person, 'Name', _userName ?? '-'),
-              _divider(),
-              _infoRow(Icons.email, 'Email', _userEmail ?? '-'),
-              _divider(),
-              _infoRow(Icons.phone, 'Phone', _userPhone ?? '-'),
-              _divider(),
-              _infoRow(Icons.qr_code, 'Your Code', _userCode ?? '-', highlight: true),
-              _divider(),
-              _infoRow(
-                Icons.star,
-                'Plan',
-                _plan == 'paid' ? 'Premium' : 'Free',
-                highlight: _plan == 'paid',
-              ),
-            ]),
-
-            const SizedBox(height: 28),
-
-            // Emergency contact
-            _sectionHeader('Emergency Contact'),
-            const SizedBox(height: 8),
+            // Header
             Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[200]!),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: const Row(
                 children: [
+                  Icon(Icons.settings_rounded, color: Color(0xFF27AE60), size: 28),
+                  SizedBox(width: 12),
                   Text(
-                    'SOS phone number',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _sosController,
-                    keyboardType: TextInputType.phone,
-                    style: const TextStyle(fontSize: 20),
-                    decoration: InputDecoration(
-                      hintText: 'Enter phone number',
-                      hintStyle: TextStyle(fontSize: 18, color: Colors.grey[300]),
-                      prefixIcon: const Icon(Icons.phone, color: Color(0xFFE74C3C)),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2C3E50),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'This number is called when you press the SOS button.',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[500]),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 28),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Profile card
+                    _card(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF27AE60).withValues(alpha: 0.15),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  _userName != null && _userName!.isNotEmpty
+                                      ? _userName![0].toUpperCase()
+                                      : '?',
+                                  style: const TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF27AE60),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _userName ?? '-',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF2C3E50),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _userEmail ?? '-',
+                                    style: const TextStyle(fontSize: 14, color: Color(0xFF95A5A6)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _plan == 'paid'
+                                    ? const Color(0xFFFFF8E1)
+                                    : const Color(0xFFF8F9FA),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                _plan == 'paid' ? 'Premium' : 'Free',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: _plan == 'paid' ? const Color(0xFFF39C12) : Colors.grey[500],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _infoRow(Icons.phone_rounded, 'Phone', _userPhone ?? '-'),
+                        if (_userCode != null) ...[
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: () {
+                              Clipboard.setData(ClipboardData(text: _userCode!));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Code copied!', style: TextStyle(fontSize: 14)),
+                                  backgroundColor: Color(0xFF27AE60),
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            },
+                            child: _infoRow(Icons.qr_code_rounded, 'Your Code', _userCode!, highlight: true),
+                          ),
+                        ],
+                      ],
+                    ),
 
-            // Quiet hours
-            _sectionHeader('Notifications'),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[200]!),
-              ),
-              child: SwitchListTile(
-                title: const Text(
-                  'Quiet Hours',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                    const SizedBox(height: 12),
+
+                    // Emergency contact
+                    _card(
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.emergency_rounded, color: Color(0xFFE74C3C), size: 22),
+                            SizedBox(width: 8),
+                            Text(
+                              'Emergency Contact',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF2C3E50),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _sosController,
+                          keyboardType: TextInputType.phone,
+                          style: const TextStyle(fontSize: 18),
+                          decoration: InputDecoration(
+                            hintText: 'Enter phone number',
+                            hintStyle: TextStyle(fontSize: 16, color: Colors.grey[300]),
+                            prefixIcon: const Icon(Icons.phone, color: Color(0xFFE74C3C), size: 22),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 2),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Called when you press "I NEED HELP"',
+                          style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Notifications
+                    _card(
+                      children: [
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text(
+                            'Quiet Hours',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF2C3E50)),
+                          ),
+                          subtitle: Text(
+                            'Silence notifications at night',
+                            style: TextStyle(fontSize: 13, color: Colors.grey[400]),
+                          ),
+                          value: _quietHoursEnabled,
+                          activeTrackColor: const Color(0xFF27AE60),
+                          onChanged: (value) => setState(() => _quietHoursEnabled = value),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Save button
+                    SizedBox(
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: _isSaving ? null : _saveSettings,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF27AE60),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                        ),
+                        child: _isSaving
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                              )
+                            : const Text('Save Settings'),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Logout button
+                    SizedBox(
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: _logout,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFE74C3C),
+                          side: const BorderSide(color: Color(0xFFE74C3C)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                        ),
+                        child: const Text('Log Out'),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    Center(
+                      child: Text(
+                        'LifeKnob v1.0.0',
+                        style: TextStyle(fontSize: 13, color: Colors.grey[400]),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
-                subtitle: Text(
-                  'Silence notifications at night',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                ),
-                value: _quietHoursEnabled,
-                activeTrackColor: const Color(0xFF27AE60),
-                onChanged: (value) => setState(() => _quietHoursEnabled = value),
               ),
             ),
-
-            const SizedBox(height: 32),
-
-            // Save button
-            SizedBox(
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _isSaving ? null : _saveSettings,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF27AE60),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                      )
-                    : const Text('Save Settings'),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Logout button
-            SizedBox(
-              height: 56,
-              child: OutlinedButton(
-                onPressed: _logout,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                child: const Text('Log Out'),
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // App version
-            Center(
-              child: Text(
-                'LifeKnob v1.0.0',
-                style: TextStyle(fontSize: 14, color: Colors.grey[400]),
-              ),
-            ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  Widget _sectionHeader(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF2C3E50),
-      ),
-    );
-  }
-
-  Widget _infoCard(List<Widget> children) {
+  Widget _card({required List<Widget> children}) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FA),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Column(children: children),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
     );
   }
 
   Widget _infoRow(IconData icon, String label, String value, {bool highlight = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 22, color: highlight ? const Color(0xFF27AE60) : Colors.grey[500]),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: highlight ? const Color(0xFF27AE60) : const Color(0xFF95A5A6)),
+        const SizedBox(width: 10),
+        Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+        const Spacer(),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: highlight ? FontWeight.bold : FontWeight.w500,
+            color: highlight ? const Color(0xFF27AE60) : const Color(0xFF2C3E50),
+            letterSpacing: highlight ? 2 : 0,
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: highlight ? FontWeight.bold : FontWeight.w500,
-              color: highlight ? const Color(0xFF27AE60) : const Color(0xFF2C3E50),
-              letterSpacing: highlight ? 2 : 0,
-            ),
-          ),
+        ),
+        if (highlight) ...[
+          const SizedBox(width: 4),
+          Icon(Icons.copy_rounded, size: 14, color: Colors.grey[400]),
         ],
-      ),
+      ],
     );
-  }
-
-  Widget _divider() {
-    return Divider(height: 1, color: Colors.grey[200]);
   }
 }
