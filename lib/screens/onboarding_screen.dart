@@ -54,7 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_page == 2) { _validateProfile(); return; }
     if (_page == 4) { _validateEmergency(); return; }
     if (_page == 5) { setState(() => _page++); return; }
-    if (_page == 6) { _addCode(); return; }
+    if (_page == 6) { _finishConnect(); return; }
     if (_page < _totalPages - 1) setState(() => _page++);
   }
 
@@ -113,9 +113,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _addCode() async {
     final code = _connectCodeController.text.trim();
-    if (code.isEmpty) { _showMessage('Please enter a code'); return; }
-    if (_connectedCodes.contains(code)) { _showMessage('Already connected'); return; }
-    if (_connectedCodes.length >= _maxSlots) { _showMessage('You have reached your connection limit.\nUpgrade your membership for more.'); return; }
+    if (code.isEmpty) { _showMessage('Enter a code first'); return; }
+    if (_connectedCodes.contains(code)) { _showMessage('Already connected to this code'); return; }
+    if (_connectedCodes.length >= _maxSlots) { _showMessage('Connection limit reached.\nUpgrade your plan for more slots.'); return; }
 
     setState(() => _isSaving = true);
     try {
@@ -235,23 +235,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: _isSaving
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
                         : Text(
-                            _page == 6 ? 'ADD' : (_page == _totalPages - 1 ? 'FINISH' : 'NEXT'),
+                            _page >= _totalPages - 2 ? 'FINISH' : 'NEXT',
                             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10), letterSpacing: 1),
                           ),
                   ),
                 ))),
               ]),
             ),
-            if (_page == 6)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                child: SizedBox(width: double.infinity, height: 48, child: OutlinedButton(
-                  onPressed: _finishConnect,
-                  style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: const BorderSide(color: LKTheme.gold), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  child: Text(_connectedCodes.isEmpty ? 'SKIP - Go to Main Page' : 'FINISH (${_connectedCodes.length} connected)',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                )),
-              ),
           ],
         ),
       ),
@@ -470,12 +460,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         Text('Add up to $_maxSlots ${_maxSlots == 1 ? "person" : "people"} (${_connectedCodes.length}/$_maxSlots)',
           style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
         const SizedBox(height: 20),
-        TextField(
-          controller: _connectCodeController, maxLength: 8,
-          textCapitalization: TextCapitalization.characters, textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 6),
-          decoration: InputDecoration(hintText: 'ENTER CODE', counterText: '',
-            hintStyle: TextStyle(fontSize: 24, color: LKTheme.textMuted.withValues(alpha: 0.4), letterSpacing: 4))),
+        Row(children: [
+          Expanded(child: TextField(
+            controller: _connectCodeController, maxLength: 8,
+            textCapitalization: TextCapitalization.characters, textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
+            decoration: InputDecoration(hintText: 'CODE', counterText: '',
+              hintStyle: TextStyle(fontSize: 24, color: LKTheme.textMuted.withValues(alpha: 0.4), letterSpacing: 4)))),
+          const SizedBox(width: 10),
+          SizedBox(height: 52, child: ElevatedButton(
+            onPressed: _isSaving ? null : _addCode,
+            style: ElevatedButton.styleFrom(backgroundColor: LKTheme.green, foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 20)),
+            child: const Text('ADD', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          )),
+        ]),
         const SizedBox(height: 8),
         const Text('Enter their code and tap ADD', style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
         const SizedBox(height: 20),
