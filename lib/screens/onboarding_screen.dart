@@ -54,7 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _next() {
     if (_page == 2) { _validateProfile(); return; }
     if (_page == 4) { _validateEmergency(); return; }
-    if (_page == 5) { setState(() => _page++); return; }
+    if (_page == 5) { _savePlan(); return; }
     if (_page == 6) { _finishConnect(); return; }
     if (_page < _totalPages - 1) setState(() => _page++);
   }
@@ -144,28 +144,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  Future<void> _savePlan() async {
+    setState(() => _isSaving = true);
+    try {
+      await ApiService().updateSettings({'plan': _selectedPlan == 'free' ? 'free' : 'paid', 'max_connections': _maxSlots});
+    } catch (_) {}
+    if (mounted) setState(() { _isSaving = false; _page++; });
+  }
+
+  bool _noConnectionWarningShown = false;
+
   Future<void> _finishConnect() async {
-    if (_connectedPeople.isEmpty) {
-      await showDialog(
-        context: context,
-        builder: (ctx) => Dialog(
-          backgroundColor: LKTheme.bgCard,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          child: Padding(padding: const EdgeInsets.all(28), child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.warning_rounded, size: 56, color: LKTheme.gold),
-            const SizedBox(height: 16),
-            const Text('No connections yet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
-            const SizedBox(height: 12),
-            const Text('Nobody can see when you press OK.\nYou can add connections later\nin the "People" tab.', textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.5)),
-            const SizedBox(height: 24),
-            SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK, continue', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            )),
-          ])),
-        ),
-      );
+    if (_connectedPeople.isEmpty && !_noConnectionWarningShown) {
+      _noConnectionWarningShown = true;
+      _showMessage('Nobody can see when you press OK yet.\nYou can add connections later in "People".');
+      return;
     }
     await AuthService().refreshProfile();
     if (mounted) Navigator.pushReplacementNamed(context, '/home');
