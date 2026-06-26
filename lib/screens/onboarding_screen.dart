@@ -125,10 +125,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     setState(() => _isSaving = true);
     try {
-      await ApiService().connect(code);
+      final result = await ApiService().connect(code);
       if (mounted) {
         _errorFields.clear();
-        _connectedPeople.add({'name': name, 'code': code});
+        final connectedName = result['data']?['connected_to']?['name'] ?? name;
+        _connectedPeople.add({'name': connectedName, 'code': code});
         _connectNameController.clear();
         _connectCodeController.clear();
         setState(() => _isSaving = false);
@@ -138,6 +139,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final errMsg = '$e';
       if (errMsg.contains('404') || errMsg.toLowerCase().contains('not found')) {
         if (mounted) _showMessage('Code not found.\n\nMake sure the person has the app installed and shared the correct code with you.');
+      } else if (errMsg.contains('already')) {
+        if (mounted) _showMessage('You are already connected to this person.');
+      } else if (errMsg.contains('limit') || errMsg.contains('403')) {
+        if (mounted) _showMessage('Connection limit reached.\nUpgrade your plan for more.');
       } else {
         if (mounted) _showMessage('Could not connect.\n$errMsg');
       }
@@ -518,18 +523,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 16),
 
         if (_connectedPeople.isNotEmpty) ...[
+          const Align(alignment: Alignment.centerLeft,
+            child: Text('Connected:', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600))),
+          const SizedBox(height: 8),
           ..._connectedPeople.map((p) => Container(
             margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.green.withValues(alpha: 0.3))),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.green.withValues(alpha: 0.3))),
             child: Row(children: [
-              const Icon(Icons.check_circle_rounded, color: LKTheme.green, size: 22),
-              const SizedBox(width: 10),
-              Expanded(child: Text(p['name']!, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary))),
-              Text(p['code']!, style: const TextStyle(fontSize: 14, color: LKTheme.gold, letterSpacing: 1, fontWeight: FontWeight.w600)),
+              Container(width: 40, height: 40,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.green.withValues(alpha: 0.15)),
+                child: const Icon(Icons.check_rounded, color: LKTheme.green, size: 22)),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(p['name']!, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
+                Text(p['code']!, style: const TextStyle(fontSize: 13, color: LKTheme.gold, letterSpacing: 1)),
+              ])),
+              const Icon(Icons.link_rounded, color: LKTheme.green, size: 20),
             ]),
           )),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
         ],
 
         if (remaining > 0) ...[
