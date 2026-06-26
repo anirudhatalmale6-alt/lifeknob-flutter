@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import 'subscription_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -499,37 +500,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             decoration: InputDecoration(hintText: 'CODE', counterText: '',
               hintStyle: TextStyle(fontSize: 30, color: LKTheme.textMuted.withValues(alpha: 0.4), letterSpacing: 6)),
           ),
-          const SizedBox(height: 8),
-          const Text('Free but with advertising', style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
+          const SizedBox(height: 6),
+          const Text('Free: 1 connection with advertising', style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
           const SizedBox(height: 20),
-          // Membership section
-          Container(
-            width: double.infinity, padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
-            child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Membership', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: LKTheme.gold)),
-              SizedBox(height: 10),
-              Text('Plans:', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
-              SizedBox(height: 8),
-              Text('  Free - 1 connection, with ads', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
-              SizedBox(height: 6),
-              Text('  \$5/month or \$50/year - 3 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
-              SizedBox(height: 4),
-              Text('  \$8/month or \$80/year - 10 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
-              SizedBox(height: 8),
-              Text('Advantages:', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
-              SizedBox(height: 4),
-              Text('  - More connections', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
-              Text('  - No advertisements', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
-              Text('  - No cooldown on switching', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
-              SizedBox(height: 10),
-              Text('You can upgrade anytime in Set Up.', style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
-            ]),
+          // Membership link
+          GestureDetector(
+            onTap: _openMembership,
+            child: Container(
+              width: double.infinity, padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.5))),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Row(children: [
+                  Icon(Icons.star_rounded, color: LKTheme.gold, size: 24),
+                  SizedBox(width: 8),
+                  Text('Want to connect more people?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                ]),
+                const SizedBox(height: 10),
+                const Text('  \$5/month or \$50/year - 3 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                const Text('  \$8/month or \$80/year - 10 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                Center(child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                  decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(12)),
+                  child: const Text('Buy Membership', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF5A3D10))),
+                )),
+              ]),
+            ),
           ),
           const SizedBox(height: 20),
         ],
       ),
     );
+  }
+
+  void _openMembership() {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => SubscriptionScreen(onGoHome: () => Navigator.pop(context)),
+    ));
   }
 
   bool _isValidEmail(String email) {
