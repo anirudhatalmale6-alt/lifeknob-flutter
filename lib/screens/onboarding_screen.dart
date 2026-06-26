@@ -124,16 +124,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     try {
       await ApiService().connect(code);
       if (mounted) {
-        setState(() {
-          _connectedPeople.add({'name': name, 'code': code});
-          _connectNameController.clear();
-          _connectCodeController.clear();
-          _isSaving = false;
-        });
-        _showMessage('Connected to $name!');
+        _connectedPeople.add({'name': name, 'code': code});
+        _connectNameController.clear();
+        _connectCodeController.clear();
+        setState(() => _isSaving = false);
       }
     } catch (e) {
-      if (mounted) { _showMessage('$e'); setState(() => _isSaving = false); }
+      if (mounted) setState(() => _isSaving = false);
+      if (mounted) _showMessage('Could not connect: $e');
     }
   }
 
