@@ -54,7 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_page == 2) { _validateProfile(); return; }
     if (_page == 4) { _validateEmergency(); return; }
     if (_page == 5) { setState(() => _page++); return; }
-    if (_page == 6) { _finishConnect(); return; }
+    if (_page == 6) { _addCode(); return; }
     if (_page < _totalPages - 1) setState(() => _page++);
   }
 
@@ -93,7 +93,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _saveProfile() async {
     setState(() => _isSaving = true);
     try {
-      await ApiService().updateProfile({'name': _nameController.text.trim(), 'phone': _phoneController.text.trim()});
+      await ApiService().updateProfile({'name': _nameController.text.trim(), 'email': _emailController.text.trim(), 'phone': _phoneController.text.trim()});
       await AuthService().refreshProfile();
     } catch (_) {}
     if (mounted) setState(() { _isSaving = false; _page++; });
@@ -134,10 +134,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _finishConnect() async {
-    if (_connectedCodes.isEmpty) {
-      _showMessage('Please add at least 1 connection\nbefore continuing');
-      return;
-    }
     await AuthService().refreshProfile();
     if (mounted) Navigator.pushReplacementNamed(context, '/home');
   }
@@ -246,13 +242,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ))),
               ]),
             ),
-            if (_page == 6 && _connectedCodes.isNotEmpty)
+            if (_page == 6)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                 child: SizedBox(width: double.infinity, height: 48, child: OutlinedButton(
                   onPressed: _finishConnect,
                   style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: const BorderSide(color: LKTheme.gold), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  child: Text('FINISH (${_connectedCodes.length} connected)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: Text(_connectedCodes.isEmpty ? 'SKIP - Go to Main Page' : 'FINISH (${_connectedCodes.length} connected)',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 )),
               ),
           ],
