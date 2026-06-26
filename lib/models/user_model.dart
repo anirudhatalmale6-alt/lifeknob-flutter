@@ -9,9 +9,7 @@ class User {
   final int usedConnections;
   final String? sosNumber;
   final String? sosName;
-  final bool quietHoursEnabled;
-  final String? quietHoursStart;
-  final String? quietHoursEnd;
+  final String? ambulanceNumber;
   final String? avatar;
 
   User({
@@ -25,9 +23,7 @@ class User {
     this.usedConnections = 0,
     this.sosNumber,
     this.sosName,
-    this.quietHoursEnabled = false,
-    this.quietHoursStart,
-    this.quietHoursEnd,
+    this.ambulanceNumber,
     this.avatar,
   });
 
@@ -43,9 +39,7 @@ class User {
       usedConnections: json['used_connections'] ?? 0,
       sosNumber: json['sos_number'],
       sosName: json['sos_name'],
-      quietHoursEnabled: json['quiet_hours_enabled'] == true || json['quiet_hours_enabled'] == 1,
-      quietHoursStart: json['quiet_hours_start'],
-      quietHoursEnd: json['quiet_hours_end'],
+      ambulanceNumber: json['ambulance_number'],
       avatar: json['avatar'],
     );
   }
@@ -62,9 +56,7 @@ class User {
       'used_connections': usedConnections,
       'sos_number': sosNumber,
       'sos_name': sosName,
-      'quiet_hours_enabled': quietHoursEnabled,
-      'quiet_hours_start': quietHoursStart,
-      'quiet_hours_end': quietHoursEnd,
+      'ambulance_number': ambulanceNumber,
       'avatar': avatar,
     };
   }

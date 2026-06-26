@@ -20,12 +20,14 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _userName;
   String? _sosNumber;
   String? _sosName;
+  String? _ambulanceNumber;
   String? _avatarUrl;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadLastCheckIn();
   }
 
   Future<void> _loadUserData() async {
@@ -36,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _userName = user.name;
         _sosNumber = user.sosNumber;
         _sosName = user.sosName;
+        _ambulanceNumber = user.ambulanceNumber;
         _avatarUrl = user.avatar;
       });
     }
@@ -48,8 +51,35 @@ class _HomeScreenState extends State<HomeScreen> {
           _userName = freshUser.name;
           _sosNumber = freshUser.sosNumber;
           _sosName = freshUser.sosName;
+          _ambulanceNumber = freshUser.ambulanceNumber;
           _avatarUrl = freshUser.avatar;
         });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _loadLastCheckIn() async {
+    try {
+      final response = await ApiService().getHistory(page: 1);
+      final List data = response['data'] ?? [];
+      if (data.isNotEmpty && mounted) {
+        final latest = data.first;
+        final createdAt = latest['created_at'];
+        if (createdAt != null) {
+          final dt = DateTime.parse(createdAt);
+          final diff = DateTime.now().difference(dt);
+          setState(() {
+            if (diff.inMinutes < 1) {
+              _lastCheckIn = 'Just now';
+            } else if (diff.inMinutes < 60) {
+              _lastCheckIn = '${diff.inMinutes} minutes ago';
+            } else if (diff.inHours < 24) {
+              _lastCheckIn = '${diff.inHours} hours ago';
+            } else {
+              _lastCheckIn = '${diff.inDays} days ago';
+            }
+          });
+        }
       }
     } catch (_) {}
   }
@@ -207,6 +237,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _callAmbulance() async {
+    final number = _ambulanceNumber;
+    if (number == null || number.isEmpty) {
+      if (!mounted) return;
+      _showBigMessage('No ambulance number', 'Go to Settings to set your local ambulance number.', const Color(0xFFF39C12));
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
@@ -220,8 +257,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               const Text('Call Ambulance?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFE74C3C))),
               const SizedBox(height: 8),
-              const Text('This will dial emergency services.\nOnly use in a real emergency.',
-                textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Color(0xFF7F8C8D))),
+              Text('This will dial $number.\nOnly use in a real emergency.',
+                textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, color: Color(0xFF7F8C8D))),
               const SizedBox(height: 24),
               Row(children: [
                 Expanded(child: OutlinedButton(
@@ -243,15 +280,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (confirmed != true) return;
-    final uri = Uri(scheme: 'tel', path: '000');
+    final uri = Uri(scheme: 'tel', path: number);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
   }
 
-  String get _lastCheckInText {
-    if (_lastCheckIn == null) return 'You have not pressed OK yet';
-    return 'You pressed OK button $_lastCheckIn';
+  String get _statusText {
+    if (_lastCheckIn == null) return 'You have not checked in yet';
+    return 'Last OK: $_lastCheckIn';
   }
 
   @override
@@ -305,9 +342,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      (_userName ?? '').toUpperCase(),
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          (_userName ?? '').toUpperCase(),
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50)),
+                        ),
+                        Text(
+                          _statusText,
+                          style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                        ),
+                      ],
                     ),
                   ),
                   if (_userCode != null)
@@ -321,8 +367,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         child: Column(
                           children: [
-                            Text(_userCode!, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF27AE60), letterSpacing: 2)),
-                            const Text('TAP TO VIEW', style: TextStyle(fontSize: 8, color: Color(0xFF95A5A6))),
+                            const Text('MY CODE', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Color(0xFF95A5A6), letterSpacing: 0.8)),
+                            Text(_userCode!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF27AE60), letterSpacing: 2)),
                           ],
                         ),
                       ),
@@ -331,24 +377,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // "Click to show your connection code" hint
-            if (_userCode != null)
-              const Padding(
-                padding: EdgeInsets.only(right: 16, top: 4),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    'Click to show your connection code',
-                    style: TextStyle(fontSize: 12, color: Color(0xFFE74C3C), fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ),
-
             // Main content area with OK button
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const Text(
+                    'Are you okay?',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Color(0xFF27AE60)),
+                  ),
+
+                  const SizedBox(height: 8),
+
                   OkButton(
                     onPressed: _doCheckIn,
                     isLoading: _isCheckingIn,
@@ -356,27 +396,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Last check-in status (red text like mockup)
-                  Text(
-                    _lastCheckInText,
-                    style: const TextStyle(fontSize: 15, color: Color(0xFFE74C3C), fontWeight: FontWeight.w500),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Instruction text (red, prominent)
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    margin: const EdgeInsets.symmetric(horizontal: 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF5F5),
+                      color: const Color(0xFFF0FAF4),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE74C3C).withValues(alpha: 0.2)),
                     ),
                     child: const Text(
-                      'Press the button if everything is fine with you',
+                      'Press the button to let your family know you are fine',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Color(0xFFE74C3C), fontWeight: FontWeight.w600),
+                      style: TextStyle(fontSize: 15, color: Color(0xFF7F8C8D), fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
@@ -385,40 +415,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // Bottom action buttons
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
               child: Row(
                 children: [
-                  // Call contact
                   Expanded(
                     child: SizedBox(
-                      height: 60,
-                      child: ElevatedButton.icon(
+                      height: 76,
+                      child: ElevatedButton(
                         onPressed: _callContact,
-                        icon: const Icon(Icons.phone_rounded, size: 22),
-                        label: Text(callButtonLabel, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis, maxLines: 2),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3498DB),
+                          backgroundColor: const Color(0xFF2E6BAE),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.2),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          elevation: 4,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('📞', style: TextStyle(fontSize: 26)),
+                            const SizedBox(height: 2),
+                            Text(callButtonLabel, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, height: 1.2)),
+                          ],
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // Call ambulance
                   Expanded(
                     child: SizedBox(
-                      height: 60,
-                      child: ElevatedButton.icon(
+                      height: 76,
+                      child: ElevatedButton(
                         onPressed: _callAmbulance,
-                        icon: const Icon(Icons.add_box_rounded, size: 22),
-                        label: const Text('CALL\nAMBULANCE', textAlign: TextAlign.center),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE74C3C),
+                          backgroundColor: const Color(0xFFC43434),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.2),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          elevation: 4,
+                        ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('🚑', style: TextStyle(fontSize: 26)),
+                            SizedBox(height: 2),
+                            Text('CALL\nAMBULANCE', textAlign: TextAlign.center, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, height: 1.2)),
+                          ],
                         ),
                       ),
                     ),
@@ -427,12 +467,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // "OR Alert if something wrong" text
-            const Padding(
-              padding: EdgeInsets.only(bottom: 6, top: 2),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6, top: 2),
               child: Text(
-                'OR Alert if something wrong',
-                style: TextStyle(fontSize: 13, color: Color(0xFFE74C3C), fontWeight: FontWeight.w500),
+                'Or call if something is wrong',
+                style: TextStyle(fontSize: 12, color: Colors.grey[400], fontWeight: FontWeight.w500),
               ),
             ),
           ],

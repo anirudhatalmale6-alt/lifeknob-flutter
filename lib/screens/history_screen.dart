@@ -121,6 +121,56 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
+  Future<void> _disconnectPerson(Connection conn) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.link_off_rounded, size: 64, color: Color(0xFFF39C12)),
+              const SizedBox(height: 16),
+              Text('Disconnect ${conn.name}?', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50)), textAlign: TextAlign.center),
+              const SizedBox(height: 8),
+              const Text('You will no longer see their check-in status.', style: TextStyle(fontSize: 16, color: Color(0xFF7F8C8D)), textAlign: TextAlign.center),
+              const SizedBox(height: 24),
+              Row(children: [
+                Expanded(child: OutlinedButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.grey[600], shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                  child: const Text('Cancel', style: TextStyle(fontSize: 18)),
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF39C12), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                  child: const Text('Disconnect', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                )),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await ApiService().disconnect(conn.userId);
+      if (mounted) {
+        _showBigMessage('Disconnected', '${conn.name} removed.', const Color(0xFF27AE60));
+        _loadData();
+      }
+    } catch (e) {
+      if (mounted) {
+        _showBigMessage('Could not disconnect', '$e', const Color(0xFFE74C3C));
+      }
+    }
+  }
+
   void _showSubscriptionPrompt() {
     Navigator.push(context, MaterialPageRoute(
       builder: (_) => SubscriptionScreen(onGoHome: () {
@@ -160,7 +210,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final bool hasOverdue = _connections.any((c) => c.isOverdue);
-    final String headerTitle = hasOverdue ? 'Alert' : 'Check-in History';
+    final String headerTitle = hasOverdue ? 'ALERT' : 'Check-in History';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -194,6 +244,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ],
               ),
             ),
+
+            // Info text
+            if (!_isLoading && _error == null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Text(
+                  'People you are watching. Tap a person to disconnect.',
+                  style: TextStyle(fontSize: 13, color: Colors.grey[400]),
+                ),
+              ),
 
             // Connection slots
             Expanded(
@@ -247,50 +307,55 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final isOverdue = conn.isOverdue;
     final circleColor = isOverdue ? const Color(0xFFE74C3C) : const Color(0xFF27AE60);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isOverdue ? const Color(0xFFE74C3C).withValues(alpha: 0.3) : Colors.grey[200]!),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6, offset: const Offset(0, 2))],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48, height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: circleColor, width: 2.5),
-              color: circleColor.withValues(alpha: 0.1),
+    return GestureDetector(
+      onTap: () => _disconnectPerson(conn),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isOverdue ? const Color(0xFFFFF5F5) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: isOverdue ? const Color(0xFFE74C3C).withValues(alpha: 0.3) : Colors.grey[200]!),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6, offset: const Offset(0, 2))],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48, height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: circleColor, width: 2.5),
+                color: circleColor.withValues(alpha: 0.1),
+              ),
+              child: Icon(
+                isOverdue ? Icons.warning_rounded : Icons.check_rounded,
+                color: circleColor, size: 24,
+              ),
             ),
-            child: Icon(
-              isOverdue ? Icons.warning_rounded : Icons.check_rounded,
-              color: circleColor, size: 24,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(conn.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Color(0xFF2C3E50))),
+                  const SizedBox(height: 2),
+                  Text(
+                    isOverdue ? 'NOT checked in!' : 'Checked in OK',
+                    style: TextStyle(fontSize: 13, color: isOverdue ? const Color(0xFFE74C3C) : const Color(0xFF27AE60), fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(conn.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Color(0xFF2C3E50))),
-                const SizedBox(height: 2),
-                Text('Pressed OK',
-                  style: TextStyle(fontSize: 13, color: isOverdue ? const Color(0xFFE74C3C) : const Color(0xFF27AE60), fontWeight: FontWeight.w500)),
-              ],
+            Text(
+              conn.lastCheckInText,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isOverdue ? FontWeight.w700 : FontWeight.w500,
+                color: isOverdue ? const Color(0xFFE74C3C) : const Color(0xFF95A5A6),
+              ),
             ),
-          ),
-          Text(
-            conn.lastCheckInText,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isOverdue ? FontWeight.w700 : FontWeight.w500,
-              color: isOverdue ? const Color(0xFFE74C3C) : const Color(0xFF95A5A6),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -351,10 +416,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: Icon(Icons.lock_outline_rounded, color: Colors.grey[400], size: 22),
             ),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Text(
-                'If you want to connect more person,\nplease update your subscription plan',
-                style: TextStyle(fontSize: 13, color: Color(0xFFE74C3C), fontWeight: FontWeight.w500, height: 1.3),
+                'Upgrade to connect more people',
+                style: TextStyle(fontSize: 14, color: Colors.grey[500], fontWeight: FontWeight.w500),
               ),
             ),
             Icon(Icons.chevron_right_rounded, color: Colors.grey[400], size: 24),

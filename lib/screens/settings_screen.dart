@@ -21,6 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String? _userCode;
   String? _plan;
   bool _isSaving = false;
+  String _language = 'English';
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       setState(() {
         _sosNameController.text = user.sosName ?? '';
         _sosPhoneController.text = user.sosNumber ?? '';
+        _ambulanceController.text = user.ambulanceNumber ?? '';
         _userName = user.name;
         _userEmail = user.email;
         _userPhone = user.phone;
@@ -41,6 +43,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _plan = user.plan;
       });
     }
+
+    try {
+      final freshUser = await AuthService().refreshProfile();
+      if (mounted) {
+        setState(() {
+          _sosNameController.text = freshUser.sosName ?? '';
+          _sosPhoneController.text = freshUser.sosNumber ?? '';
+          _ambulanceController.text = freshUser.ambulanceNumber ?? '';
+          _userName = freshUser.name;
+          _userEmail = freshUser.email;
+          _userPhone = freshUser.phone;
+          _userCode = freshUser.userCode;
+          _plan = freshUser.plan;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _saveSettings() async {
@@ -121,6 +139,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  void _showLanguageSelector() {
+    final languages = ['English', 'Magyar', 'Deutsch', 'Español', 'Français', '日本語', '中文'];
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Select Language', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50))),
+              const SizedBox(height: 16),
+              ...languages.map((lang) => ListTile(
+                leading: Icon(
+                  lang == _language ? Icons.radio_button_checked : Icons.radio_button_off,
+                  color: lang == _language ? const Color(0xFF27AE60) : Colors.grey[400],
+                ),
+                title: Text(lang, style: TextStyle(fontSize: 18, fontWeight: lang == _language ? FontWeight.w700 : FontWeight.normal)),
+                onTap: () {
+                  setState(() => _language = lang);
+                  Navigator.pop(ctx);
+                },
+              )),
+              const SizedBox(height: 8),
+              Text('More languages coming soon', style: TextStyle(fontSize: 13, color: Colors.grey[400])),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLegalPage(String title) {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => _LegalPage(title: title, onGoHome: widget.onGoHome),
+    ));
   }
 
   Future<void> _logout() async {
@@ -228,7 +285,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ]),
                       const SizedBox(height: 14),
-                      _infoRow(Icons.phone_rounded, 'Phone', _userPhone ?? '-', editable: true),
+                      _infoRow(Icons.phone_rounded, 'Phone', _userPhone ?? '-'),
                       const SizedBox(height: 8),
                       GestureDetector(
                         onTap: _showCodePopup,
@@ -294,12 +351,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // Language
                     _card([
                       GestureDetector(
-                        onTap: () {},
+                        onTap: _showLanguageSelector,
                         child: Row(children: [
                           const Icon(Icons.language_rounded, color: Color(0xFF27AE60), size: 24),
                           const SizedBox(width: 12),
                           const Expanded(child: Text('Language', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Color(0xFF2C3E50)))),
-                          const Text('English', style: TextStyle(fontSize: 16, color: Color(0xFF27AE60), fontWeight: FontWeight.w600)),
+                          Text(_language, style: const TextStyle(fontSize: 16, color: Color(0xFF27AE60), fontWeight: FontWeight.w600)),
                           const SizedBox(width: 4),
                           Icon(Icons.chevron_right_rounded, color: Colors.grey[400], size: 22),
                         ]),
@@ -309,9 +366,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     // Legal
                     _card([
-                      _linkRow(Icons.description_rounded, 'Terms and Conditions'),
+                      GestureDetector(
+                        onTap: () => _showLegalPage('Terms and Conditions'),
+                        child: _linkRow(Icons.description_rounded, 'Terms and Conditions'),
+                      ),
                       Divider(color: Colors.grey[200], height: 1),
-                      _linkRow(Icons.lock_rounded, 'Privacy Policy'),
+                      GestureDetector(
+                        onTap: () => _showLegalPage('Privacy Policy'),
+                        child: _linkRow(Icons.lock_rounded, 'Privacy Policy'),
+                      ),
                     ]),
                     const SizedBox(height: 20),
 
@@ -352,26 +415,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _infoRow(IconData icon, String label, String value, {bool editable = false, bool isCode = false}) {
+  Widget _infoRow(IconData icon, String label, String value, {bool isCode = false}) {
     return Row(children: [
       Icon(icon, size: 20, color: isCode ? const Color(0xFF27AE60) : const Color(0xFF95A5A6)),
       const SizedBox(width: 10),
       Text(label, style: TextStyle(fontSize: 15, color: Colors.grey[500])),
       const Spacer(),
-      if (editable)
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(border: Border.all(color: Colors.grey[300]!), borderRadius: BorderRadius.circular(8), color: Colors.white),
-          child: Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF2C3E50))),
-        )
-      else
-        Text(value, style: TextStyle(
-          fontSize: 15,
-          fontWeight: isCode ? FontWeight.w800 : FontWeight.w500,
-          color: isCode ? const Color(0xFF27AE60) : const Color(0xFF2C3E50),
-          letterSpacing: isCode ? 2 : 0,
-        )),
-      if (editable) ...[const SizedBox(width: 4), Icon(Icons.edit_rounded, size: 14, color: Colors.grey[400])],
+      Text(value, style: TextStyle(
+        fontSize: 15,
+        fontWeight: isCode ? FontWeight.w800 : FontWeight.w500,
+        color: isCode ? const Color(0xFF27AE60) : const Color(0xFF2C3E50),
+        letterSpacing: isCode ? 2 : 0,
+      )),
       if (isCode) ...[const SizedBox(width: 4), Icon(Icons.zoom_in_rounded, size: 16, color: Colors.grey[400])],
     ]);
   }
@@ -392,12 +447,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: InputDecoration(
         hintText: hint,
         counterText: '',
-        hintStyle: TextStyle(fontSize: 16, color: Colors.grey[350]),
+        hintStyle: TextStyle(fontSize: 16, color: Colors.grey[400]),
         prefixIcon: Icon(icon, color: iconColor, size: 22),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[250]!)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: iconColor, width: 2)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
@@ -405,17 +460,146 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _linkRow(IconData icon, String label) {
-    return GestureDetector(
-      onTap: () {},
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Row(children: [
-          Icon(icon, size: 20, color: Colors.grey[400]),
-          const SizedBox(width: 12),
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 16, color: Color(0xFF2C3E50)))),
-          Icon(Icons.chevron_right_rounded, color: Colors.grey[400], size: 22),
-        ]),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(children: [
+        Icon(icon, size: 20, color: Colors.grey[400]),
+        const SizedBox(width: 12),
+        Expanded(child: Text(label, style: const TextStyle(fontSize: 16, color: Color(0xFF2C3E50)))),
+        Icon(Icons.chevron_right_rounded, color: Colors.grey[400], size: 22),
+      ]),
+    );
+  }
+}
+
+class _LegalPage extends StatelessWidget {
+  final String title;
+  final VoidCallback? onGoHome;
+
+  const _LegalPage({required this.title, this.onGoHome});
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isTerms = title.contains('Terms');
+    final String content = isTerms ? _termsContent : _privacyContent;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Row(children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.grey[100]),
+                    child: const Icon(Icons.arrow_back_rounded, size: 24, color: Color(0xFF2C3E50)),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(child: Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50)))),
+              ]),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Text(content, style: const TextStyle(fontSize: 15, color: Color(0xFF555555), height: 1.6)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 8, 32, 16),
+              child: SizedBox(
+                width: double.infinity, height: 52,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF27AE60), foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('OK - Go Back', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  static const String _termsContent = '''Terms and Conditions for LifeKnob
+
+Last updated: June 2026
+
+1. Acceptance of Terms
+By using LifeKnob, you agree to these Terms and Conditions. If you do not agree, please do not use the app.
+
+2. Service Description
+LifeKnob is a daily check-in app designed for elderly users and their families. Users press "I'm OK" to let connected people know they are fine. The app is not a medical device and does not replace emergency services.
+
+3. User Accounts
+You must provide accurate information when creating an account. You are responsible for maintaining the security of your account credentials.
+
+4. Connections
+Users can connect to other users using unique codes. Free users may connect to 1 person. Premium users may connect to up to 5 people.
+
+5. Subscriptions
+Premium features are available through monthly or yearly subscriptions. Subscriptions auto-renew unless cancelled. Refund policies follow the app store guidelines.
+
+6. Emergency Features
+The "Call Ambulance" and "Call Contact" buttons are convenience features that dial phone numbers you have configured. LifeKnob is not responsible for emergency response times or outcomes.
+
+7. Privacy
+Your check-in data is shared only with your connected users. We do not sell your personal information. See our Privacy Policy for details.
+
+8. Limitation of Liability
+LifeKnob is provided "as is" without warranties. We are not liable for any damages arising from the use or inability to use the service.
+
+9. Changes to Terms
+We may update these terms from time to time. Continued use of the app constitutes acceptance of updated terms.
+
+10. Contact
+For questions about these terms, please contact us through the app.''';
+
+  static const String _privacyContent = '''Privacy Policy for LifeKnob
+
+Last updated: June 2026
+
+1. Information We Collect
+- Account information: name, email, phone number
+- Check-in data: timestamps of your "I'm OK" presses
+- Connection data: who you are connected to
+- Device information: for push notifications
+
+2. How We Use Your Information
+- To provide the check-in service
+- To notify your connected people of your status
+- To send you reminders and alerts
+- To improve the app
+
+3. Information Sharing
+We share your check-in status ONLY with people you have explicitly connected with using your unique code. We do not sell, rent, or share your personal information with third parties for marketing purposes.
+
+4. Data Storage
+Your data is stored securely on our servers. Check-in history is retained for 12 months.
+
+5. Your Rights
+You can:
+- View and update your personal information in Settings
+- Delete your account and all associated data
+- Disconnect from any connected person at any time
+
+6. Children's Privacy
+LifeKnob is not intended for children under 13. We do not knowingly collect information from children.
+
+7. Security
+We use industry-standard security measures to protect your data, including encrypted connections and secure storage.
+
+8. Changes to Privacy Policy
+We may update this policy from time to time. We will notify you of significant changes through the app.
+
+9. Contact
+For privacy-related questions, please contact us through the app.''';
 }
