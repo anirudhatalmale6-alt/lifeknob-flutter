@@ -14,7 +14,7 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   int _page = 0;
-  static const int _totalPages = 4;
+  static const int _totalPages = 5;
 
   String _language = 'English';
   String? _userCode;
@@ -40,7 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _next() {
-    if (_page == 1) {
+    if (_page == 2) {
       if (_nameController.text.trim().isEmpty) {
         _showMessage('Please enter your name');
         return;
@@ -48,11 +48,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _saveProfile();
       return;
     }
-    if (_page == 2) {
+    if (_page == 3) {
       _saveEmergency();
       return;
     }
-    if (_page == 3) {
+    if (_page == 4) {
       _saveConnection();
       return;
     }
@@ -192,6 +192,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 duration: const Duration(milliseconds: 250),
                 child: [
                   _buildLanguage,
+                  _buildCode,
                   _buildProfile,
                   _buildEmergency,
                   _buildConnect,
@@ -220,7 +221,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
             ),
-            if (_page >= 2)
+            if (_page >= 3)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: GestureDetector(
@@ -280,27 +281,77 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  // Page 1: Profile
+  // Page 1: Your Code
+  Widget _buildCode() {
+    return Padding(
+      key: const ValueKey('code'),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.badge_rounded, size: 56, color: LKTheme.gold),
+          const SizedBox(height: 16),
+          const Text('Your Personal Code', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+          const SizedBox(height: 28),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 22),
+            decoration: BoxDecoration(
+              color: LKTheme.bgCard,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: LKTheme.gold, width: 2),
+              boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.15), blurRadius: 20)],
+            ),
+            child: Text(
+              _userCode ?? '........',
+              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 8),
+            ),
+          ),
+          const SizedBox(height: 28),
+          const Text(
+            'This is YOUR unique code.',
+            style: TextStyle(fontSize: 22, color: LKTheme.textPrimary, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            'Share this code with your family\nso they can connect to you\nand see when you press OK.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 17, color: LKTheme.textSecondary, height: 1.5),
+          ),
+          const SizedBox(height: 24),
+          GestureDetector(
+            onTap: () {
+              if (_userCode != null) {
+                Clipboard.setData(ClipboardData(text: _userCode!));
+                _showMessage('Code copied!');
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.5))),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.copy_rounded, size: 20, color: LKTheme.gold),
+                  SizedBox(width: 8),
+                  Text('Copy Code', style: TextStyle(fontSize: 17, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Page 2: Profile
   Widget _buildProfile() {
     return SingleChildScrollView(
       key: const ValueKey('profile'),
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         children: [
-          const SizedBox(height: 16),
-
-          // Code display at top
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.4))),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('YOUR CODE: ', style: TextStyle(fontSize: 13, color: LKTheme.textSecondary)),
-                Text(_userCode ?? '...', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 2)),
-              ],
-            ),
-          ),
+          const SizedBox(height: 20),
+          const Text('Your Details', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
           const SizedBox(height: 20),
 
           // Avatar
