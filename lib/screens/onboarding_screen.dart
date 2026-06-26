@@ -113,10 +113,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _addCode() async {
+    _errorFields.clear();
     final name = _connectNameController.text.trim();
     final code = _connectCodeController.text.trim();
-    if (name.isEmpty) { _showMessage('Enter a name for this person'); return; }
-    if (code.isEmpty) { _showMessage('Enter their code'); return; }
+    String? msg;
+    if (name.isEmpty) { _errorFields.add('connectName'); msg ??= 'Enter a name for this person'; }
+    if (code.isEmpty) { _errorFields.add('connectCode'); msg ??= 'Enter their code'; }
+    if (_errorFields.isNotEmpty) { setState(() {}); _showMessage(msg!); return; }
     if (_connectedPeople.any((p) => p['code'] == code)) { _showMessage('Already connected to this code'); return; }
     if (_connectedPeople.length >= _maxSlots) { _showMessage('Connection limit reached.\nUpgrade your plan for more slots.'); return; }
 
@@ -124,6 +127,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     try {
       await ApiService().connect(code);
       if (mounted) {
+        _errorFields.clear();
         _connectedPeople.add({'name': name, 'code': code});
         _connectNameController.clear();
         _connectCodeController.clear();
@@ -131,7 +135,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       }
     } catch (e) {
       if (mounted) setState(() => _isSaving = false);
-      if (mounted) _showMessage('Could not connect: $e');
+      final errMsg = '$e';
+      if (errMsg.contains('404') || errMsg.toLowerCase().contains('not found')) {
+        if (mounted) _showMessage('Code not found.\n\nMake sure the person has the app installed and shared the correct code with you.');
+      } else {
+        if (mounted) _showMessage('Could not connect.\n$errMsg');
+      }
     }
   }
 
@@ -538,15 +547,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               _label('Name'), const SizedBox(height: 6),
               TextField(controller: _connectNameController, maxLength: 50,
                 style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-                decoration: const InputDecoration(hintText: 'e.g. Grandma Rose', counterText: '', prefixIcon: Icon(Icons.person_rounded, color: LKTheme.gold))),
+                onChanged: (_) { if (_errorFields.contains('connectName')) setState(() => _errorFields.remove('connectName')); },
+                decoration: _inputDeco('e.g. Grandma Rose', Icons.person_rounded, LKTheme.gold, 'connectName')),
               const SizedBox(height: 12),
               _label('Code'), const SizedBox(height: 6),
               TextField(controller: _connectCodeController, maxLength: 8,
                 textCapitalization: TextCapitalization.characters,
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
-                decoration: InputDecoration(hintText: 'CODE', counterText: '',
-                  hintStyle: TextStyle(fontSize: 22, color: LKTheme.textMuted.withValues(alpha: 0.4), letterSpacing: 4),
-                  prefixIcon: const Icon(Icons.link_rounded, color: LKTheme.gold))),
+                onChanged: (_) { if (_errorFields.contains('connectCode')) setState(() => _errorFields.remove('connectCode')); },
+                decoration: _inputDeco('CODE', Icons.link_rounded, LKTheme.gold, 'connectCode')),
               const SizedBox(height: 14),
               SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
                 onPressed: _isSaving ? null : _addCode,
