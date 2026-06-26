@@ -52,15 +52,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_page == 2) {
       final name = _nameController.text.trim();
       if (name.isEmpty) { _showMessage('Please enter your name'); return; }
-      if (_emailController.text.trim().isEmpty) { _showMessage('Please enter your email'); return; }
-      if (_phoneController.text.trim().isEmpty) { _showMessage('Please enter your phone number'); return; }
+      final email = _emailController.text.trim();
+      if (email.isEmpty) { _showMessage('Please enter your email'); return; }
+      if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) { _showMessage('Please enter a valid email address\n(example: name@email.com)'); return; }
+      final phone = _phoneController.text.trim();
+      if (phone.isEmpty) { _showMessage('Please enter your phone number'); return; }
+      if (!RegExp(r'^\+?[0-9]{6,20}$').hasMatch(phone)) { _showMessage('Phone number can only contain\n+ and numbers, no spaces\n(example: +61400000000)'); return; }
       _saveProfile();
       return;
     }
     if (_page == 4) {
       if (_sosNameController.text.trim().isEmpty) { _showMessage('Please enter emergency contact name'); return; }
-      if (_sosPhoneController.text.trim().isEmpty) { _showMessage('Please enter emergency contact number'); return; }
-      if (_ambulanceController.text.trim().isEmpty) { _showMessage('Please enter ambulance number'); return; }
+      final sosPhone = _sosPhoneController.text.trim();
+      if (sosPhone.isEmpty) { _showMessage('Please enter emergency contact number'); return; }
+      if (!RegExp(r'^\+?[0-9]{3,20}$').hasMatch(sosPhone)) { _showMessage('Emergency number can only contain\n+ and numbers, no spaces'); return; }
+      final ambNum = _ambulanceController.text.trim();
+      if (ambNum.isEmpty) { _showMessage('Please enter ambulance number'); return; }
+      if (!RegExp(r'^[0-9]{1,10}$').hasMatch(ambNum)) { _showMessage('Ambulance number can only\ncontain numbers (e.g. 000, 911, 112)'); return; }
       _saveEmergency();
       return;
     }
