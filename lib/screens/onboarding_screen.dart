@@ -20,7 +20,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String? _userCode;
   String _selectedPlan = 'free';
   int _maxSlots = 1;
-  final List<String> _connectedCodes = [];
+  final List<Map<String, String>> _connectedPeople = [];
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -28,6 +28,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _sosNameController = TextEditingController();
   final _sosPhoneController = TextEditingController();
   final _ambulanceController = TextEditingController();
+  final _connectNameController = TextEditingController();
   final _connectCodeController = TextEditingController();
 
   bool _isSaving = false;
@@ -112,21 +113,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _addCode() async {
+    final name = _connectNameController.text.trim();
     final code = _connectCodeController.text.trim();
-    if (code.isEmpty) { _showMessage('Enter a code first'); return; }
-    if (_connectedCodes.contains(code)) { _showMessage('Already connected to this code'); return; }
-    if (_connectedCodes.length >= _maxSlots) { _showMessage('Connection limit reached.\nUpgrade your plan for more slots.'); return; }
+    if (name.isEmpty) { _showMessage('Enter a name for this person'); return; }
+    if (code.isEmpty) { _showMessage('Enter their code'); return; }
+    if (_connectedPeople.any((p) => p['code'] == code)) { _showMessage('Already connected to this code'); return; }
+    if (_connectedPeople.length >= _maxSlots) { _showMessage('Connection limit reached.\nUpgrade your plan for more slots.'); return; }
 
     setState(() => _isSaving = true);
     try {
       await ApiService().connect(code);
       if (mounted) {
         setState(() {
-          _connectedCodes.add(code);
+          _connectedPeople.add({'name': name, 'code': code});
+          _connectNameController.clear();
           _connectCodeController.clear();
           _isSaving = false;
         });
-        _showMessage('Connected!');
+        _showMessage('Connected to $name!');
       }
     } catch (e) {
       if (mounted) { _showMessage('$e'); setState(() => _isSaving = false); }
@@ -134,7 +138,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _finishConnect() async {
-    if (_connectedCodes.isEmpty) {
+    if (_connectedPeople.isEmpty) {
       final goAnyway = await showDialog<bool>(
         context: context,
         builder: (ctx) => Dialog(
@@ -220,7 +224,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void dispose() {
     _nameController.dispose(); _emailController.dispose(); _phoneController.dispose();
     _sosNameController.dispose(); _sosPhoneController.dispose(); _ambulanceController.dispose();
-    _connectCodeController.dispose();
+    _connectNameController.dispose(); _connectCodeController.dispose();
     super.dispose();
   }
 
@@ -264,7 +268,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Expanded(flex: 2, child: SizedBox(height: 52, child: Container(
                   decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14), boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))]),
                   child: ElevatedButton(
-                    onPressed: _isSaving ? null : (_page == 6 ? _addCode : _next),
+                    onPressed: _isSaving ? null : (_page == 6 ? _finishConnect : _next),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                     child: _isSaving
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
@@ -484,54 +488,65 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // Page 6: Connect People
   Widget _buildConnect() {
-    return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 32),
+    final remaining = _maxSlots - _connectedPeople.length;
+    return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(children: [
         const SizedBox(height: 16),
         const Icon(Icons.people_rounded, size: 44, color: LKTheme.gold),
         const SizedBox(height: 8),
         const Text('Connect to People', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
         const SizedBox(height: 4),
-        Text('Add up to $_maxSlots ${_maxSlots == 1 ? "person" : "people"} (${_connectedCodes.length}/$_maxSlots)',
+        Text('${_connectedPeople.length} / $_maxSlots connections',
           style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
-        const SizedBox(height: 20),
-        Row(children: [
-          Expanded(child: TextField(
-            controller: _connectCodeController, maxLength: 8,
-            textCapitalization: TextCapitalization.characters, textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
-            decoration: InputDecoration(hintText: 'CODE', counterText: '',
-              hintStyle: TextStyle(fontSize: 24, color: LKTheme.textMuted.withValues(alpha: 0.4), letterSpacing: 4)))),
-          const SizedBox(width: 10),
-          SizedBox(height: 52, child: ElevatedButton(
-            onPressed: _isSaving ? null : _addCode,
-            style: ElevatedButton.styleFrom(backgroundColor: LKTheme.green, foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(horizontal: 20)),
-            child: const Text('ADD', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-          )),
-        ]),
-        const SizedBox(height: 8),
-        const Text('Enter their code and tap ADD', style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
-        const SizedBox(height: 20),
-        if (_connectedCodes.isNotEmpty) ...[
-          const Align(alignment: Alignment.centerLeft,
-            child: Text('Connected:', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600))),
-          const SizedBox(height: 8),
-          ..._connectedCodes.map((code) => Container(
+        const SizedBox(height: 16),
+
+        if (_connectedPeople.isNotEmpty) ...[
+          ..._connectedPeople.map((p) => Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.green.withValues(alpha: 0.3))),
             child: Row(children: [
               const Icon(Icons.check_circle_rounded, color: LKTheme.green, size: 22),
               const SizedBox(width: 10),
-              Text(code, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.textPrimary, letterSpacing: 2)),
+              Expanded(child: Text(p['name']!, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary))),
+              Text(p['code']!, style: const TextStyle(fontSize: 14, color: LKTheme.gold, letterSpacing: 1, fontWeight: FontWeight.w600)),
             ]),
           )),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
         ],
-        if (_connectedCodes.length < _maxSlots && _connectedCodes.isNotEmpty)
-          Text('${_maxSlots - _connectedCodes.length} more ${_maxSlots - _connectedCodes.length == 1 ? "slot" : "slots"} available',
-            style: const TextStyle(fontSize: 13, color: LKTheme.textMuted)),
+
+        if (remaining > 0) ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: LKTheme.border)),
+            child: Column(children: [
+              _label('Name'), const SizedBox(height: 6),
+              TextField(controller: _connectNameController, maxLength: 50,
+                style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+                decoration: const InputDecoration(hintText: 'e.g. Grandma Rose', counterText: '', prefixIcon: Icon(Icons.person_rounded, color: LKTheme.gold))),
+              const SizedBox(height: 12),
+              _label('Code'), const SizedBox(height: 6),
+              TextField(controller: _connectCodeController, maxLength: 8,
+                textCapitalization: TextCapitalization.characters,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
+                decoration: InputDecoration(hintText: 'CODE', counterText: '',
+                  hintStyle: TextStyle(fontSize: 22, color: LKTheme.textMuted.withValues(alpha: 0.4), letterSpacing: 4),
+                  prefixIcon: const Icon(Icons.link_rounded, color: LKTheme.gold))),
+              const SizedBox(height: 14),
+              SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
+                onPressed: _isSaving ? null : _addCode,
+                style: ElevatedButton.styleFrom(backgroundColor: LKTheme.green, foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                child: const Text('ADD CONNECTION', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+              )),
+            ]),
+          ),
+          if (remaining > 1)
+            Padding(padding: const EdgeInsets.only(top: 8),
+              child: Text('$remaining ${remaining == 1 ? "slot" : "slots"} remaining', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted))),
+        ] else
+          Padding(padding: const EdgeInsets.all(16),
+            child: Text('All $_maxSlots slots used', style: const TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600))),
         const SizedBox(height: 16),
       ]));
   }
