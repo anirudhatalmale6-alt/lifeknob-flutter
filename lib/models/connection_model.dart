@@ -3,6 +3,8 @@ class Connection {
   final int userId;
   final String name;
   final String userCode;
+  final String? avatar;
+  final String status;
   final DateTime? lastCheckIn;
   final String? lastCheckInType;
 
@@ -11,6 +13,8 @@ class Connection {
     required this.userId,
     required this.name,
     required this.userCode,
+    this.avatar,
+    this.status = 'accepted',
     this.lastCheckIn,
     this.lastCheckInType,
   });
@@ -21,6 +25,8 @@ class Connection {
       userId: json['user_id'] ?? 0,
       name: json['name'] ?? 'Unknown',
       userCode: json['user_code'] ?? '',
+      avatar: json['avatar'],
+      status: json['status'] ?? 'accepted',
       lastCheckIn: json['last_check_in'] != null
           ? DateTime.parse(json['last_check_in'])
           : null,
@@ -38,7 +44,11 @@ class Connection {
     return '${lastCheckIn!.day}/${lastCheckIn!.month}/${lastCheckIn!.year}';
   }
 
+  bool get isPending => status == 'pending';
+  bool get isAccepted => status == 'accepted';
+
   bool get isOverdue {
+    if (!isAccepted) return false;
     if (lastCheckIn == null) return false;
     return DateTime.now().difference(lastCheckIn!).inHours > 24;
   }

@@ -104,6 +104,32 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> acceptRequest(int connectionId) async {
+    final response = await http.post(
+      Uri.parse(ApiConfig.getUrl('acceptRequest')),
+      headers: await _headers(),
+      body: jsonEncode({'connection_id': connectionId}),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> rejectRequest(int connectionId) async {
+    final response = await http.post(
+      Uri.parse(ApiConfig.getUrl('rejectRequest')),
+      headers: await _headers(),
+      body: jsonEncode({'connection_id': connectionId}),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> getPendingRequests() async {
+    final response = await http.get(
+      Uri.parse(ApiConfig.getUrl('pendingRequests')),
+      headers: await _headers(),
+    );
+    return _handleResponse(response);
+  }
+
   Future<Map<String, dynamic>> getConnections() async {
     final response = await http.get(
       Uri.parse(ApiConfig.getUrl('connections')),

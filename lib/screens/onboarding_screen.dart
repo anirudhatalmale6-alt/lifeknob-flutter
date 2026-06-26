@@ -529,17 +529,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ..._connectedPeople.map((p) => Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.green.withValues(alpha: 0.3))),
+            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
             child: Row(children: [
               Container(width: 40, height: 40,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.green.withValues(alpha: 0.15)),
-                child: const Icon(Icons.check_rounded, color: LKTheme.green, size: 22)),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
+                child: const Icon(Icons.hourglass_top_rounded, color: LKTheme.gold, size: 20)),
               const SizedBox(width: 12),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(p['name']!, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
-                Text(p['code']!, style: const TextStyle(fontSize: 13, color: LKTheme.gold, letterSpacing: 1)),
+                const Text('Request sent - waiting for acceptance', style: TextStyle(fontSize: 12, color: LKTheme.textMuted)),
               ])),
-              const Icon(Icons.link_rounded, color: LKTheme.green, size: 20),
+              Text(p['code']!, style: const TextStyle(fontSize: 12, color: LKTheme.gold, letterSpacing: 1)),
             ]),
           )),
           const SizedBox(height: 8),
