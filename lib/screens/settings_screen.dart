@@ -429,9 +429,10 @@ class _LegalPage extends StatelessWidget {
             Expanded(child: SingleChildScrollView(padding: const EdgeInsets.all(20), child: Text(content, style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.6)))),
             Padding(
               padding: const EdgeInsets.fromLTRB(32, 8, 32, 16),
-              child: SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
+              child: SizedBox(width: double.infinity, height: 52, child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('OK - Go Back', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                child: const Text('BACK', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               )),
             ),
           ],
