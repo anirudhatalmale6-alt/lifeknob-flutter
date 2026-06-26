@@ -31,22 +31,26 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadLastCheckIn();
   }
 
-  Future<void> _loadUserData() async {
-    var user = AuthService().currentUser ?? await AuthService().getSavedUser();
-    try {
-      user = await AuthService().refreshProfile();
-    } catch (_) {}
+  void _setUserData(dynamic user) {
+    if (user == null || !mounted) return;
+    setState(() {
+      _userCode = user.userCode;
+      _userName = user.name;
+      _sosNumber = user.sosNumber;
+      _sosName = user.sosName;
+      _ambulanceNumber = user.ambulanceNumber;
+      _avatarUrl = user.avatar;
+    });
+  }
 
-    if (user != null && mounted) {
-      setState(() {
-        _userCode = user!.userCode;
-        _userName = user.name;
-        _sosNumber = user.sosNumber;
-        _sosName = user.sosName;
-        _ambulanceNumber = user.ambulanceNumber;
-        _avatarUrl = user.avatar;
-      });
-    }
+  Future<void> _loadUserData() async {
+    final cached = AuthService().currentUser ?? await AuthService().getSavedUser();
+    _setUserData(cached);
+
+    try {
+      final fresh = await AuthService().refreshProfile();
+      _setUserData(fresh);
+    } catch (_) {}
   }
 
   Future<void> _loadLastCheckIn() async {

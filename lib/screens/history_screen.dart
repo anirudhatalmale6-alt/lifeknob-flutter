@@ -190,6 +190,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                       SizedBox(width: 180, height: 44, child: ElevatedButton(onPressed: _loadData, child: const Text('Try Again'))),
                     ]))
                   : RefreshIndicator(color: LKTheme.gold, backgroundColor: LKTheme.bgCard, onRefresh: _loadData,
+                      child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 500),
                       child: ListView(padding: const EdgeInsets.fromLTRB(12, 4, 12, 16), children: [
 
                         // Incoming requests
@@ -216,7 +217,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                           const SizedBox(height: 8),
                           _buildAddRow(),
                         ],
-                      ])),
+                      ])))),
             ),
           ],
         ),
@@ -301,49 +302,32 @@ class HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  // Add row: [name] [code] [+ CONNECT PEOPLE button]
   Widget _buildAddRow() {
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      // Name + Code fields
-      Expanded(child: Column(children: [
-        SizedBox(height: 42, child: TextField(controller: _nameCtrl, maxLength: 50,
-          style: const TextStyle(fontSize: 15, color: LKTheme.textPrimary),
-          decoration: InputDecoration(
-            hintText: 'name ...',
-            hintStyle: TextStyle(fontSize: 15, color: LKTheme.textMuted.withValues(alpha: 0.6)),
-            counterText: '', isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            filled: true, fillColor: LKTheme.bgCardLight,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: LKTheme.border)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: LKTheme.border)),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: LKTheme.gold, width: 2)),
-          ))),
-        const SizedBox(height: 4),
-        SizedBox(height: 42, child: TextField(controller: _codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2),
-          decoration: InputDecoration(
-            hintText: 'code',
-            hintStyle: TextStyle(fontSize: 15, color: LKTheme.textMuted.withValues(alpha: 0.5)),
-            counterText: '', isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            filled: true, fillColor: LKTheme.bgCardLight,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: LKTheme.border)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: LKTheme.border)),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: LKTheme.gold, width: 2)),
-          ))),
-      ])),
-      const SizedBox(width: 8),
-      // Button
-      SizedBox(height: 88, child: ElevatedButton(
-        onPressed: _isAdding ? null : _connectPeople,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: LKTheme.gold, foregroundColor: Colors.black,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          padding: const EdgeInsets.symmetric(horizontal: 10)),
-        child: _isAdding
-          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
-          : const Text('+ CONNECT\nPEOPLE', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, height: 1.3)),
-      )),
-    ]);
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 500),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          Expanded(child: TextField(controller: _nameCtrl, maxLength: 50,
+            style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary),
+            decoration: const InputDecoration(hintText: 'name ...', counterText: '',
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14)))),
+          const SizedBox(width: 8),
+          Expanded(child: TextField(controller: _codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2),
+            decoration: const InputDecoration(hintText: 'code', counterText: '',
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14)))),
+        ]),
+        const SizedBox(height: 10),
+        SizedBox(height: 48, child: ElevatedButton.icon(
+          onPressed: _isAdding ? null : _connectPeople,
+          icon: _isAdding
+            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
+            : const Icon(Icons.person_add_rounded, size: 20),
+          label: _isAdding ? const Text('') : const Text('+ CONNECT PEOPLE', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+          style: ElevatedButton.styleFrom(backgroundColor: LKTheme.gold, foregroundColor: Colors.black,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+        )),
+      ]),
+    );
   }
 }
