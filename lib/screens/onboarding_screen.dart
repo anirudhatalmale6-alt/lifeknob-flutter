@@ -49,6 +49,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return;
     }
     if (_page == 4) {
+      if (_sosNameController.text.trim().isEmpty) { _showMessage('Please enter emergency contact name'); return; }
+      if (_sosPhoneController.text.trim().isEmpty) { _showMessage('Please enter emergency contact number'); return; }
+      if (_ambulanceController.text.trim().isEmpty) { _showMessage('Please enter ambulance number'); return; }
       _saveEmergency();
       return;
     }

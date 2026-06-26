@@ -175,7 +175,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Navigator.push(context, MaterialPageRoute(builder: (_) => _LegalPage(title: title)));
   }
 
-  Future<void> _logout() async {
+  Future<void> _startAgain() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
@@ -186,11 +186,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.logout_rounded, size: 64, color: LKTheme.red),
+              const Icon(Icons.refresh_rounded, size: 64, color: LKTheme.red),
               const SizedBox(height: 16),
-              const Text('Log Out?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
+              const Text('Start Again?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
               const SizedBox(height: 8),
-              const Text('You will need to sign in again.', style: TextStyle(fontSize: 18, color: LKTheme.textSecondary)),
+              const Text('This will reset everything.\nYou will get a new code and\ngo through setup again.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
               const SizedBox(height: 24),
               Row(children: [
                 Expanded(child: OutlinedButton(
@@ -202,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Expanded(child: ElevatedButton(
                   onPressed: () => Navigator.pop(ctx, true),
                   style: ElevatedButton.styleFrom(backgroundColor: LKTheme.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: const Text('Log Out', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: const Text('Reset', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 )),
               ]),
             ],
@@ -212,7 +212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     if (confirm != true) return;
     await AuthService().logout();
-    if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
   @override
@@ -345,7 +345,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     )),
 
                     const SizedBox(height: 16),
-                    Center(child: GestureDetector(onTap: _logout, child: const Text('Log Out', style: TextStyle(fontSize: 12, color: LKTheme.textMuted)))),
+                    Center(child: GestureDetector(onTap: _startAgain, child: const Text('Start Again', style: TextStyle(fontSize: 13, color: LKTheme.textMuted, decoration: TextDecoration.underline)))),
                     const SizedBox(height: 8),
                     const Center(child: Text('LifeKnob v1.0.0', style: TextStyle(fontSize: 10, color: LKTheme.textMuted))),
                     const SizedBox(height: 16),
