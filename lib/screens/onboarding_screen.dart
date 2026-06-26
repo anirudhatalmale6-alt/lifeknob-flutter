@@ -139,32 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _finishConnect() async {
     if (_connectedPeople.isEmpty) {
-      await showDialog(
-        context: context,
-        builder: (ctx) => Dialog(
-          backgroundColor: LKTheme.bgCard,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.warning_rounded, size: 56, color: LKTheme.gold),
-              const SizedBox(height: 16),
-              const Text('No connections yet', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
-              const SizedBox(height: 12),
-              const Text(
-                'Nobody can see when you press OK.\n\nYou can add connections later in the "People" tab.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.5),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK, I understand', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              )),
-            ]),
-          ),
-        ),
-      );
+      _showMessage('Nobody can see when you press OK yet.\nYou can add connections later in "People".');
     }
     await AuthService().refreshProfile();
     if (mounted) Navigator.pushReplacementNamed(context, '/home');
@@ -267,7 +242,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: _isSaving
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
                         : Text(
-                            _page >= _totalPages - 2 ? 'FINISH' : 'NEXT',
+                            _page == _totalPages - 1 ? 'FINISH' : 'NEXT',
                             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10), letterSpacing: 1),
                           ),
                   ),
