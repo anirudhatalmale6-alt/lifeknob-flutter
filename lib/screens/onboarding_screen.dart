@@ -138,7 +138,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (mounted) setState(() => _isSaving = false);
       final errMsg = '$e';
       if (errMsg.contains('404') || errMsg.toLowerCase().contains('not found')) {
-        if (mounted) _showMessage('Code not found.\n\nMake sure the person has the app installed and shared the correct code with you.');
+        if (mounted) _showMessage('This code is not in the system.\nPlease check the code and try again.');
       } else if (errMsg.contains('already')) {
         if (mounted) _showMessage('You are already connected to this person.');
       } else if (errMsg.contains('limit') || errMsg.contains('403')) {

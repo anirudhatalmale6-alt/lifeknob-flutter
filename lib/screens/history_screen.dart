@@ -82,7 +82,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (mounted) setState(() => _isAdding = false);
       final msg = '$e';
       if (msg.contains('not found') || msg.contains('404')) {
-        _showMsg('Code not found.\nMake sure the person has the app installed and shared the correct code.');
+        _showMsg('This code is not in the system.\nPlease check the code and try again.');
       } else if (msg.contains('already')) {
         _showMsg('You already sent a request to this person.');
       } else if (msg.contains('limit') || msg.contains('403')) {
