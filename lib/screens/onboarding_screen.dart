@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
@@ -53,8 +54,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _next() {
     if (_page == 2) { _validateProfile(); return; }
-    if (_page == 4) { _validateEmergency(); return; }
-    if (_page == 5) { _savePlan(); return; }
+    if (_page == 3) { _validateEmergency(); return; }
+    if (_page == 4) { _savePlanAndRegister(); return; }
     if (_page == 6) { _finishConnect(); return; }
     if (_page < _totalPages - 1) setState(() => _page++);
   }
@@ -73,7 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (phone.isEmpty) { _errorFields.add('phone'); msg ??= 'Please enter your phone number'; }
     else if (!RegExp(r'^\+?[0-9]{6,20}$').hasMatch(phone)) { _errorFields.add('phone'); msg ??= 'Phone: only + and numbers, no spaces'; }
     if (_errorFields.isNotEmpty) { setState(() {}); _showMessage(msg!); return; }
-    _saveProfile();
+    setState(() => _page++);
   }
 
   void _validateEmergency() {
@@ -88,7 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (ambNum.isEmpty) { _errorFields.add('ambulance'); msg ??= 'Please enter ambulance number'; }
     else if (!RegExp(r'^[0-9]{1,10}$').hasMatch(ambNum)) { _errorFields.add('ambulance'); msg ??= 'Ambulance: numbers only (e.g. 000, 911)'; }
     if (_errorFields.isNotEmpty) { setState(() {}); _showMessage(msg!); return; }
-    _saveEmergency();
+    setState(() => _page++);
   }
 
   Future<void> _saveProfile() async {
@@ -129,10 +130,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (mounted) {
         _errorFields.clear();
         final connectedName = result['data']?['connected_to']?['name'] ?? name;
+        final status = result['data']?['connection_status'] ?? 'pending';
         _connectedPeople.add({'name': connectedName, 'code': code});
         _connectNameController.clear();
         _connectCodeController.clear();
         setState(() => _isSaving = false);
+        if (status == 'accepted') {
+          _showMessage('Connected with $connectedName!\nYou can now see each other\'s check-ins.');
+        } else {
+          _showMessage('Request sent!\nWaiting for $connectedName to add your code.');
+        }
       }
     } catch (e) {
       if (mounted) setState(() => _isSaving = false);
@@ -149,10 +156,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  Future<void> _savePlan() async {
+  Future<void> _savePlanAndRegister() async {
     setState(() => _isSaving = true);
     try {
-      await ApiService().updateSettings({'plan': _selectedPlan == 'free' ? 'free' : 'paid', 'max_connections': _maxSlots});
+      final isLoggedIn = await AuthService().isLoggedIn();
+      if (!isLoggedIn) {
+        final prefs = await SharedPreferences.getInstance();
+        var deviceId = prefs.getString('device_id');
+        if (deviceId == null || deviceId.isEmpty) {
+          deviceId = 'web_${DateTime.now().millisecondsSinceEpoch}_${(DateTime.now().microsecond % 1000000).toString().padLeft(6, '0')}';
+          await prefs.setString('device_id', deviceId);
+        }
+        final user = await AuthService().autoRegister(deviceId);
+        _userCode = user.userCode;
+      }
+      await ApiService().updateProfile({
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'phone': _phoneController.text.trim(),
+      });
+      await ApiService().updateSettings({
+        'sos_name': _sosNameController.text.trim(),
+        'sos_number': _sosPhoneController.text.trim(),
+        'ambulance_number': _ambulanceController.text.trim(),
+        'plan': _selectedPlan == 'free' ? 'free' : 'paid',
+        'max_connections': _maxSlots,
+      });
+      final user = await AuthService().refreshProfile();
+      _userCode = user.userCode;
     } catch (_) {}
     if (mounted) setState(() { _isSaving = false; _page++; });
   }
@@ -246,7 +277,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
-                child: [_buildLanguage, _buildWelcome, _buildProfile, _buildCode, _buildEmergency, _buildMembership, _buildConnect][_page](),
+                child: [_buildLanguage, _buildWelcome, _buildProfile, _buildEmergency, _buildMembership, _buildCode, _buildConnect][_page](),
               ),
             ),
             Padding(
@@ -508,77 +539,80 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  // Page 6: Connect People
+  // Page 6: Connect People (matches People page layout)
   Widget _buildConnect() {
     final remaining = _maxSlots - _connectedPeople.length;
-    return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(children: [
-        const SizedBox(height: 16),
-        const Icon(Icons.people_rounded, size: 44, color: LKTheme.gold),
-        const SizedBox(height: 8),
-        const Text('Connect to People', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 4),
-        Text('${_connectedPeople.length} / $_maxSlots connections',
-          style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
-        const SizedBox(height: 16),
+    return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 500),
+        child: Column(children: [
+          const SizedBox(height: 16),
+          Row(children: [
+            const Icon(Icons.people_rounded, color: LKTheme.gold, size: 28),
+            const SizedBox(width: 10),
+            const Expanded(child: Text('Connect to People', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
+            Text('${_connectedPeople.length} / $_maxSlots', style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
+          ]),
+          const SizedBox(height: 12),
 
-        if (_connectedPeople.isNotEmpty) ...[
-          const Align(alignment: Alignment.centerLeft,
-            child: Text('Connected:', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600))),
-          const SizedBox(height: 8),
+          // Connected people rows (same style as People page)
           ..._connectedPeople.map((p) => Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
+            margin: const EdgeInsets.only(bottom: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(10), border: Border.all(color: LKTheme.border)),
             child: Row(children: [
-              Container(width: 40, height: 40,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
-                child: const Icon(Icons.hourglass_top_rounded, color: LKTheme.gold, size: 20)),
-              const SizedBox(width: 12),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(p['name']!, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
-                const Text('Request sent - waiting for acceptance', style: TextStyle(fontSize: 12, color: LKTheme.textMuted)),
-              ])),
-              Text(p['code']!, style: const TextStyle(fontSize: 12, color: LKTheme.gold, letterSpacing: 1)),
+              Expanded(flex: 4, child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                decoration: BoxDecoration(color: LKTheme.bgCardLight, borderRadius: BorderRadius.circular(6), border: Border.all(color: LKTheme.border)),
+                child: Text(p['name']!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
+              )),
+              const SizedBox(width: 6),
+              Expanded(flex: 2, child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                decoration: BoxDecoration(color: LKTheme.bgCardLight, borderRadius: BorderRadius.circular(6), border: Border.all(color: LKTheme.border)),
+                child: Text(p['code']!, style: const TextStyle(fontSize: 13, letterSpacing: 1, fontWeight: FontWeight.w700, color: LKTheme.gold)),
+              )),
+              const SizedBox(width: 6),
+              const Expanded(flex: 3, child: Text('Connection request\nset up. Waiting\nfor response.', style: TextStyle(fontSize: 11, color: LKTheme.textMuted, height: 1.3))),
+              GestureDetector(
+                onTap: () => setState(() => _connectedPeople.remove(p)),
+                child: const Column(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.cancel_rounded, size: 26, color: LKTheme.textMuted),
+                  Text('delete', style: TextStyle(fontSize: 9, color: LKTheme.textMuted)),
+                ]),
+              ),
             ]),
           )),
-          const SizedBox(height: 8),
-        ],
 
-        if (remaining > 0) ...[
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: LKTheme.border)),
-            child: Column(children: [
-              _label('Name'), const SizedBox(height: 6),
-              TextField(controller: _connectNameController, maxLength: 50,
-                style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-                onChanged: (_) { if (_errorFields.contains('connectName')) setState(() => _errorFields.remove('connectName')); },
-                decoration: _inputDeco('e.g. Grandma Rose', Icons.person_rounded, LKTheme.gold, 'connectName')),
-              const SizedBox(height: 12),
-              _label('Code'), const SizedBox(height: 6),
-              TextField(controller: _connectCodeController, maxLength: 8,
-                textCapitalization: TextCapitalization.characters,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
-                onChanged: (_) { if (_errorFields.contains('connectCode')) setState(() => _errorFields.remove('connectCode')); },
-                decoration: _inputDeco('CODE', Icons.link_rounded, LKTheme.gold, 'connectCode')),
-              const SizedBox(height: 14),
-              SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
-                onPressed: _isSaving ? null : _addCode,
-                style: ElevatedButton.styleFrom(backgroundColor: LKTheme.green, foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                child: const Text('ADD CONNECTION', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-              )),
-            ]),
-          ),
-          if (remaining > 1)
-            Padding(padding: const EdgeInsets.only(top: 8),
-              child: Text('$remaining ${remaining == 1 ? "slot" : "slots"} remaining', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted))),
-        ] else
-          Padding(padding: const EdgeInsets.all(16),
-            child: Text('All $_maxSlots slots used', style: const TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600))),
-        const SizedBox(height: 16),
-      ]));
+          // Limit message
+          if (_connectedPeople.length >= _maxSlots && _connectedPeople.isNotEmpty)
+            Padding(padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+              child: const Text("You can't connect more people, need membership plan",
+                style: TextStyle(fontSize: 14, color: LKTheme.red, fontWeight: FontWeight.w500))),
+
+          // Add connection fields
+          if (remaining > 0) ...[
+            const SizedBox(height: 8),
+            const Text("Enter the other person's details:", style: TextStyle(fontSize: 14, color: LKTheme.textMuted)),
+            const SizedBox(height: 8),
+            TextField(controller: _connectNameController, maxLength: 50,
+              style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+              onChanged: (_) { if (_errorFields.contains('connectName')) setState(() => _errorFields.remove('connectName')); },
+              decoration: _inputDeco('Their name (e.g. My Son)', Icons.person_rounded, LKTheme.gold, 'connectName')),
+            const SizedBox(height: 10),
+            TextField(controller: _connectCodeController, maxLength: 8, textCapitalization: TextCapitalization.characters,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
+              onChanged: (_) { if (_errorFields.contains('connectCode')) setState(() => _errorFields.remove('connectCode')); },
+              decoration: _inputDeco('Their code', Icons.link_rounded, LKTheme.gold, 'connectCode')),
+            const SizedBox(height: 12),
+            SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
+              onPressed: _isSaving ? null : _addCode,
+              child: _isSaving
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
+                : const Text('+ CONNECT PEOPLE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            )),
+          ],
+          const SizedBox(height: 16),
+        ]))));
   }
 
   Widget _label(String text) {

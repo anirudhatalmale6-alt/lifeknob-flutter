@@ -23,6 +23,8 @@ class ApiConfig {
     'activeAlerts': '/alerts/active',
     'uploadAvatar': '/profile/avatar',
     'autoRegister': '/auth/auto-register',
+    'updateConnection': '/connection/update',
+    'siteSettings': '/site-settings',
   };
 
   static String getUrl(String endpoint) {

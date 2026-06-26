@@ -64,19 +64,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       return;
     }
 
-    try {
-      final deviceId = await _getDeviceId();
-      final user = await AuthService().autoRegister(deviceId);
-      if (!mounted) return;
-      if (user.name.isNotEmpty) {
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        Navigator.pushReplacementNamed(context, '/onboarding');
-      }
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/login');
-    }
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/onboarding');
   }
 
   @override

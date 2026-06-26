@@ -35,7 +35,7 @@ class Connection {
   }
 
   String get lastCheckInText {
-    if (lastCheckIn == null) return 'No check-ins yet';
+    if (lastCheckIn == null) return 'Waiting for first check-in';
     final diff = DateTime.now().difference(lastCheckIn!);
     if (diff.inMinutes < 1) return 'Just now';
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
@@ -47,9 +47,11 @@ class Connection {
   bool get isPending => status == 'pending';
   bool get isAccepted => status == 'accepted';
 
+  static int alertThresholdDays = 2;
+
   bool get isOverdue {
     if (!isAccepted) return false;
     if (lastCheckIn == null) return false;
-    return DateTime.now().difference(lastCheckIn!).inHours > 24;
+    return DateTime.now().difference(lastCheckIn!).inHours > (alertThresholdDays * 24);
   }
 }

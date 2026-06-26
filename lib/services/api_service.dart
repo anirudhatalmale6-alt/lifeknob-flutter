@@ -18,13 +18,24 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
-    final body = jsonDecode(response.body);
+    if (response.body.isEmpty) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return {'status': 'success', 'data': []};
+      }
+      throw ApiException(statusCode: response.statusCode, message: 'Empty response from server');
+    }
+    final dynamic body;
+    try {
+      body = jsonDecode(response.body);
+    } catch (e) {
+      throw ApiException(statusCode: response.statusCode, message: 'Invalid response: ${response.body.substring(0, response.body.length > 100 ? 100 : response.body.length)}');
+    }
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body is Map<String, dynamic> ? body : {'data': body};
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: body['message'] ?? body['error'] ?? 'Something went wrong',
+        message: body is Map ? (body['message'] ?? body['error'] ?? 'Something went wrong') : 'Something went wrong',
       );
     }
   }
@@ -125,6 +136,23 @@ class ApiService {
   Future<Map<String, dynamic>> getPendingRequests() async {
     final response = await http.get(
       Uri.parse(ApiConfig.getUrl('pendingRequests')),
+      headers: await _headers(),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> updateConnectionName(int connectionId, String name) async {
+    final response = await http.post(
+      Uri.parse(ApiConfig.getUrl('updateConnection')),
+      headers: await _headers(),
+      body: jsonEncode({'connection_id': connectionId, 'name': name}),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> getSiteSettings() async {
+    final response = await http.get(
+      Uri.parse(ApiConfig.getUrl('siteSettings')),
       headers: await _headers(),
     );
     return _handleResponse(response);
