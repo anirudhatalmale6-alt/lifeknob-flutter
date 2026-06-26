@@ -19,11 +19,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _isLoading = true;
   String? _error;
   int _maxConnections = 1;
+  final _nameCtrl = TextEditingController();
+  final _codeCtrl = TextEditingController();
+  bool _isAdding = false;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _codeCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -38,72 +48,41 @@ class _HistoryScreenState extends State<HistoryScreen> {
       final pendResp = await ApiService().getPendingRequests();
       final List pendData = pendResp['data'] ?? [];
 
-      if (mounted) {
-        setState(() {
-          _connections = connData.map((e) => Connection.fromJson(e)).toList();
-          _pendingRequests = pendData.map((e) => Map<String, dynamic>.from(e)).toList();
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() {
+        _connections = connData.map((e) => Connection.fromJson(e)).toList();
+        _pendingRequests = pendData.map((e) => Map<String, dynamic>.from(e)).toList();
+        _isLoading = false;
+      });
     } catch (e) {
       if (mounted) setState(() { _error = e.toString(); _isLoading = false; });
     }
   }
 
-  Future<void> _addConnection() async {
-    if (_connections.length >= _maxConnections) {
-      Navigator.push(context, MaterialPageRoute(
-        builder: (_) => SubscriptionScreen(onGoHome: () { Navigator.pop(context); widget.onGoHome?.call(); }),
-      ));
+  Future<void> _connectPeople() async {
+    final name = _nameCtrl.text.trim();
+    final code = _codeCtrl.text.trim();
+    if (name.isEmpty || code.isEmpty) {
+      _showMsg('Please enter both name and code');
       return;
     }
 
-    final nameCtrl = TextEditingController();
-    final codeCtrl = TextEditingController();
-    final result = await showDialog<Map<String, String>>(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: LKTheme.bgCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.person_add_rounded, size: 44, color: LKTheme.gold),
-          const SizedBox(height: 12),
-          const Text('Add Person', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
-          const SizedBox(height: 6),
-          const Text('Your name and photo will be\nsent as a connection request.', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
-          const SizedBox(height: 18),
-          TextField(controller: nameCtrl, maxLength: 50, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-            decoration: const InputDecoration(hintText: 'Their name', counterText: '', prefixIcon: Icon(Icons.person_rounded, color: LKTheme.gold))),
-          const SizedBox(height: 10),
-          TextField(controller: codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 4, color: LKTheme.gold), textAlign: TextAlign.center,
-            decoration: InputDecoration(hintText: 'CODE', counterText: '', hintStyle: TextStyle(fontSize: 24, color: LKTheme.textMuted.withValues(alpha: 0.4), letterSpacing: 4))),
-          const SizedBox(height: 18),
-          Row(children: [
-            Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(context),
-              style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-              child: const Text('Cancel', style: TextStyle(fontSize: 16)))),
-            const SizedBox(width: 12),
-            Expanded(child: ElevatedButton(
-              onPressed: () => Navigator.pop(context, {'name': nameCtrl.text.trim(), 'code': codeCtrl.text.trim()}),
-              style: ElevatedButton.styleFrom(backgroundColor: LKTheme.gold, foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-              child: const Text('Send Request', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)))),
-          ]),
-        ])),
-      ),
-    );
-
-    if (result == null || result['code']!.isEmpty) return;
-
+    setState(() => _isAdding = true);
     try {
-      await ApiService().connect(result['code']!);
-      if (mounted) { _showBigMessage('Request sent!', 'Waiting for them to accept.', LKTheme.gold); _loadData(); }
+      await ApiService().connect(code);
+      _nameCtrl.clear();
+      _codeCtrl.clear();
+      if (mounted) { setState(() => _isAdding = false); _loadData(); }
     } catch (e) {
+      if (mounted) setState(() => _isAdding = false);
       final msg = '$e';
       if (msg.contains('404') || msg.contains('not found')) {
-        if (mounted) _showBigMessage('Code not found', 'Make sure the person has the app installed and shared the correct code.', LKTheme.gold);
+        _showMsg('Code not found.\nMake sure the person has the app and shared the correct code.');
+      } else if (msg.contains('already')) {
+        _showMsg('You already sent a request to this person.');
+      } else if (msg.contains('limit') || msg.contains('403')) {
+        _showMsg('You can\'t connect more people.\nUpgrade your membership plan.');
       } else {
-        if (mounted) _showBigMessage('Could not connect', msg, LKTheme.red);
+        _showMsg('Could not connect: $msg');
       }
     }
   }
@@ -111,25 +90,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _acceptRequest(Map<String, dynamic> req) async {
     try {
       await ApiService().acceptRequest(req['connection_id']);
-      if (mounted) { _showBigMessage('Accepted!', '${req['name']} is now connected.', LKTheme.green); _loadData(); }
-    } catch (e) { if (mounted) _showBigMessage('Error', '$e', LKTheme.red); }
+      if (mounted) _loadData();
+    } catch (e) { _showMsg('Error: $e'); }
   }
 
   Future<void> _rejectRequest(Map<String, dynamic> req) async {
     try {
       await ApiService().rejectRequest(req['connection_id']);
-      if (mounted) { _loadData(); }
-    } catch (e) { if (mounted) _showBigMessage('Error', '$e', LKTheme.red); }
+      if (mounted) _loadData();
+    } catch (_) {}
   }
 
-  Future<void> _disconnectPerson(Connection conn) async {
+  Future<void> _deleteConnection(Connection conn) async {
     final confirmed = await showDialog<bool>(context: context, builder: (ctx) => Dialog(
       backgroundColor: LKTheme.bgCard, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.link_off_rounded, size: 56, color: LKTheme.gold),
-        const SizedBox(height: 16),
-        Text('Disconnect ${conn.name}?', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary), textAlign: TextAlign.center),
-        const SizedBox(height: 24),
+      child: Padding(padding: const EdgeInsets.all(28), child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Icon(Icons.delete_rounded, size: 48, color: LKTheme.red),
+        const SizedBox(height: 12),
+        Text('Delete ${conn.name}?', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary), textAlign: TextAlign.center),
+        const SizedBox(height: 20),
         Row(children: [
           Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx, false),
             style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
@@ -137,7 +116,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           const SizedBox(width: 12),
           Expanded(child: ElevatedButton(onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: LKTheme.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-            child: const Text('Remove', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)))),
+            child: const Text('Delete', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)))),
         ]),
       ])),
     ));
@@ -145,32 +124,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
     try {
       await ApiService().disconnect(conn.userId);
       if (mounted) _loadData();
-    } catch (e) { if (mounted) _showBigMessage('Error', '$e', LKTheme.red); }
+    } catch (e) { _showMsg('Error: $e'); }
   }
 
-  void _showBigMessage(String title, String message, Color color) {
+  void _showMsg(String msg) {
     showDialog(context: context, builder: (ctx) => Dialog(
       backgroundColor: LKTheme.bgCard, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(color == LKTheme.red ? Icons.error_rounded : Icons.check_circle_rounded, size: 56, color: color),
-        const SizedBox(height: 16),
-        Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color), textAlign: TextAlign.center),
-        if (message.isNotEmpty) ...[const SizedBox(height: 8), Text(message, style: const TextStyle(fontSize: 16, color: LKTheme.textSecondary), textAlign: TextAlign.center)],
-        const SizedBox(height: 24),
-        SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
+      child: Padding(padding: const EdgeInsets.all(28), child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Icon(Icons.info_rounded, size: 48, color: LKTheme.gold),
+        const SizedBox(height: 12),
+        Text(msg, style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary), textAlign: TextAlign.center),
+        const SizedBox(height: 20),
+        SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
           onPressed: () => Navigator.pop(ctx),
-          style: ElevatedButton.styleFrom(backgroundColor: color, foregroundColor: color == LKTheme.gold ? Colors.black : Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-          child: const Text('OK', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        )),
+          child: const Text('OK', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))),
       ])),
     ));
   }
 
   @override
   Widget build(BuildContext context) {
-    final acceptedConns = _connections.where((c) => c.isAccepted).toList();
-    final pendingConns = _connections.where((c) => c.isPending).toList();
-    final hasOverdue = acceptedConns.any((c) => c.isOverdue);
+    final hasOverdue = _connections.any((c) => c.isAccepted && c.isOverdue);
 
     return Scaffold(
       backgroundColor: LKTheme.bg,
@@ -183,79 +157,125 @@ class _HistoryScreenState extends State<HistoryScreen> {
               const SizedBox(width: 10),
               Expanded(child: Text(hasOverdue ? 'ALERT' : 'People',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: hasOverdue ? LKTheme.red : LKTheme.textPrimary))),
-              GestureDetector(onTap: _addConnection, child: Container(
+              if (widget.onGoHome != null) GestureDetector(onTap: widget.onGoHome, child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(20)),
                 child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.person_add_rounded, size: 18, color: Color(0xFF5A3D10)),
+                  Icon(Icons.home_rounded, size: 18, color: Color(0xFF5A3D10)),
                   SizedBox(width: 6),
-                  Text('Add', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF5A3D10))),
-                ]),
-              )),
+                  Text('Home', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF5A3D10))),
+                ]))),
             ])),
 
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: LKTheme.gold))
-                  : _error != null
-                      ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          const Icon(Icons.error_rounded, size: 56, color: LKTheme.red),
-                          const SizedBox(height: 16),
-                          SizedBox(width: 200, height: 48, child: ElevatedButton(onPressed: _loadData, child: const Text('Try Again'))),
-                        ]))
-                      : RefreshIndicator(color: LKTheme.gold, backgroundColor: LKTheme.bgCard, onRefresh: _loadData,
-                          child: ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 16), children: [
-                            // Pending incoming requests
-                            if (_pendingRequests.isNotEmpty) ...[
-                              const Padding(padding: EdgeInsets.only(bottom: 8), child: Text('Requests for you:', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600))),
-                              ..._pendingRequests.map((r) => _buildRequestCard(r)),
-                              const SizedBox(height: 12),
-                            ],
-                            // Connected
-                            if (acceptedConns.isNotEmpty) ...[
-                              const Padding(padding: EdgeInsets.only(bottom: 8), child: Text('Connected:', style: TextStyle(fontSize: 15, color: LKTheme.green, fontWeight: FontWeight.w600))),
-                              ...acceptedConns.map((c) => _buildConnectedCard(c)),
-                            ],
-                            // Pending outgoing
-                            if (pendingConns.isNotEmpty) ...[
-                              const Padding(padding: EdgeInsets.only(top: 12, bottom: 8), child: Text('Waiting for acceptance:', style: TextStyle(fontSize: 15, color: LKTheme.textMuted, fontWeight: FontWeight.w600))),
-                              ...pendingConns.map((c) => _buildPendingCard(c)),
-                            ],
-                            if (acceptedConns.isEmpty && pendingConns.isEmpty && _pendingRequests.isEmpty)
-                              Padding(padding: const EdgeInsets.only(top: 60), child: Column(children: [
-                                Icon(Icons.people_outline_rounded, size: 64, color: LKTheme.textMuted.withValues(alpha: 0.5)),
-                                const SizedBox(height: 16),
-                                const Text('No connections yet', style: TextStyle(fontSize: 18, color: LKTheme.textMuted)),
-                                const SizedBox(height: 8),
-                                const Text('Tap "+ Add" to connect with someone', style: TextStyle(fontSize: 14, color: LKTheme.textMuted)),
-                              ])),
-                          ])),
-            ),
+                ? const Center(child: CircularProgressIndicator(color: LKTheme.gold))
+                : _error != null
+                  ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      const Icon(Icons.error_rounded, size: 48, color: LKTheme.red),
+                      const SizedBox(height: 12),
+                      SizedBox(width: 180, height: 44, child: ElevatedButton(onPressed: _loadData, child: const Text('Try Again'))),
+                    ]))
+                  : RefreshIndicator(color: LKTheme.gold, backgroundColor: LKTheme.bgCard, onRefresh: _loadData,
+                      child: ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 16), children: [
 
-            // Home button
-            if (widget.onGoHome != null) Padding(padding: const EdgeInsets.fromLTRB(32, 4, 32, 12), child: SizedBox(width: double.infinity, height: 48,
-              child: Container(decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(24)),
-                child: ElevatedButton.icon(onPressed: widget.onGoHome,
-                  icon: const Icon(Icons.home_rounded, size: 22, color: Color(0xFF5A3D10)),
-                  label: const Text('Home', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5A3D10))),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))))))),
+                        // Incoming requests
+                        if (_pendingRequests.isNotEmpty) ...[
+                          const Padding(padding: EdgeInsets.only(bottom: 8),
+                            child: Text('Requests for you:', style: TextStyle(fontSize: 14, color: LKTheme.gold, fontWeight: FontWeight.w600))),
+                          ..._pendingRequests.map(_buildRequestCard),
+                          const SizedBox(height: 12),
+                        ],
+
+                        // My connections list
+                        ..._connections.map(_buildConnectionRow),
+
+                        // Limit message
+                        if (_connections.length >= _maxConnections && _connections.isNotEmpty)
+                          Padding(padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: GestureDetector(
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SubscriptionScreen(onGoHome: () { Navigator.pop(context); widget.onGoHome?.call(); }))),
+                              child: const Text("You can't connect more people, need membership plan",
+                                style: TextStyle(fontSize: 14, color: LKTheme.red, fontWeight: FontWeight.w500)))),
+
+                        // Add new (if slots available)
+                        if (_connections.length < _maxConnections) ...[
+                          const SizedBox(height: 12),
+                          _buildAddRow(),
+                        ],
+                      ])),
+            ),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildConnectionRow(Connection conn) {
+    final isOverdue = conn.isAccepted && conn.isOverdue;
+    final isPending = conn.isPending;
+
+    String statusText;
+    Color statusColor;
+    if (isPending) {
+      statusText = 'Connection request set up.\nWaiting for response.';
+      statusColor = LKTheme.textMuted;
+    } else if (isOverdue) {
+      statusText = 'Connected.\nLast verified: ${conn.lastCheckInText}';
+      statusColor = LKTheme.red;
+    } else {
+      statusText = 'Connected.\nLast verified: ${conn.lastCheckInText}';
+      statusColor = LKTheme.green;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: LKTheme.bgCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isOverdue ? LKTheme.red : LKTheme.border, width: isOverdue ? 2 : 1),
+      ),
+      child: Row(children: [
+        // Name + Code
+        Expanded(flex: 3, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(color: LKTheme.bgCardLight, borderRadius: BorderRadius.circular(8), border: Border.all(color: isOverdue ? LKTheme.red : LKTheme.border)),
+            child: Text(conn.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: isOverdue ? LKTheme.red : LKTheme.textPrimary)),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(color: LKTheme.bgCardLight, borderRadius: BorderRadius.circular(8), border: Border.all(color: isOverdue ? LKTheme.red : LKTheme.border)),
+            child: Text(conn.userCode, style: TextStyle(fontSize: 14, color: isOverdue ? LKTheme.red : LKTheme.gold, letterSpacing: 1)),
+          ),
+        ])),
+        const SizedBox(width: 8),
+        // Status
+        Expanded(flex: 2, child: Text(statusText, style: TextStyle(fontSize: 12, color: statusColor, fontWeight: isOverdue ? FontWeight.w700 : FontWeight.normal, height: 1.3))),
+        // Actions
+        Column(children: [
+          IconButton(icon: const Icon(Icons.cancel_rounded, size: 28), color: LKTheme.textMuted,
+            onPressed: () => _deleteConnection(conn), padding: EdgeInsets.zero, constraints: const BoxConstraints()),
+          const SizedBox(height: 4),
+          const Text('delete', style: TextStyle(fontSize: 10, color: LKTheme.textMuted)),
+        ]),
+      ]),
+    );
+  }
+
   Widget _buildRequestCard(Map<String, dynamic> req) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: LKTheme.gold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
+      margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: LKTheme.gold.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
       child: Row(children: [
-        Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.2)),
-          child: Center(child: Text((req['name'] ?? '?')[0].toUpperCase(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.gold)))),
-        const SizedBox(width: 12),
+        Container(width: 40, height: 40, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.2)),
+          child: Center(child: Text((req['name'] ?? '?')[0].toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: LKTheme.gold)))),
+        const SizedBox(width: 10),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(req['name'] ?? 'Unknown', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
-          const Text('Wants to connect with you', style: TextStyle(fontSize: 13, color: LKTheme.gold)),
+          const Text('Wants to connect', style: TextStyle(fontSize: 12, color: LKTheme.gold)),
         ])),
         IconButton(icon: const Icon(Icons.check_circle_rounded, color: LKTheme.green, size: 32), onPressed: () => _acceptRequest(req)),
         IconButton(icon: const Icon(Icons.cancel_rounded, color: LKTheme.red, size: 32), onPressed: () => _rejectRequest(req)),
@@ -263,43 +283,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildConnectedCard(Connection conn) {
-    final isOverdue = conn.isOverdue;
-    return GestureDetector(
-      onTap: () => _disconnectPerson(conn),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: isOverdue ? LKTheme.red.withValues(alpha: 0.1) : LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: isOverdue ? LKTheme.red.withValues(alpha: 0.3) : LKTheme.border)),
-        child: Row(children: [
-          Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: isOverdue ? LKTheme.red : LKTheme.green, width: 2), color: (isOverdue ? LKTheme.red : LKTheme.green).withValues(alpha: 0.1)),
-            child: Icon(isOverdue ? Icons.warning_rounded : Icons.check_rounded, color: isOverdue ? LKTheme.red : LKTheme.green, size: 22)),
-          const SizedBox(width: 12),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(conn.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
-            Text(isOverdue ? 'NOT checked in!' : 'OK', style: TextStyle(fontSize: 13, color: isOverdue ? LKTheme.red : LKTheme.green)),
-          ])),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(conn.lastCheckInText, style: TextStyle(fontSize: 13, color: isOverdue ? LKTheme.red : LKTheme.textMuted, fontWeight: isOverdue ? FontWeight.w700 : FontWeight.normal)),
-            Text(conn.userCode, style: const TextStyle(fontSize: 11, color: LKTheme.textMuted, letterSpacing: 1)),
-          ]),
-        ]),
-      ),
-    );
-  }
-
-  Widget _buildPendingCard(Connection conn) {
+  Widget _buildAddRow() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.border)),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
       child: Row(children: [
-        Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.textMuted.withValues(alpha: 0.15)),
-          child: const Icon(Icons.hourglass_top_rounded, color: LKTheme.textMuted, size: 22)),
-        const SizedBox(width: 12),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(conn.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
-          const Text('Waiting for acceptance', style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
+        Expanded(child: Column(children: [
+          TextField(controller: _nameCtrl, maxLength: 50,
+            style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary),
+            decoration: const InputDecoration(hintText: 'name ...', counterText: '', isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10))),
+          const SizedBox(height: 6),
+          TextField(controller: _codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2),
+            decoration: const InputDecoration(hintText: 'code', counterText: '', isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10))),
         ])),
-        Text(conn.userCode, style: const TextStyle(fontSize: 11, color: LKTheme.textMuted, letterSpacing: 1)),
+        const SizedBox(width: 10),
+        SizedBox(height: 60, child: ElevatedButton(
+          onPressed: _isAdding ? null : _connectPeople,
+          style: ElevatedButton.styleFrom(backgroundColor: LKTheme.gold, foregroundColor: Colors.black,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(horizontal: 12)),
+          child: _isAdding
+            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
+            : const Text('+ CONNECT\nPEOPLE', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, height: 1.3)),
+        )),
       ]),
     );
   }
