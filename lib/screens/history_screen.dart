@@ -23,18 +23,14 @@ class HistoryScreenState extends State<HistoryScreen> {
   final _codeCtrl = TextEditingController();
   bool _isAdding = false;
 
-  bool _loaded = false;
-
   @override
   void initState() {
     super.initState();
+    _loadData();
   }
 
   void ensureLoaded() {
-    if (!_loaded) {
-      _loaded = true;
-      _loadData();
-    }
+    _loadData();
   }
 
   @override
