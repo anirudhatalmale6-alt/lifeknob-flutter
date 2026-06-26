@@ -121,6 +121,15 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse(ApiConfig.getUrl('updateProfile')),
+      headers: await _headers(),
+      body: jsonEncode(data),
+    );
+    return _handleResponse(response);
+  }
+
   Future<Map<String, dynamic>> updateSettings(Map<String, dynamic> settings) async {
     final response = await http.post(
       Uri.parse(ApiConfig.getUrl('updateSettings')),

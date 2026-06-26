@@ -54,17 +54,25 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     final isLoggedIn = await AuthService().isLoggedIn();
     if (isLoggedIn) {
-      await AuthService().getSavedUser();
+      final user = await AuthService().getSavedUser();
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home');
+      if (user != null && user.name.isNotEmpty) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/onboarding');
+      }
       return;
     }
 
     try {
       final deviceId = await _getDeviceId();
-      await AuthService().autoRegister(deviceId);
+      final user = await AuthService().autoRegister(deviceId);
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home');
+      if (user.name.isNotEmpty) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/onboarding');
+      }
     } catch (e) {
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/login');
