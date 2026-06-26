@@ -139,7 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _finishConnect() async {
     if (_connectedPeople.isEmpty) {
-      final goAnyway = await showDialog<bool>(
+      await showDialog(
         context: context,
         builder: (ctx) => Dialog(
           backgroundColor: LKTheme.bgCard,
@@ -147,30 +147,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           child: Padding(
             padding: const EdgeInsets.all(28),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.info_rounded, size: 56, color: LKTheme.gold),
+              const Icon(Icons.warning_rounded, size: 56, color: LKTheme.gold),
               const SizedBox(height: 16),
               const Text('No connections yet', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
               const SizedBox(height: 12),
               const Text(
-                'You have not connected to anyone.\n\nYou can press OK, but nobody will see it until you add a connection.\n\nYou can add connections later in the "People" tab.',
+                'Nobody can see when you press OK.\n\nYou can add connections later in the "People" tab.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.5),
               ),
               const SizedBox(height: 24),
               SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Continue anyway', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              )),
-              const SizedBox(height: 8),
-              Center(child: GestureDetector(
-                onTap: () => Navigator.pop(ctx, false),
-                child: const Text('Go back and add code', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK, I understand', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               )),
             ]),
           ),
         ),
       );
-      if (goAnyway != true) return;
     }
     await AuthService().refreshProfile();
     if (mounted) Navigator.pushReplacementNamed(context, '/home');
@@ -436,21 +430,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildMembership() {
     return SingleChildScrollView(key: const ValueKey('membership'), padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(children: [
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         const Icon(Icons.star_rounded, size: 48, color: LKTheme.gold),
         const SizedBox(height: 10),
         const Text('Select Your Plan', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        const SizedBox(height: 8),
+        const Text(
+          'Choose how many people you want to watch over.\nMore connections means more family members can see when you press OK.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14, color: LKTheme.textSecondary, height: 1.4)),
         const SizedBox(height: 20),
-        _planCard('free', 'Free', '1 connection', 'With advertising', null, null),
+        _planCard('free', 'Free', [
+          'Watch over 1 person',
+          'With advertising',
+          '3-day cooldown when switching',
+        ], null, null),
         const SizedBox(height: 12),
-        _planCard('plan5', 'Premium', 'Up to 3 connections', 'No ads, no cooldown', '\$5', '\$50/year'),
+        _planCard('plan5', 'Premium', [
+          'Watch over up to 3 people',
+          'No advertisements',
+          'Switch connections freely',
+          'Cancel anytime',
+        ], '\$5', '\$50/year'),
         const SizedBox(height: 12),
-        _planCard('plan8', 'Premium Plus', 'Up to 10 connections', 'No ads, no cooldown, priority', '\$8', '\$80/year'),
+        _planCard('plan8', 'Premium Plus', [
+          'Watch over up to 10 people',
+          'No advertisements',
+          'Switch connections freely',
+          'Priority notifications',
+          'Best for large families',
+          'Cancel anytime',
+        ], '\$8', '\$80/year'),
+        const SizedBox(height: 10),
+        const Text('You can change your plan anytime in Set Up.', style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
         const SizedBox(height: 16),
       ]));
   }
 
-  Widget _planCard(String planKey, String name, String connections, String features, String? monthly, String? yearly) {
+  Widget _planCard(String planKey, String name, List<String> features, String? monthly, String? yearly) {
     final selected = _selectedPlan == planKey;
     return GestureDetector(
       onTap: () => setState(() {
@@ -458,29 +475,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         _maxSlots = planKey == 'free' ? 1 : planKey == 'plan5' ? 3 : 10;
       }),
       child: Container(
-        width: double.infinity, padding: const EdgeInsets.all(18),
+        width: double.infinity, padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: selected ? LKTheme.gold.withValues(alpha: 0.1) : LKTheme.bgCard,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: selected ? LKTheme.gold : LKTheme.border, width: selected ? 2 : 1),
         ),
-        child: Row(children: [
-          Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off, color: selected ? LKTheme.gold : LKTheme.textMuted, size: 26),
-          const SizedBox(width: 14),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(name, style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700, color: selected ? LKTheme.gold : LKTheme.textPrimary)),
-            const SizedBox(height: 4),
-            Text(connections, style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
-            Text(features, style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
-          ])),
-          if (monthly != null)
-            Column(children: [
-              Text(monthly, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.gold)),
-              Text('/mo', style: const TextStyle(fontSize: 12, color: LKTheme.textMuted)),
-              if (yearly != null) Text(yearly, style: const TextStyle(fontSize: 12, color: LKTheme.teal, fontWeight: FontWeight.w600)),
-            ])
-          else
-            const Text('FREE', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: LKTheme.textSecondary)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off, color: selected ? LKTheme.gold : LKTheme.textMuted, size: 26),
+            const SizedBox(width: 12),
+            Expanded(child: Text(name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: selected ? LKTheme.gold : LKTheme.textPrimary))),
+            if (monthly != null)
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text(monthly, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: LKTheme.gold)),
+                const Text('/month', style: TextStyle(fontSize: 11, color: LKTheme.textMuted)),
+                if (yearly != null) Text('or $yearly', style: const TextStyle(fontSize: 12, color: LKTheme.teal, fontWeight: FontWeight.w600)),
+              ])
+            else
+              const Text('FREE', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textSecondary)),
+          ]),
+          const SizedBox(height: 10),
+          ...features.map((f) => Padding(
+            padding: const EdgeInsets.only(left: 38, bottom: 4),
+            child: Row(children: [
+              Icon(Icons.check_rounded, size: 16, color: selected ? LKTheme.gold : LKTheme.textMuted),
+              const SizedBox(width: 8),
+              Text(f, style: TextStyle(fontSize: 14, color: selected ? LKTheme.textPrimary : LKTheme.textSecondary)),
+            ]),
+          )),
         ]),
       ),
     );
