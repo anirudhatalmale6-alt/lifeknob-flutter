@@ -58,7 +58,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       String? msg;
       if (name.isEmpty) { _errorFields.add('name'); msg ??= 'Please enter your name'; }
       if (email.isEmpty) { _errorFields.add('email'); msg ??= 'Please enter your email'; }
-      else if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) { _errorFields.add('email'); msg ??= 'Invalid email (example: name@email.com)'; }
+      else if (!_isValidEmail(email)) { _errorFields.add('email'); msg ??= 'Invalid email address'; }
       if (phone.isEmpty) { _errorFields.add('phone'); msg ??= 'Please enter your phone number'; }
       else if (!RegExp(r'^\+?[0-9]{6,20}$').hasMatch(phone)) { _errorFields.add('phone'); msg ??= 'Phone: only + and numbers, no spaces'; }
       if (_errorFields.isNotEmpty) { setState(() {}); _showMessage(msg!); return; }
@@ -513,9 +513,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               SizedBox(height: 8),
               Text('  Free - 1 connection, with ads', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
               SizedBox(height: 6),
-              Text('  \$5/month - up to 3 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+              Text('  \$5/month or \$50/year - 3 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
               SizedBox(height: 4),
-              Text('  \$8/month - up to 10 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+              Text('  \$8/month or \$80/year - 10 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
               SizedBox(height: 8),
               Text('Advantages:', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
               SizedBox(height: 4),
@@ -530,6 +530,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ],
       ),
     );
+  }
+
+  bool _isValidEmail(String email) {
+    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email)) return false;
+    final parts = email.split('@');
+    if (parts.length != 2) return false;
+    final domain = parts[1].toLowerCase();
+    final domainParts = domain.split('.');
+    if (domainParts.any((p) => p.length < 2)) return false;
+    final tld = domainParts.last;
+    const validTlds = ['com','net','org','edu','gov','io','co','us','uk','au','de','fr','es','it','nl','se','no','fi','dk','hu','at','ch','be','pt','ru','cn','jp','kr','in','br','mx','ca','nz','za','info','biz','pro','online','site','app','dev','me','tv','cc','club'];
+    if (!validTlds.contains(tld) && tld.length > 4) return false;
+    return true;
   }
 
   Widget _label(String text) {
