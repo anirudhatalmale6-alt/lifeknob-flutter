@@ -1,4 +1,6 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 
@@ -32,12 +34,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     _controller.forward();
-    _checkAuth();
+    _initApp();
   }
 
-  Future<void> _checkAuth() async {
-    await Future.delayed(const Duration(seconds: 2));
+  Future<String> _getDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    var deviceId = prefs.getString('device_id');
+    if (deviceId == null || deviceId.isEmpty) {
+      final rand = Random();
+      deviceId = 'web_${DateTime.now().millisecondsSinceEpoch}_${rand.nextInt(999999).toString().padLeft(6, '0')}';
+      await prefs.setString('device_id', deviceId);
+    }
+    return deviceId;
+  }
 
+  Future<void> _initApp() async {
+    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
     final isLoggedIn = await AuthService().isLoggedIn();
@@ -45,7 +57,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       await AuthService().getSavedUser();
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/home');
-    } else {
+      return;
+    }
+
+    try {
+      final deviceId = await _getDeviceId();
+      await AuthService().autoRegister(deviceId);
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/login');
     }

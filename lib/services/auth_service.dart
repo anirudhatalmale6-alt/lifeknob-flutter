@@ -77,6 +77,17 @@ class AuthService {
     return user;
   }
 
+  Future<User> autoRegister(String deviceId) async {
+    final response = await ApiService().autoRegister(deviceId);
+    final token = response['token'] ?? '';
+    final userData = response['user'] ?? response['data']?['user'] ?? response['data'] ?? {};
+
+    await _saveToken(token);
+    final user = User.fromJson(userData);
+    await _saveUser(user);
+    return user;
+  }
+
   Future<User> refreshProfile() async {
     final response = await ApiService().getProfile();
     final userData = response['user'] ?? response['data'] ?? response;

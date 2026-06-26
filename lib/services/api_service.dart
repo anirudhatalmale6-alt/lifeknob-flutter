@@ -58,6 +58,15 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> autoRegister(String deviceId) async {
+    final response = await http.post(
+      Uri.parse(ApiConfig.getUrl('autoRegister')),
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: jsonEncode({'device_id': deviceId}),
+    );
+    return _handleResponse(response);
+  }
+
   // Check-In
   Future<Map<String, dynamic>> checkIn({String type = 'ok'}) async {
     final response = await http.post(

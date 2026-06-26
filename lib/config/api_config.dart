@@ -19,6 +19,7 @@ class ApiConfig {
     'alerts': '/alerts',
     'activeAlerts': '/alerts/active',
     'uploadAvatar': '/profile/avatar',
+    'autoRegister': '/auth/auto-register',
   };
 
   static String getUrl(String endpoint) {
