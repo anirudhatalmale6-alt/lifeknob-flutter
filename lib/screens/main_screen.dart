@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 import 'home_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
@@ -26,20 +27,15 @@ class MainScreenState extends State<MainScreen> {
     ];
 
     return Scaffold(
+      backgroundColor: LKTheme.bg,
       body: IndexedStack(
         index: _currentIndex,
         children: screens,
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
-            ),
-          ],
+          color: LKTheme.bgCard,
+          border: Border(top: BorderSide(color: LKTheme.border.withValues(alpha: 0.5))),
         ),
         child: SafeArea(
           child: Padding(
@@ -47,9 +43,9 @@ class MainScreenState extends State<MainScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _navItem(Icons.home_rounded, 'Home', 0),
-                _navItem(Icons.schedule_rounded, 'History', 1),
-                _navItem(Icons.settings_rounded, 'Settings', 2),
+                _navItem(Icons.dashboard_rounded, 'DASHBOARD', 0),
+                _navItem(Icons.list_alt_rounded, 'LOGS', 1),
+                _navItem(Icons.settings_rounded, 'SYSTEMS', 2),
               ],
             ),
           ),
@@ -64,22 +60,23 @@ class MainScreenState extends State<MainScreen> {
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 80,
+        width: 90,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 28,
-              color: isSelected ? const Color(0xFF27AE60) : const Color(0xFFBDC3C7),
+              size: 26,
+              color: isSelected ? LKTheme.gold : LKTheme.textMuted,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? const Color(0xFF27AE60) : const Color(0xFFBDC3C7),
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? LKTheme.gold : LKTheme.textMuted,
+                letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 2),
@@ -89,7 +86,7 @@ class MainScreenState extends State<MainScreen> {
               height: isSelected ? 6 : 0,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFF27AE60),
+                color: LKTheme.gold,
               ),
             ),
           ],

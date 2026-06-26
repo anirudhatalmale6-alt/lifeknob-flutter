@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 
@@ -27,10 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    setState(() { _isLoading = true; _errorMessage = null; });
 
     try {
       await AuthService().login(
@@ -51,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: LKTheme.bg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -61,154 +59,93 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 60),
-
-                // Logo
                 Center(
                   child: Container(
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFF27AE60),
+                      gradient: LKTheme.goldGradient,
                       boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF27AE60).withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          spreadRadius: 3,
-                        ),
+                        BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 20, spreadRadius: 3),
                       ],
                     ),
-                    child: const Icon(Icons.favorite, color: Colors.white, size: 40),
+                    child: const Icon(Icons.favorite, color: Color(0xFF5A3D10), size: 40),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Center(
-                  child: Text(
-                    'LifeKnob',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
-                    ),
-                  ),
-                ),
+                const Center(child: Text('LifeKnob', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: LKTheme.gold))),
                 const SizedBox(height: 8),
-                Center(
-                  child: Text(
-                    'Welcome back',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[500]),
-                  ),
-                ),
-
+                const Center(child: Text('Welcome back', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary))),
                 const SizedBox(height: 48),
 
-                // Error message
                 if (_errorMessage != null)
                   Container(
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.red[50],
+                      color: LKTheme.red.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red[200]!),
+                      border: Border.all(color: LKTheme.red.withValues(alpha: 0.3)),
                     ),
-                    child: Text(
-                      _errorMessage!,
-                      style: TextStyle(color: Colors.red[700], fontSize: 14),
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Text(_errorMessage!, style: const TextStyle(color: LKTheme.red, fontSize: 14), textAlign: TextAlign.center),
                   ),
 
-                // Email field
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   maxLength: 100,
-                  style: const TextStyle(fontSize: 18),
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    labelStyle: const TextStyle(fontSize: 16),
-                    counterText: '',
-                    prefixIcon: const Icon(Icons.email_outlined, size: 24),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'Please enter your email';
-                    if (!value.contains('@')) return 'Please enter a valid email';
+                  style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+                  decoration: const InputDecoration(labelText: 'Email', counterText: '', prefixIcon: Icon(Icons.email_outlined, size: 24, color: LKTheme.gold)),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Please enter your email';
+                    if (!v.contains('@')) return 'Please enter a valid email';
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
 
-                // Password field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   maxLength: 50,
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    labelStyle: const TextStyle(fontSize: 16),
                     counterText: '',
-                    prefixIcon: const Icon(Icons.lock_outlined, size: 24),
+                    prefixIcon: const Icon(Icons.lock_outlined, size: 24, color: LKTheme.gold),
                     suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        size: 24,
-                      ),
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 24, color: LKTheme.textMuted),
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'Please enter your password';
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Please enter your password';
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 24),
 
-                // Login button
                 SizedBox(
                   height: 56,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _login,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF27AE60),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                    ),
                     child: _isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                          )
-                        : const Text('Sign In'),
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
+                        : const Text('Sign In', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
                   ),
                 ),
-
                 const SizedBox(height: 24),
 
-                // Register link
                 Center(
                   child: TextButton(
                     onPressed: () => Navigator.pushNamed(context, '/register'),
                     child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        children: const [
+                      text: const TextSpan(
+                        style: TextStyle(fontSize: 16, color: LKTheme.textSecondary),
+                        children: [
                           TextSpan(text: "Don't have an account? "),
-                          TextSpan(
-                            text: 'Sign Up',
-                            style: TextStyle(
-                              color: Color(0xFF27AE60),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          TextSpan(text: 'Sign Up', style: TextStyle(color: LKTheme.gold, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),

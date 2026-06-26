@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
+import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../widgets/ok_button.dart';
@@ -105,23 +106,24 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
+        backgroundColor: LKTheme.bgCard,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('YOUR CONNECTION CODE', style: TextStyle(fontSize: 16, color: Color(0xFF95A5A6), fontWeight: FontWeight.w500)),
+              const Text('YOUR CONNECTION CODE', style: TextStyle(fontSize: 14, color: LKTheme.textSecondary, fontWeight: FontWeight.w600, letterSpacing: 1)),
               const SizedBox(height: 16),
               Text(
                 _userCode!,
-                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: Color(0xFF27AE60), letterSpacing: 6),
+                style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 6),
               ),
               const SizedBox(height: 16),
               const Text(
                 'Share this code with your family\nso they can connect to you.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 15, color: Color(0xFF7F8C8D), height: 1.4),
+                style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.4),
               ),
               const SizedBox(height: 24),
               Row(
@@ -131,15 +133,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: _userCode!));
                         Navigator.pop(ctx);
-                        if (mounted) {
-                          _showBigMessage('Code copied!', '', const Color(0xFF27AE60));
-                        }
+                        if (mounted) _showBigMessage('Code copied!', '', LKTheme.gold);
                       },
                       icon: const Icon(Icons.copy_rounded, size: 20),
                       label: const Text('Copy', style: TextStyle(fontSize: 16)),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF27AE60),
-                        side: const BorderSide(color: Color(0xFF27AE60)),
+                        foregroundColor: LKTheme.gold,
+                        side: const BorderSide(color: LKTheme.gold),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
@@ -150,8 +150,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(ctx),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF27AE60),
-                        foregroundColor: Colors.white,
+                        backgroundColor: LKTheme.gold,
+                        foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
@@ -173,11 +173,11 @@ class _HomeScreenState extends State<HomeScreen> {
       await ApiService().checkIn(type: 'ok');
       if (mounted) {
         setState(() => _lastCheckIn = 'Just now');
-        _showBigMessage('Check-in sent!', 'Your connections have been notified.', const Color(0xFF27AE60));
+        _showBigMessage('Check-in sent!', 'Your connections have been notified.', LKTheme.gold);
       }
     } catch (e) {
       if (mounted) {
-        _showBigMessage('Could not check in', '$e', const Color(0xFFE74C3C));
+        _showBigMessage('Could not check in', '$e', LKTheme.red);
       }
     } finally {
       if (mounted) setState(() => _isCheckingIn = false);
@@ -188,6 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
+        backgroundColor: LKTheme.bgCard,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -195,14 +196,14 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                color == const Color(0xFF27AE60) ? Icons.check_circle_rounded : Icons.error_rounded,
+                color == LKTheme.red ? Icons.error_rounded : Icons.check_circle_rounded,
                 size: 64, color: color,
               ),
               const SizedBox(height: 16),
               Text(title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color), textAlign: TextAlign.center),
               if (message.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(message, style: const TextStyle(fontSize: 16, color: Color(0xFF7F8C8D)), textAlign: TextAlign.center),
+                Text(message, style: const TextStyle(fontSize: 16, color: LKTheme.textSecondary), textAlign: TextAlign.center),
               ],
               const SizedBox(height: 24),
               SizedBox(
@@ -210,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(ctx),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: color, foregroundColor: Colors.white,
+                    backgroundColor: color, foregroundColor: color == LKTheme.gold ? Colors.black : Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   child: const Text('OK', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
@@ -227,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final number = _sosNumber;
     if (number == null || number.isEmpty) {
       if (!mounted) return;
-      _showBigMessage('No contact set', 'Go to Settings to add your emergency contact.', const Color(0xFFF39C12));
+      _showBigMessage('No contact set', 'Go to Systems to add your emergency contact.', LKTheme.gold);
       return;
     }
     final uri = Uri(scheme: 'tel', path: number);
@@ -240,36 +241,37 @@ class _HomeScreenState extends State<HomeScreen> {
     final number = _ambulanceNumber;
     if (number == null || number.isEmpty) {
       if (!mounted) return;
-      _showBigMessage('No ambulance number', 'Go to Settings to set your local ambulance number.', const Color(0xFFF39C12));
+      _showBigMessage('No ambulance number', 'Go to Systems to set your local ambulance number.', LKTheme.gold);
       return;
     }
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
+        backgroundColor: LKTheme.bgCard,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.local_hospital_rounded, size: 64, color: Color(0xFFE74C3C)),
+              const Icon(Icons.local_hospital_rounded, size: 64, color: LKTheme.red),
               const SizedBox(height: 16),
-              const Text('Call Ambulance?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFE74C3C))),
+              const Text('Call Ambulance?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.red)),
               const SizedBox(height: 8),
               Text('This will dial $number.\nOnly use in a real emergency.',
-                textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, color: Color(0xFF7F8C8D))),
+                textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, color: LKTheme.textSecondary)),
               const SizedBox(height: 24),
               Row(children: [
                 Expanded(child: OutlinedButton(
                   onPressed: () => Navigator.pop(ctx, false),
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.grey[600], shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                  style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                   child: const Text('Cancel', style: TextStyle(fontSize: 18)),
                 )),
                 const SizedBox(width: 12),
                 Expanded(child: ElevatedButton(
                   onPressed: () => Navigator.pop(ctx, true),
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE74C3C), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                  style: ElevatedButton.styleFrom(backgroundColor: LKTheme.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                   child: const Text('Call Now', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 )),
               ]),
@@ -286,192 +288,198 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  String get _statusText {
-    if (_lastCheckIn == null) return 'You have not checked in yet';
-    return 'Last OK: $_lastCheckIn';
-  }
-
   @override
   Widget build(BuildContext context) {
-    final String callButtonLabel = (_sosName != null && _sosName!.isNotEmpty)
-        ? 'CALL\n${_sosName!.toUpperCase()}'
-        : 'CALL\nCONTACT';
+    final String contactLabel = (_sosName != null && _sosName!.isNotEmpty)
+        ? _sosName!.toUpperCase()
+        : 'CONTACT';
+
+    final String verifiedText = _lastCheckIn != null
+        ? 'Verified: $_lastCheckIn'
+        : 'Not verified yet';
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: LKTheme.bg,
       body: SafeArea(
         child: Column(
           children: [
-            // Profile header
+            // Top header bar
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: Row(
                 children: [
+                  // Avatar
                   GestureDetector(
                     onTap: _pickAvatar,
-                    child: Stack(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFF27AE60).withValues(alpha: 0.15),
-                            border: Border.all(color: const Color(0xFF27AE60), width: 2),
-                            image: _avatarUrl != null
-                                ? DecorationImage(image: NetworkImage('https://lifeknob.com$_avatarUrl'), fit: BoxFit.cover)
-                                : null,
-                          ),
-                          child: _avatarUrl == null
-                              ? Center(child: Text(
-                                  _userName != null && _userName!.isNotEmpty ? _userName![0].toUpperCase() : '?',
-                                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF27AE60)),
-                                ))
-                              : null,
-                        ),
-                        Positioned(
-                          bottom: 0, right: 0,
-                          child: Container(
-                            width: 16, height: 16,
-                            decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF27AE60), border: Border.all(color: Colors.white, width: 1.5)),
-                            child: const Icon(Icons.camera_alt, size: 9, color: Colors.white),
-                          ),
-                        ),
-                      ],
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: LKTheme.gold, width: 2),
+                        image: _avatarUrl != null
+                            ? DecorationImage(image: NetworkImage('https://lifeknob.com$_avatarUrl'), fit: BoxFit.cover)
+                            : null,
+                        color: LKTheme.bgCardLight,
+                      ),
+                      child: _avatarUrl == null
+                          ? Center(child: Text(
+                              _userName != null && _userName!.isNotEmpty ? _userName![0].toUpperCase() : '?',
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.gold),
+                            ))
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 12),
+                  // User info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           (_userName ?? '').toUpperCase(),
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50)),
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: LKTheme.textPrimary, letterSpacing: 0.5),
                         ),
                         Text(
-                          _statusText,
-                          style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                          verifiedText,
+                          style: TextStyle(fontSize: 12, color: _lastCheckIn != null ? LKTheme.teal : LKTheme.textMuted),
                         ),
                       ],
                     ),
                   ),
-                  if (_userCode != null)
-                    GestureDetector(
-                      onTap: _showCodePopup,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFF27AE60), width: 1.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            const Text('MY CODE', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Color(0xFF95A5A6), letterSpacing: 0.8)),
-                            Text(_userCode!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF27AE60), letterSpacing: 2)),
-                          ],
-                        ),
-                      ),
+                  // LifeKnob logo/brand
+                  GestureDetector(
+                    onTap: _showCodePopup,
+                    child: Column(
+                      children: [
+                        const Text('LIFE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 2, height: 1)),
+                        const Text('KNOB', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 2, height: 1.1)),
+                        Text(_userCode ?? '', style: const TextStyle(fontSize: 9, color: LKTheme.textMuted, letterSpacing: 1)),
+                      ],
                     ),
+                  ),
                 ],
               ),
             ),
 
-            // Main content area with OK button
+            // Main content
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
                     'Are you okay?',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Color(0xFF27AE60)),
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: LKTheme.teal, letterSpacing: 0.5),
                   ),
-
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
 
                   OkButton(
                     onPressed: _doCheckIn,
                     isLoading: _isCheckingIn,
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
 
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 32),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0FAF4),
-                      borderRadius: BorderRadius.circular(12),
+                  if (_lastCheckIn != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.monitor_heart_outlined, size: 18, color: LKTheme.gold.withValues(alpha: 0.7)),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Verified: $_lastCheckIn',
+                          style: TextStyle(fontSize: 13, color: LKTheme.gold.withValues(alpha: 0.7)),
+                        ),
+                      ],
                     ),
-                    child: const Text(
-                      'Press the button to let your family know you are fine',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15, color: Color(0xFF7F8C8D), fontWeight: FontWeight.w500),
-                    ),
-                  ),
                 ],
               ),
             ),
 
-            // Bottom action buttons
+            // I NEED HELP section
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Text(
+                'I NEED HELP!',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.red, letterSpacing: 1),
+              ),
+            ),
+
+            // Call buttons
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 6),
               child: Row(
                 children: [
+                  // Direct Line
                   Expanded(
-                    child: SizedBox(
-                      height: 76,
-                      child: ElevatedButton(
-                        onPressed: _callContact,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2E6BAE),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                          elevation: 4,
+                    child: GestureDetector(
+                      onTap: _callContact,
+                      child: Container(
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: LKTheme.blueGradient,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Row(
                           children: [
-                            const Text('📞', style: TextStyle(fontSize: 26)),
-                            const SizedBox(height: 2),
-                            Text(callButtonLabel, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, height: 1.2)),
+                            const Padding(
+                              padding: EdgeInsets.only(left: 14),
+                              child: Icon(Icons.phone_rounded, color: Colors.white, size: 28),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('DIRECT LINE:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white70, letterSpacing: 0.5)),
+                                  Text(contactLabel, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white)),
+                                  const Text('Non-Emergency Contact', style: TextStyle(fontSize: 9, color: Colors.white54)),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
+                  // Emergency
                   Expanded(
-                    child: SizedBox(
-                      height: 76,
-                      child: ElevatedButton(
-                        onPressed: _callAmbulance,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFC43434),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                          elevation: 4,
+                    child: GestureDetector(
+                      onTap: _callAmbulance,
+                      child: Container(
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: LKTheme.redGradient,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
                         ),
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: const Row(
                           children: [
-                            Text('🚑', style: TextStyle(fontSize: 26)),
-                            SizedBox(height: 2),
-                            Text('CALL\nAMBULANCE', textAlign: TextAlign.center, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, height: 1.2)),
+                            Padding(
+                              padding: EdgeInsets.only(left: 14),
+                              child: Icon(Icons.local_hospital_rounded, color: Colors.white, size: 28),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('EMERGENCY:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white70, letterSpacing: 0.5)),
+                                  Text('CALL AMBULANCE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white)),
+                                  Text('Immediate Response', style: TextStyle(fontSize: 9, color: Colors.white54)),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6, top: 2),
-              child: Text(
-                'Or call if something is wrong',
-                style: TextStyle(fontSize: 12, color: Colors.grey[400], fontWeight: FontWeight.w500),
               ),
             ),
           ],

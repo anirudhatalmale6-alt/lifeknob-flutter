@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 import '../services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -59,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: LKTheme.bg,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -68,26 +69,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo circle
                 Container(
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF27AE60),
+                    gradient: LKTheme.goldGradient,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF27AE60).withValues(alpha: 0.3),
+                        color: LKTheme.gold.withValues(alpha: 0.3),
                         blurRadius: 30,
                         spreadRadius: 5,
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.favorite,
-                    color: Colors.white,
-                    size: 60,
-                  ),
+                  child: const Icon(Icons.favorite, color: Color(0xFF5A3D10), size: 60),
                 ),
                 const SizedBox(height: 24),
                 const Text(
@@ -95,16 +91,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C3E50),
+                    color: LKTheme.gold,
                     letterSpacing: 1.5,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'Silence is the alarm',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey[500],
+                    color: LKTheme.textSecondary,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -113,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   width: 30,
                   height: 30,
                   child: CircularProgressIndicator(
-                    color: Color(0xFF27AE60),
+                    color: LKTheme.gold,
                     strokeWidth: 3,
                   ),
                 ),
