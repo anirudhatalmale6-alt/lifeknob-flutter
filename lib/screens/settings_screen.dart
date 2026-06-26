@@ -186,33 +186,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.refresh_rounded, size: 64, color: LKTheme.red),
+              const Icon(Icons.refresh_rounded, size: 64, color: LKTheme.gold),
               const SizedBox(height: 16),
               const Text('Start Again?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
               const SizedBox(height: 8),
-              const Text('This will reset everything.\nYou will get a new code and\ngo through setup again.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
+              const Text('Go through the setup steps\nagain to review or update\nyour details.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
               const SizedBox(height: 24),
-              Row(children: [
-                Expanded(child: OutlinedButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: const Text('Cancel', style: TextStyle(fontSize: 18)),
-                )),
-                const SizedBox(width: 12),
-                Expanded(child: ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  style: ElevatedButton.styleFrom(backgroundColor: LKTheme.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: const Text('Reset', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                )),
-              ]),
+              SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Start Again', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              )),
+              const SizedBox(height: 8),
+              Center(child: GestureDetector(
+                onTap: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel', style: TextStyle(fontSize: 15, color: LKTheme.textMuted)),
+              )),
             ],
           ),
         ),
       ),
     );
     if (confirm != true) return;
-    await AuthService().logout();
-    if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+    if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/onboarding', (route) => false);
   }
 
   @override

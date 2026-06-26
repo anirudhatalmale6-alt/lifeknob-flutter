@@ -36,7 +36,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void initState() {
     super.initState();
     final user = AuthService().currentUser;
-    if (user != null) _userCode = user.userCode;
+    if (user != null) {
+      _userCode = user.userCode;
+      if (user.name.isNotEmpty) _nameController.text = user.name;
+      if (user.email.isNotEmpty) _emailController.text = user.email;
+      if (user.phone.isNotEmpty) _phoneController.text = user.phone;
+      if (user.sosName != null && user.sosName!.isNotEmpty) _sosNameController.text = user.sosName!;
+      if (user.sosNumber != null && user.sosNumber!.isNotEmpty) _sosPhoneController.text = user.sosNumber!;
+      if (user.ambulanceNumber != null && user.ambulanceNumber!.isNotEmpty) _ambulanceController.text = user.ambulanceNumber!;
+      _avatarUrl = user.avatar;
+    }
   }
 
   void _next() {
