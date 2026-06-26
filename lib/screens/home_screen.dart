@@ -32,10 +32,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final user = AuthService().currentUser ?? await AuthService().getSavedUser();
+    var user = AuthService().currentUser ?? await AuthService().getSavedUser();
+    try {
+      user = await AuthService().refreshProfile();
+    } catch (_) {}
+
     if (user != null && mounted) {
       setState(() {
-        _userCode = user.userCode;
+        _userCode = user!.userCode;
         _userName = user.name;
         _sosNumber = user.sosNumber;
         _sosName = user.sosName;
@@ -43,20 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
         _avatarUrl = user.avatar;
       });
     }
-
-    try {
-      final freshUser = await AuthService().refreshProfile();
-      if (mounted) {
-        setState(() {
-          _userCode = freshUser.userCode;
-          _userName = freshUser.name;
-          _sosNumber = freshUser.sosNumber;
-          _sosName = freshUser.sosName;
-          _ambulanceNumber = freshUser.ambulanceNumber;
-          _avatarUrl = freshUser.avatar;
-        });
-      }
-    } catch (_) {}
   }
 
   Future<void> _loadLastCheckIn() async {

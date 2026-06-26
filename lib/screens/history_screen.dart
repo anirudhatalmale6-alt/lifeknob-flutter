@@ -10,10 +10,10 @@ class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key, this.onGoHome});
 
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
+  State<HistoryScreen> createState() => HistoryScreenState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
+class HistoryScreenState extends State<HistoryScreen> {
   List<Connection> _connections = [];
   List<Map<String, dynamic>> _pendingRequests = [];
   bool _isLoading = true;
@@ -23,10 +23,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final _codeCtrl = TextEditingController();
   bool _isAdding = false;
 
+  bool _loaded = false;
+
   @override
   void initState() {
     super.initState();
-    _loadData();
+  }
+
+  void ensureLoaded() {
+    if (!_loaded) {
+      _loaded = true;
+      _loadData();
+    }
   }
 
   @override
