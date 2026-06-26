@@ -285,27 +285,43 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildAddRow() {
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
-      child: Row(children: [
-        Expanded(child: Column(children: [
-          TextField(controller: _nameCtrl, maxLength: 50,
-            style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary),
-            decoration: const InputDecoration(hintText: 'name ...', counterText: '', isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10))),
-          const SizedBox(height: 6),
-          TextField(controller: _codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2),
-            decoration: const InputDecoration(hintText: 'code', counterText: '', isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10))),
-        ])),
-        const SizedBox(width: 10),
-        SizedBox(height: 60, child: ElevatedButton(
-          onPressed: _isAdding ? null : _connectPeople,
-          style: ElevatedButton.styleFrom(backgroundColor: LKTheme.gold, foregroundColor: Colors.black,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(horizontal: 12)),
-          child: _isAdding
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
-            : const Text('+ CONNECT\nPEOPLE', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, height: 1.3)),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.4))),
+      child: Column(children: [
+        TextField(controller: _nameCtrl, maxLength: 50,
+          style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+          decoration: InputDecoration(
+            hintText: 'name ...',
+            hintStyle: TextStyle(fontSize: 18, color: LKTheme.textMuted.withValues(alpha: 0.7)),
+            counterText: '',
+            prefixIcon: const Icon(Icons.person_rounded, color: LKTheme.gold),
+            filled: true, fillColor: LKTheme.bgCardLight,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: LKTheme.border)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: LKTheme.border)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: LKTheme.gold, width: 2)),
+          )),
+        const SizedBox(height: 8),
+        TextField(controller: _codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 3),
+          decoration: InputDecoration(
+            hintText: 'code',
+            hintStyle: TextStyle(fontSize: 20, color: LKTheme.textMuted.withValues(alpha: 0.5), letterSpacing: 3),
+            counterText: '',
+            prefixIcon: const Icon(Icons.link_rounded, color: LKTheme.gold),
+            filled: true, fillColor: LKTheme.bgCardLight,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: LKTheme.border)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: LKTheme.border)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: LKTheme.gold, width: 2)),
+          )),
+        const SizedBox(height: 12),
+        SizedBox(width: double.infinity, height: 50, child: Container(
+          decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(12)),
+          child: ElevatedButton.icon(
+            onPressed: _isAdding ? null : _connectPeople,
+            icon: _isAdding ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2)) : const Icon(Icons.person_add_rounded, color: Color(0xFF5A3D10), size: 22),
+            label: _isAdding ? const SizedBox() : const Text('+ CONNECT PEOPLE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10))),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+          ),
         )),
       ]),
     );
