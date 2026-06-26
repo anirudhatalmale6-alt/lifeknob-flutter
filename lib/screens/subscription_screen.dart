@@ -63,7 +63,7 @@ class SubscriptionScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // Premium Monthly
+                    // $5 plan
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(18),
@@ -86,22 +86,21 @@ class SubscriptionScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Premium Monthly', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                              const Text('Premium', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
                               const SizedBox(height: 6),
                               const Row(
                                 crossAxisAlignment: CrossAxisAlignment.baseline,
                                 textBaseline: TextBaseline.alphabetic,
                                 children: [
-                                  Text('\$4.99', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: LKTheme.gold)),
+                                  Text('\$5', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: LKTheme.gold)),
                                   SizedBox(width: 4),
                                   Text('/ month', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary)),
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              _feature('Connect up to 5 people'),
-                              _feature('Switch connections freely'),
+                              _feature('Connect up to 3 people'),
                               _feature('No ads'),
-                              _feature('Priority notifications'),
+                              _feature('No cooldown on switching'),
                               const SizedBox(height: 14),
                               SizedBox(
                                 width: double.infinity, height: 54,
@@ -121,7 +120,7 @@ class SubscriptionScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // Premium Yearly
+                    // $8 plan
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(18),
@@ -133,22 +132,22 @@ class SubscriptionScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Premium Yearly', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                          const Text('Premium Plus', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
                           const SizedBox(height: 6),
                           const Row(
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             textBaseline: TextBaseline.alphabetic,
                             children: [
-                              Text('\$39.99', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: LKTheme.gold)),
+                              Text('\$8', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: LKTheme.gold)),
                               SizedBox(width: 4),
-                              Text('/ year', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary)),
+                              Text('/ month', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary)),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          const Text('Save 33%', style: TextStyle(fontSize: 15, color: LKTheme.teal, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 12),
-                          _feature('Everything in Monthly'),
-                          _feature('Best value'),
+                          _feature('Connect up to 10 people'),
+                          _feature('No ads'),
+                          _feature('No cooldown on switching'),
+                          _feature('Priority notifications'),
                           const SizedBox(height: 14),
                           SizedBox(
                             width: double.infinity, height: 54,

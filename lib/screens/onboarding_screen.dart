@@ -31,6 +31,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   bool _isSaving = false;
   String? _avatarUrl;
+  final Set<String> _errorFields = {};
 
   @override
   void initState() {
@@ -50,25 +51,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _next() {
     if (_page == 2) {
+      _errorFields.clear();
       final name = _nameController.text.trim();
-      if (name.isEmpty) { _showMessage('Please enter your name'); return; }
       final email = _emailController.text.trim();
-      if (email.isEmpty) { _showMessage('Please enter your email'); return; }
-      if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) { _showMessage('Please enter a valid email address\n(example: name@email.com)'); return; }
       final phone = _phoneController.text.trim();
-      if (phone.isEmpty) { _showMessage('Please enter your phone number'); return; }
-      if (!RegExp(r'^\+?[0-9]{6,20}$').hasMatch(phone)) { _showMessage('Phone number can only contain\n+ and numbers, no spaces\n(example: +61400000000)'); return; }
+      String? msg;
+      if (name.isEmpty) { _errorFields.add('name'); msg ??= 'Please enter your name'; }
+      if (email.isEmpty) { _errorFields.add('email'); msg ??= 'Please enter your email'; }
+      else if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) { _errorFields.add('email'); msg ??= 'Invalid email (example: name@email.com)'; }
+      if (phone.isEmpty) { _errorFields.add('phone'); msg ??= 'Please enter your phone number'; }
+      else if (!RegExp(r'^\+?[0-9]{6,20}$').hasMatch(phone)) { _errorFields.add('phone'); msg ??= 'Phone: only + and numbers, no spaces'; }
+      if (_errorFields.isNotEmpty) { setState(() {}); _showMessage(msg!); return; }
       _saveProfile();
       return;
     }
     if (_page == 4) {
-      if (_sosNameController.text.trim().isEmpty) { _showMessage('Please enter emergency contact name'); return; }
+      _errorFields.clear();
+      final sosName = _sosNameController.text.trim();
       final sosPhone = _sosPhoneController.text.trim();
-      if (sosPhone.isEmpty) { _showMessage('Please enter emergency contact number'); return; }
-      if (!RegExp(r'^\+?[0-9]{3,20}$').hasMatch(sosPhone)) { _showMessage('Emergency number can only contain\n+ and numbers, no spaces'); return; }
       final ambNum = _ambulanceController.text.trim();
-      if (ambNum.isEmpty) { _showMessage('Please enter ambulance number'); return; }
-      if (!RegExp(r'^[0-9]{1,10}$').hasMatch(ambNum)) { _showMessage('Ambulance number can only\ncontain numbers (e.g. 000, 911, 112)'); return; }
+      String? msg;
+      if (sosName.isEmpty) { _errorFields.add('sosName'); msg ??= 'Please enter emergency contact name'; }
+      if (sosPhone.isEmpty) { _errorFields.add('sosPhone'); msg ??= 'Please enter emergency contact number'; }
+      else if (!RegExp(r'^\+?[0-9]{3,20}$').hasMatch(sosPhone)) { _errorFields.add('sosPhone'); msg ??= 'Emergency number: only + and numbers'; }
+      if (ambNum.isEmpty) { _errorFields.add('ambulance'); msg ??= 'Please enter ambulance number'; }
+      else if (!RegExp(r'^[0-9]{1,10}$').hasMatch(ambNum)) { _errorFields.add('ambulance'); msg ??= 'Ambulance: numbers only (e.g. 000, 911)'; }
+      if (_errorFields.isNotEmpty) { setState(() {}); _showMessage(msg!); return; }
       _saveEmergency();
       return;
     }
@@ -374,15 +382,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 20),
           _label('Your Name'), const SizedBox(height: 6),
           TextField(controller: _nameController, maxLength: 50, style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
-            decoration: const InputDecoration(hintText: 'Your name', counterText: '', prefixIcon: Icon(Icons.person_rounded, color: LKTheme.gold))),
+            onChanged: (_) { if (_errorFields.contains('name')) setState(() => _errorFields.remove('name')); },
+            decoration: _inputDeco('Your name', Icons.person_rounded, LKTheme.gold, 'name')),
           const SizedBox(height: 14),
           _label('Your Email Address'), const SizedBox(height: 6),
           TextField(controller: _emailController, maxLength: 100, keyboardType: TextInputType.emailAddress, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-            decoration: const InputDecoration(hintText: 'your@email.com', counterText: '', prefixIcon: Icon(Icons.email_rounded, color: LKTheme.gold))),
+            onChanged: (_) { if (_errorFields.contains('email')) setState(() => _errorFields.remove('email')); },
+            decoration: _inputDeco('your@email.com', Icons.email_rounded, LKTheme.gold, 'email')),
           const SizedBox(height: 14),
           _label('Your Phone Number'), const SizedBox(height: 6),
           TextField(controller: _phoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-            decoration: const InputDecoration(hintText: '+61 400 000 000', counterText: '', prefixIcon: Icon(Icons.phone_rounded, color: LKTheme.gold))),
+            onChanged: (_) { if (_errorFields.contains('phone')) setState(() => _errorFields.remove('phone')); },
+            decoration: _inputDeco('+61400000000', Icons.phone_rounded, LKTheme.gold, 'phone')),
           const SizedBox(height: 20),
         ],
       ),
@@ -445,11 +456,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 24),
           _label('Name'), const SizedBox(height: 6),
           TextField(controller: _sosNameController, maxLength: 50, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-            decoration: const InputDecoration(hintText: 'Contact name', counterText: '', prefixIcon: Icon(Icons.person_rounded, color: LKTheme.blue))),
+            onChanged: (_) { if (_errorFields.contains('sosName')) setState(() => _errorFields.remove('sosName')); },
+            decoration: _inputDeco('Contact name', Icons.person_rounded, LKTheme.blue, 'sosName')),
           const SizedBox(height: 14),
           _label('Phone Number'), const SizedBox(height: 6),
           TextField(controller: _sosPhoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-            decoration: const InputDecoration(hintText: 'Phone number', counterText: '', prefixIcon: Icon(Icons.phone_rounded, color: LKTheme.blue))),
+            onChanged: (_) { if (_errorFields.contains('sosPhone')) setState(() => _errorFields.remove('sosPhone')); },
+            decoration: _inputDeco('+61400000000', Icons.phone_rounded, LKTheme.blue, 'sosPhone')),
           const SizedBox(height: 24),
           const Divider(color: LKTheme.border),
           const SizedBox(height: 16),
@@ -457,7 +470,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 12),
           _label('Phone Number'), const SizedBox(height: 6),
           TextField(controller: _ambulanceController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-            decoration: const InputDecoration(hintText: 'e.g. 000, 911, 112', counterText: '', prefixIcon: Icon(Icons.local_hospital_rounded, color: LKTheme.red))),
+            onChanged: (_) { if (_errorFields.contains('ambulance')) setState(() => _errorFields.remove('ambulance')); },
+            decoration: _inputDeco('e.g. 000, 911, 112', Icons.local_hospital_rounded, LKTheme.red, 'ambulance')),
           const SizedBox(height: 20),
         ],
       ),
@@ -495,15 +509,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('Membership', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: LKTheme.gold)),
               SizedBox(height: 10),
-              Text('Options:', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
-              SizedBox(height: 6),
+              Text('Plans:', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
+              SizedBox(height: 8),
               Text('  Free - 1 connection, with ads', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
-              SizedBox(height: 4),
-              Text('  Premium - \$4.99/month', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
               SizedBox(height: 6),
+              Text('  \$5/month - up to 3 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+              SizedBox(height: 4),
+              Text('  \$8/month - up to 10 people', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+              SizedBox(height: 8),
               Text('Advantages:', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
               SizedBox(height: 4),
-              Text('  - Connect up to 5 people', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
+              Text('  - More connections', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
               Text('  - No advertisements', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
               Text('  - No cooldown on switching', style: TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
               SizedBox(height: 10),
@@ -519,5 +535,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _label(String text) {
     return Align(alignment: Alignment.centerLeft,
       child: Text(text, style: const TextStyle(fontSize: 14, color: LKTheme.gold, fontWeight: FontWeight.w600)));
+  }
+
+  InputDecoration _inputDeco(String hint, IconData icon, Color iconColor, String fieldKey) {
+    final hasError = _errorFields.contains(fieldKey);
+    return InputDecoration(
+      hintText: hint, counterText: '',
+      prefixIcon: Icon(icon, color: hasError ? LKTheme.red : iconColor),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: hasError ? LKTheme.red : LKTheme.border, width: hasError ? 2 : 1)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: hasError ? LKTheme.red : LKTheme.gold, width: 2)),
+      filled: true, fillColor: LKTheme.bgCardLight,
+    );
   }
 }
