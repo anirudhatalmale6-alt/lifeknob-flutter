@@ -235,7 +235,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Row(children: [
                 const Icon(Icons.settings_rounded, color: LKTheme.textSecondary, size: 28),
                 const SizedBox(width: 10),
-                const Expanded(child: Text('Systems', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
+                const Expanded(child: Text('Set Up', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
                 if (widget.onGoHome != null)
                   GestureDetector(
                     onTap: widget.onGoHome,

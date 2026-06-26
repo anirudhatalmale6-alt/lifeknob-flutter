@@ -210,7 +210,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 children: [
                   Icon(hasOverdue ? Icons.warning_rounded : Icons.list_alt_rounded, color: hasOverdue ? LKTheme.red : LKTheme.gold, size: 28),
                   const SizedBox(width: 10),
-                  Expanded(child: Text(hasOverdue ? 'ALERT' : 'Logs',
+                  Expanded(child: Text(hasOverdue ? 'ALERT' : 'People',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: hasOverdue ? LKTheme.red : LKTheme.textPrimary))),
                   if (widget.onGoHome != null)
                     GestureDetector(
