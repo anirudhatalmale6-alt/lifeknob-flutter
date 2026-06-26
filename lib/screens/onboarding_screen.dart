@@ -134,6 +134,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _finishConnect() async {
+    if (_connectedCodes.isEmpty) {
+      final goAnyway = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => Dialog(
+          backgroundColor: LKTheme.bgCard,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.info_rounded, size: 56, color: LKTheme.gold),
+              const SizedBox(height: 16),
+              const Text('No connections yet', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+              const SizedBox(height: 12),
+              const Text(
+                'You have not connected to anyone.\n\nYou can press OK, but nobody will see it until you add a connection.\n\nYou can add connections later in the "People" tab.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.5),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Continue anyway', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              )),
+              const SizedBox(height: 8),
+              Center(child: GestureDetector(
+                onTap: () => Navigator.pop(ctx, false),
+                child: const Text('Go back and add code', style: TextStyle(fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+              )),
+            ]),
+          ),
+        ),
+      );
+      if (goAnyway != true) return;
+    }
     await AuthService().refreshProfile();
     if (mounted) Navigator.pushReplacementNamed(context, '/home');
   }
