@@ -137,7 +137,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _finishConnect() async {
     if (_connectedPeople.isEmpty) {
-      _showMessage('Nobody can see when you press OK yet.\nYou can add connections later in "People".');
+      await showDialog(
+        context: context,
+        builder: (ctx) => Dialog(
+          backgroundColor: LKTheme.bgCard,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: Padding(padding: const EdgeInsets.all(28), child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.warning_rounded, size: 56, color: LKTheme.gold),
+            const SizedBox(height: 16),
+            const Text('No connections yet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+            const SizedBox(height: 12),
+            const Text('Nobody can see when you press OK.\nYou can add connections later\nin the "People" tab.', textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.5)),
+            const SizedBox(height: 24),
+            SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK, continue', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            )),
+          ])),
+        ),
+      );
     }
     await AuthService().refreshProfile();
     if (mounted) Navigator.pushReplacementNamed(context, '/home');
