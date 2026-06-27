@@ -23,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String? _sosName;
   String? _ambulanceNumber;
 
-  // Knob rotation
   static const double _triggerAngle = 3 * pi / 2;
   double _rotation = 0.0;
   double _prevAngle = 0.0;
@@ -95,7 +94,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     } catch (_) {}
   }
 
-  // Knob gesture handling
   double _getAngle(Offset pos, Offset center) => atan2(pos.dy - center.dy, pos.dx - center.dx);
 
   void _onKnobPanStart(DragStartDetails d, Offset center) {
@@ -148,18 +146,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       backgroundColor: Colors.transparent,
       child: Container(
         padding: const EdgeInsets.all(32),
-        decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.3)),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.95),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 20)],
+        ),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text('YOUR CODE', style: GoogleFonts.cinzel(fontSize: 14, color: LKTheme.textSecondary, fontWeight: FontWeight.w600, letterSpacing: 3)),
+          Text('YOUR CODE', style: GoogleFonts.cinzel(fontSize: 14, color: const Color(0xFF8A7A60), fontWeight: FontWeight.w600, letterSpacing: 3)),
           const SizedBox(height: 16),
-          Text(_userCode!, style: GoogleFonts.cinzel(fontSize: 48, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 6)),
+          Text(_userCode!, style: GoogleFonts.cinzel(fontSize: 48, fontWeight: FontWeight.w900, color: const Color(0xFFB08930), letterSpacing: 6)),
           const SizedBox(height: 16),
-          Text('Share this code with your family', style: GoogleFonts.cormorantGaramond(fontSize: 16, color: LKTheme.textSecondary, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
+          Text('Share this code with your family', style: GoogleFonts.cormorantGaramond(fontSize: 16, color: const Color(0xFF8A7A60), fontStyle: FontStyle.italic), textAlign: TextAlign.center),
           const SizedBox(height: 24),
           Row(children: [
             Expanded(child: OutlinedButton(
               onPressed: () { Clipboard.setData(ClipboardData(text: _userCode!)); Navigator.pop(ctx); },
-              style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.4)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+              style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFFB08930), side: const BorderSide(color: Color(0xFFD4A843)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
               child: Text('COPY', style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700)),
             )),
             const SizedBox(width: 12),
@@ -176,16 +178,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _callContact() async {
-    final number = _sosNumber;
-    if (number == null || number.isEmpty) return;
-    final uri = Uri(scheme: 'tel', path: number);
+    final n = _sosNumber;
+    if (n == null || n.isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: n);
     if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
   Future<void> _callAmbulance() async {
-    final number = _ambulanceNumber;
-    if (number == null || number.isEmpty) return;
-    final uri = Uri(scheme: 'tel', path: number);
+    final n = _ambulanceNumber;
+    if (n == null || n.isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: n);
     if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
@@ -197,178 +199,152 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final contactLabel = (_sosName != null && _sosName!.isNotEmpty) ? _sosName!.toUpperCase() : 'CONTACT';
     final displayName = (_userName != null && _userName!.isNotEmpty) ? _userName!.toUpperCase() : 'USER';
 
-    // Knob center position (relative to screen)
-    final knobCenterY = screenH * 0.42;
-    final knobSize = screenW * 0.78;
+    final knobSize = screenW * 0.82;
+    final goldColor = const Color(0xFF8A7A50);
+    final darkGold = const Color(0xFF6B5530);
 
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Layer 1: Background image
-          Image.asset('assets/images/bg_main.jpg', fit: BoxFit.cover, width: screenW, height: screenH),
+          // Layer 1: Frosted glass background
+          Image.asset('assets/images/bg_phone.png', fit: BoxFit.cover),
 
-          // Layer 2: Interactive overlays
+          // Layer 2: All content
           SafeArea(
             child: Column(
               children: [
-                // Zone 1: Header - user info (tappable to setup)
+                // HEADER ROW
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(70, 12, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(displayName, style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w800, color: const Color(0xFF6B5530), letterSpacing: 2), maxLines: 1, overflow: TextOverflow.ellipsis),
-                            Text('Last verified:', style: GoogleFonts.cormorantGaramond(fontSize: 13, color: const Color(0xFF8A7A60), fontStyle: FontStyle.italic)),
-                            Text(_lastCheckIn ?? 'Not yet', style: GoogleFonts.cormorantGaramond(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF8A7A60))),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Zone 3: "TURN THE KNOB" + QR
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 16, 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text('TURN THE KNOB', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF8A7A50), letterSpacing: 3)),
-                      ),
+                      // Avatar placeholder (over the bg avatar area)
+                      const SizedBox(width: 52),
+                      const SizedBox(width: 10),
+                      // User info
+                      Expanded(child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(displayName, style: GoogleFonts.cinzel(fontSize: 20, fontWeight: FontWeight.w800, color: darkGold, letterSpacing: 2), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text('Last verified:', style: GoogleFonts.cormorantGaramond(fontSize: 14, color: goldColor, fontStyle: FontStyle.italic)),
+                          Text(_lastCheckIn ?? 'Not yet', style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w600, color: goldColor)),
+                        ],
+                      )),
+                      // Logo area
                       GestureDetector(
                         onTap: _showCodePopup,
-                        child: const SizedBox(width: 50, height: 50),
+                        child: Image.asset('assets/images/logo.png', width: 65, height: 55, fit: BoxFit.contain),
                       ),
                     ],
                   ),
                 ),
 
-                // Zone 4: Knob area (interactive turn)
+                // TURN THE KNOB + QR
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 16, 0),
+                  child: Row(children: [
+                    Expanded(child: Text('TURN THE KNOB', style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w700, color: goldColor, letterSpacing: 3))),
+                    GestureDetector(
+                      onTap: _showCodePopup,
+                      child: Container(width: 48, height: 48, color: Colors.transparent),
+                    ),
+                  ]),
+                ),
+
+                // THE KNOB - gold image that rotates
                 Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final center = Offset(constraints.maxWidth / 2, constraints.maxHeight * 0.42);
-                      return GestureDetector(
-                        onPanStart: (d) => _onKnobPanStart(d, center),
-                        onPanUpdate: (d) => _onKnobPanUpdate(d, center),
-                        onPanEnd: _onKnobPanEnd,
-                        child: Stack(
-                          children: [
-                            // Transparent gesture area
-                            Container(color: Colors.transparent),
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    final center = Offset(constraints.maxWidth / 2, constraints.maxHeight / 2);
+                    return GestureDetector(
+                      onPanStart: (d) => _onKnobPanStart(d, center),
+                      onPanUpdate: (d) => _onKnobPanUpdate(d, center),
+                      onPanEnd: _onKnobPanEnd,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Gold knob image (rotates)
+                          Transform.rotate(
+                            angle: _rotation,
+                            child: Image.asset('assets/images/knob_gold.png', width: knobSize, height: knobSize, fit: BoxFit.contain),
+                          ),
+                          // Text overlay (stays upright)
+                          _showSuccess
+                            ? Column(mainAxisSize: MainAxisSize.min, children: [
+                                Text('SENT!', style: GoogleFonts.cinzel(fontSize: 40, fontWeight: FontWeight.w800, color: const Color(0xFF27AE60), letterSpacing: 4)),
+                                const Icon(Icons.check_rounded, color: Color(0xFF27AE60), size: 44),
+                              ])
+                            : ShaderMask(
+                                shaderCallback: (bounds) {
+                                  final fillStop = 1.0 - progress;
+                                  return LinearGradient(
+                                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                                    colors: [darkGold, darkGold, const Color(0xFF27AE60), const Color(0xFF27AE60)],
+                                    stops: [0.0, fillStop, fillStop, 1.0],
+                                  ).createShader(bounds);
+                                },
+                                blendMode: BlendMode.srcIn,
+                                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                  Text('I AM', style: GoogleFonts.cinzel(fontSize: 38, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 8)),
+                                  Text('OKAY!', style: GoogleFonts.cinzel(fontSize: 68, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 6, height: 0.85)),
+                                ]),
+                              ),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
 
-                            // Knob text overlay (centered on the knob area)
-                            Positioned(
-                              left: 0, right: 0,
-                              top: center.dy - 50,
-                              child: _showSuccess
-                                ? Column(
-                                    children: [
-                                      Text('SENT!', style: GoogleFonts.cinzel(fontSize: 36, fontWeight: FontWeight.w800, color: const Color(0xFF27AE60), letterSpacing: 4)),
-                                      const Icon(Icons.check_rounded, color: Color(0xFF27AE60), size: 40),
-                                    ],
-                                  )
-                                : ShaderMask(
-                                    shaderCallback: (bounds) {
-                                      final fillStop = 1.0 - progress;
-                                      return LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: const [Color(0xFF6B5530), Color(0xFF6B5530), Color(0xFF27AE60), Color(0xFF27AE60)],
-                                        stops: [0.0, fillStop, fillStop, 1.0],
-                                      ).createShader(bounds);
-                                    },
-                                    blendMode: BlendMode.srcIn,
-                                    child: Column(
-                                      children: [
-                                        Text('I AM', style: GoogleFonts.cinzel(fontSize: 34, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 6)),
-                                        Text('OKAY!', style: GoogleFonts.cinzel(fontSize: 62, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 5, height: 0.9)),
-                                      ],
-                                    ),
-                                  ),
-                            ),
-                          ],
+                // OR CALL FOR HELP
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  child: Text('OR CALL FOR HELP', style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w700, color: goldColor, letterSpacing: 3), textAlign: TextAlign.center),
+                ),
+
+                // CALL BUTTONS
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                  child: Row(children: [
+                    // Direct Line
+                    Expanded(child: GestureDetector(
+                      onTap: _callContact,
+                      child: Container(
+                        height: 90,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          image: const DecorationImage(image: AssetImage('assets/images/btn_blue.png'), fit: BoxFit.cover),
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 4))],
                         ),
-                      );
-                    },
-                  ),
+                        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                          Text('DIRECT LINE:', style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.9), letterSpacing: 1)),
+                          Text(contactLabel, style: GoogleFonts.cinzel(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text('Non-Emergency Contact', style: GoogleFonts.cormorantGaramond(fontSize: 12, color: Colors.white.withValues(alpha: 0.7), fontStyle: FontStyle.italic)),
+                        ])),
+                      ),
+                    )),
+                    const SizedBox(width: 8),
+                    // Emergency
+                    Expanded(child: GestureDetector(
+                      onTap: _callAmbulance,
+                      child: Container(
+                        height: 90,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          image: const DecorationImage(image: AssetImage('assets/images/btn_red.png'), fit: BoxFit.cover),
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 4))],
+                        ),
+                        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                          Text('EMERGENCY:', style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.9), letterSpacing: 1)),
+                          Text('CALL AMBULANCE', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
+                          Text('Immediate Response Required', style: GoogleFonts.cormorantGaramond(fontSize: 11, color: Colors.white.withValues(alpha: 0.7), fontStyle: FontStyle.italic)),
+                        ])),
+                      ),
+                    )),
+                  ]),
                 ),
 
-                // "OR CALL FOR HELP" text overlay
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text('OR CALL FOR HELP', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF8A7A50), letterSpacing: 2)),
-                    ],
-                  ),
-                ),
-
-                // Zone 5 & 6: Call buttons (tap zones with text)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-                  child: SizedBox(
-                    height: screenH * 0.1,
-                    child: Row(
-                      children: [
-                        // Direct Line
-                        Expanded(child: GestureDetector(
-                          onTap: _callContact,
-                          child: Container(
-                            color: Colors.transparent,
-                            alignment: Alignment.center,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('DIRECT LINE:', style: GoogleFonts.cinzel(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFFD4C8B0), letterSpacing: 1)),
-                                Text(contactLabel, style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                Text('Non-Emergency Contact', style: GoogleFonts.cormorantGaramond(fontSize: 12, color: const Color(0xFFB0A890), fontStyle: FontStyle.italic)),
-                              ],
-                            ),
-                          ),
-                        )),
-                        // Emergency
-                        Expanded(child: GestureDetector(
-                          onTap: _callAmbulance,
-                          child: Container(
-                            color: Colors.transparent,
-                            alignment: Alignment.center,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('EMERGENCY:', style: GoogleFonts.cinzel(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFFD4B8B0), letterSpacing: 1)),
-                                Text('CALL AMBULANCE', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
-                                Text('Immediate Response Required', style: GoogleFonts.cormorantGaramond(fontSize: 12, color: const Color(0xFFC0A0A0), fontStyle: FontStyle.italic)),
-                              ],
-                            ),
-                          ),
-                        )),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Nav labels
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
-                  child: SizedBox(
-                    height: 50,
-                    child: Row(
-                      children: [
-                        Expanded(child: GestureDetector(
-                          child: Center(child: Text('LIFE KNOB', style: GoogleFonts.cinzel(fontSize: 10, fontWeight: FontWeight.w700, color: const Color(0xFFB09840), letterSpacing: 2))),
-                        )),
-                        Expanded(child: Center(child: Text('PEOPLE', style: GoogleFonts.cinzel(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFF8A7A60), letterSpacing: 2)))),
-                        Expanded(child: Center(child: Text('SETUP', style: GoogleFonts.cinzel(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFF8A7A60), letterSpacing: 2)))),
-                      ],
-                    ),
-                  ),
-                ),
+                // BOTTOM NAV
+                const SizedBox(height: 6),
               ],
             ),
           ),

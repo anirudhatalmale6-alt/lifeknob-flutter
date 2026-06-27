@@ -70,6 +70,10 @@ flutter:
     - assets/images/silver_rim.png
     - assets/images/gold_bevel.png
     - assets/images/bg_main.jpg
+    - assets/images/bg_phone.png
+    - assets/images/knob_gold.png
+    - assets/images/btn_blue.png
+    - assets/images/btn_red.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
