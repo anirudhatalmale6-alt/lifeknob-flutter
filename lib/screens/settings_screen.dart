@@ -249,16 +249,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Row(children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: LKTheme.textSecondary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.tune_rounded, color: LKTheme.textSecondary, size: 24),
-                ),
+                const Icon(Icons.tune_rounded, color: LKTheme.gold, size: 28),
                 const SizedBox(width: 12),
-                const Expanded(child: Text('Set Up', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.textPrimary))),
+                const Expanded(child: Text('SETUP', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 2))),
               ]),
             ),
 

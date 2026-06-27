@@ -355,35 +355,46 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
 
     final fontSize1 = faceSize * 0.14;
     final fontSize2 = faceSize * 0.24;
+    const brownColor = Color(0xFF5A3D10);
+    const greenColor = Color(0xFF27AE60);
 
-    // Text color transitions from dark brown to green as knob turns
-    final textColor1 = Color.lerp(const Color(0xFF6B4D1E), const Color(0xFF1B8C3D), progress)!;
-    final textColor2 = Color.lerp(const Color(0xFF5A3D10), const Color(0xFF27AE60), progress)!;
+    if (_showSuccess) {
+      return Column(
+        key: const ValueKey('success'),
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('SENT!', style: TextStyle(color: greenColor, fontSize: fontSize1 * 1.1, fontWeight: FontWeight.w800, letterSpacing: 2,
+              shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
+          Icon(Icons.check_rounded, color: greenColor, size: faceSize * 0.22),
+        ],
+      );
+    }
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: _showSuccess
-          ? Column(
-              key: const ValueKey('success'),
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('SENT!', style: TextStyle(color: const Color(0xFF1B8C3D), fontSize: fontSize1 * 1.1, fontWeight: FontWeight.w800, letterSpacing: 2,
-                    shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
-                Icon(Icons.check_rounded, color: const Color(0xFF27AE60), size: faceSize * 0.22),
-              ],
-            )
-          : Column(
-              key: const ValueKey('idle'),
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('I AM', style: TextStyle(color: textColor1, fontSize: fontSize1, fontWeight: FontWeight.w800, letterSpacing: 3,
-                    shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
-                Text('OKAY!', style: TextStyle(color: textColor2, fontSize: fontSize2, fontWeight: FontWeight.w900, letterSpacing: 4, height: 1.0,
-                    shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
-              ],
-            ),
+    // Liquid fill: green fills from bottom to top based on progress
+    final fillStop = 1.0 - progress;
+
+    return ShaderMask(
+      shaderCallback: (bounds) {
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: const [brownColor, brownColor, greenColor, greenColor],
+          stops: [0.0, fillStop, fillStop, 1.0],
+        ).createShader(bounds);
+      },
+      blendMode: BlendMode.srcIn,
+      child: Column(
+        key: const ValueKey('idle'),
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('I AM', style: TextStyle(color: Colors.white, fontSize: fontSize1, fontWeight: FontWeight.w800, letterSpacing: 3,
+              shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
+          Text('OKAY!', style: TextStyle(color: Colors.white, fontSize: fontSize2, fontWeight: FontWeight.w900, letterSpacing: 4, height: 1.0,
+              shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
+        ],
+      ),
     );
   }
 }

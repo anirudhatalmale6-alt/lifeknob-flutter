@@ -235,31 +235,23 @@ class HistoryScreenState extends State<HistoryScreen> {
                 child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 500),
                 child: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 16), children: [
 
-                  // Page title
+                  // Page title - matching premium style
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16, top: 4),
                     child: Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: LKTheme.gold.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(Icons.people_rounded, color: LKTheme.gold, size: 24),
-                        ),
+                        const Icon(Icons.people_rounded, color: LKTheme.gold, size: 28),
                         const SizedBox(width: 12),
-                        const Expanded(child: Text('My People', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.textPrimary))),
+                        const Expanded(child: Text('PEOPLE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 2))),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: LKTheme.gold.withValues(alpha: 0.08),
+                            gradient: LKTheme.goldGradient,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: LKTheme.gold.withValues(alpha: 0.15)),
                           ),
                           child: Text(
                             '$_activeCount / $_maxConnections',
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: LKTheme.gold),
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10)),
                           ),
                         ),
                       ],
