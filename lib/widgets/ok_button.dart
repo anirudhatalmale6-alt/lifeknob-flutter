@@ -273,29 +273,49 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
   }
 
   Widget _buildFace(double faceSize) {
-    return Container(
+    return SizedBox(
       width: faceSize,
       height: faceSize,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: const RadialGradient(
-          center: Alignment(-0.3, -0.3),
-          radius: 0.8,
-          colors: [Color(0xFFF0E080), Color(0xFFDDB94E), Color(0xFFBE9530), Color(0xFFD4A843), Color(0xFFE8C96A)],
-          stops: [0.0, 0.3, 0.55, 0.8, 1.0],
-        ),
-        boxShadow: [
-          BoxShadow(color: const Color(0xFFB08930).withValues(alpha: 0.5), blurRadius: 12, offset: const Offset(0, 4)),
-          const BoxShadow(color: Color(0x44000000), blurRadius: 6, offset: Offset(3, 3)),
-          BoxShadow(color: const Color(0xFFEDD87C).withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(-1, -1)),
-        ],
-      ),
       child: Stack(
         children: [
+          // Gold face with beveled rim
+          Container(
+            width: faceSize,
+            height: faceSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const SweepGradient(
+                colors: [Color(0xFFE8C96A), Color(0xFFB08930), Color(0xFFD4A843), Color(0xFFEDD87C), Color(0xFFB08930), Color(0xFFD4A843), Color(0xFFE8C96A)],
+              ),
+              boxShadow: [
+                BoxShadow(color: const Color(0xFFB08930).withValues(alpha: 0.5), blurRadius: 12, offset: const Offset(0, 4)),
+                const BoxShadow(color: Color(0x44000000), blurRadius: 6, offset: Offset(3, 3)),
+              ],
+            ),
+          ),
+          // Inner face with brushed metal
+          Center(
+            child: Container(
+              width: faceSize - 16,
+              height: faceSize - 16,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const RadialGradient(
+                  center: Alignment(-0.2, -0.2),
+                  radius: 0.85,
+                  colors: [Color(0xFFF0E080), Color(0xFFDDB94E), Color(0xFFBE9530), Color(0xFFD4A843), Color(0xFFE8C96A)],
+                  stops: [0.0, 0.3, 0.55, 0.8, 1.0],
+                ),
+              ),
+              child: CustomPaint(
+                painter: _BrushedMetalPainter(),
+              ),
+            ),
+          ),
           // Grip notches
           ...List.generate(20, (i) {
             final a = i * (2 * pi / 20) - pi / 2;
-            final r = faceSize / 2 - 14;
+            final r = faceSize / 2 - 12;
             return Positioned(
               left: faceSize / 2 + r * cos(a) - 3,
               top: faceSize / 2 + r * sin(a) - 3,
@@ -314,7 +334,7 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
           // Indicator arrow at top
           Positioned(
             left: faceSize / 2 - 10,
-            top: 4,
+            top: 2,
             child: CustomPaint(
               size: const Size(20, 20),
               painter: _ArrowPainter(color: _showSuccess ? LKTheme.teal : const Color(0xFF5A3D10)),
@@ -362,6 +382,45 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
             ),
     );
   }
+}
+
+class _BrushedMetalPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+
+    for (int i = 0; i < 72; i++) {
+      final angle = i * (2 * pi / 72);
+      final alpha = (i % 2 == 0) ? 0.08 : 0.04;
+      paint.color = const Color(0xFF8B6914).withValues(alpha: alpha);
+      canvas.drawLine(
+        Offset(center.dx + 20 * cos(angle), center.dy + 20 * sin(angle)),
+        Offset(center.dx + (r - 8) * cos(angle), center.dy + (r - 8) * sin(angle)),
+        paint,
+      );
+    }
+
+    // Center star/cross
+    final starPaint = Paint()
+      ..color = const Color(0xFF8B6914).withValues(alpha: 0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (int i = 0; i < 4; i++) {
+      final angle = i * (pi / 4) + pi / 8;
+      canvas.drawLine(
+        Offset(center.dx + 8 * cos(angle), center.dy + 8 * sin(angle)),
+        Offset(center.dx + 25 * cos(angle), center.dy + 25 * sin(angle)),
+        starPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _ArrowPainter extends CustomPainter {

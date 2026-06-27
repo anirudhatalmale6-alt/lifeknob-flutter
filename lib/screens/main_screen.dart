@@ -77,14 +77,56 @@ class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMi
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _navItem(Icons.explore_rounded, 'DASHBOARD', 0),
-                    _navItem(Icons.receipt_long_rounded, 'LOGS', 1),
-                    _navItem(Icons.settings_rounded, 'SYSTEMS', 2),
+                    _logoNavItem(0),
+                    _navItem(Icons.person_rounded, 'PEOPLE', 1),
+                    _navItem(Icons.tune_rounded, 'SETUP', 2),
                   ],
                 ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _logoNavItem(int index) {
+    final isSelected = _currentIndex == index;
+    return GestureDetector(
+      onTap: () => _onTabChanged(index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.symmetric(horizontal: isSelected ? 16 : 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? LKTheme.gold.withValues(alpha: 0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: isSelected ? 30 : 26,
+              height: isSelected ? 30 : 26,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: isSelected ? LKTheme.goldGradient : null,
+                color: isSelected ? null : LKTheme.textMuted,
+              ),
+              child: Icon(Icons.favorite, size: isSelected ? 16 : 14, color: isSelected ? const Color(0xFF5A3D10) : LKTheme.bg),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'LIFE KNOB',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? LKTheme.gold : LKTheme.textMuted,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
         ),
       ),
     );
