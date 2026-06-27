@@ -46,6 +46,7 @@ class Connection {
 
   bool get isPending => status == 'pending';
   bool get isAccepted => status == 'accepted';
+  bool get isInactive => status == 'inactive';
 
   static int alertThresholdDays = 2;
 

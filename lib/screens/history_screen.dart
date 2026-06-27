@@ -22,6 +22,8 @@ class HistoryScreenState extends State<HistoryScreen> {
   final _codeCtrl = TextEditingController();
   bool _isAdding = false;
 
+  int get _activeCount => _connections.where((c) => !c.isInactive).length;
+
   @override
   void initState() {
     super.initState();
@@ -193,8 +195,8 @@ class HistoryScreenState extends State<HistoryScreen> {
                   // Connection rows
                   ..._connections.map(_buildConnectionRow),
 
-                  // Limit message
-                  if (_connections.length >= _maxConnections && _connections.isNotEmpty)
+                  // Limit message (inactive connections don't count)
+                  if (_activeCount >= _maxConnections && _connections.isNotEmpty)
                     Padding(padding: const EdgeInsets.only(top: 8, bottom: 4),
                       child: GestureDetector(
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SubscriptionScreen(onGoHome: () { Navigator.pop(context); widget.onGoHome?.call(); }))),
@@ -202,7 +204,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                           style: TextStyle(fontSize: 14, color: LKTheme.red, fontWeight: FontWeight.w500)))),
 
                   // Add new connection row
-                  if (_connections.length < _maxConnections) ...[
+                  if (_activeCount < _maxConnections) ...[
                     const SizedBox(height: 8),
                     _buildAddRow(),
                   ],
@@ -219,22 +221,27 @@ class HistoryScreenState extends State<HistoryScreen> {
   Widget _buildConnectionRow(Connection conn) {
     final isOverdue = conn.isAccepted && conn.isOverdue;
     final isPending = conn.isPending;
+    final isInactive = conn.isInactive;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: LKTheme.bgCard,
+        color: isInactive ? LKTheme.bgCard.withValues(alpha: 0.5) : LKTheme.bgCard,
         borderRadius: BorderRadius.circular(12),
         border: isOverdue ? Border.all(color: LKTheme.red, width: 2) : null,
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Expanded(child: Text(conn.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: isOverdue ? LKTheme.red : LKTheme.textPrimary))),
-          Text(conn.userCode, style: TextStyle(fontSize: 14, letterSpacing: 1.5, fontWeight: FontWeight.w700, color: isOverdue ? LKTheme.red : LKTheme.gold)),
+          Expanded(child: Text(conn.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700,
+              color: isInactive ? LKTheme.textMuted : isOverdue ? LKTheme.red : LKTheme.textPrimary))),
+          Text(conn.userCode, style: TextStyle(fontSize: 14, letterSpacing: 1.5, fontWeight: FontWeight.w700,
+              color: isInactive ? LKTheme.textMuted : isOverdue ? LKTheme.red : LKTheme.gold)),
         ]),
         const SizedBox(height: 6),
-        if (isPending)
+        if (isInactive)
+          const Text('Disconnected', style: TextStyle(fontSize: 14, color: LKTheme.textMuted, fontStyle: FontStyle.italic))
+        else if (isPending)
           const Text('Waiting for the other side to add your code...', style: TextStyle(fontSize: 14, color: LKTheme.textMuted, fontStyle: FontStyle.italic))
         else ...[
           Text('Connected', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isOverdue ? LKTheme.red : LKTheme.green)),
@@ -246,9 +253,11 @@ class HistoryScreenState extends State<HistoryScreen> {
         ],
         const SizedBox(height: 8),
         Row(children: [
-          GestureDetector(onTap: () => _editConnection(conn),
-            child: const Text('edit', style: TextStyle(fontSize: 13, color: LKTheme.gold, decoration: TextDecoration.underline))),
-          const SizedBox(width: 20),
+          if (!isInactive) ...[
+            GestureDetector(onTap: () => _editConnection(conn),
+              child: const Text('edit', style: TextStyle(fontSize: 13, color: LKTheme.gold, decoration: TextDecoration.underline))),
+            const SizedBox(width: 20),
+          ],
           GestureDetector(onTap: () => _deleteConnection(conn),
             child: const Text('remove', style: TextStyle(fontSize: 13, color: LKTheme.textMuted, decoration: TextDecoration.underline))),
         ]),
