@@ -339,7 +339,7 @@ class HistoryScreenState extends State<HistoryScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        gradient: isInactive ? null : LKTheme.cardGradient,
+        gradient: isInactive ? null : const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF111827), Color(0xFF0C1120)]),
         color: isInactive ? LKTheme.bgCard.withValues(alpha: 0.4) : null,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(

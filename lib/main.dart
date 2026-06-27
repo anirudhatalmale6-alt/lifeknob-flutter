@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'config/theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -41,18 +42,18 @@ class LifeKnobApp extends StatelessWidget {
           secondary: LKTheme.teal,
           surface: LKTheme.bgCard,
         ),
-        textTheme: const TextTheme(
+        textTheme: GoogleFonts.cinzelTextTheme(const TextTheme(
           headlineLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: LKTheme.textPrimary),
           headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.textPrimary),
           bodyLarge: TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           bodyMedium: TextStyle(fontSize: 16, color: LKTheme.textPrimary),
-        ),
+        )),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: LKTheme.gold,
-            foregroundColor: Colors.black,
-            textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            foregroundColor: const Color(0xFF5A3D10),
+            textStyle: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             minimumSize: const Size(double.infinity, 52),
           ),
         ),
@@ -60,11 +61,11 @@ class LifeKnobApp extends StatelessWidget {
           filled: true,
           fillColor: LKTheme.bgCardLight,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: LKTheme.border)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: LKTheme.border)),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: LKTheme.gold, width: 2)),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: LKTheme.gold.withValues(alpha: 0.15))),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: LKTheme.gold, width: 1.5)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          labelStyle: const TextStyle(fontSize: 16, color: LKTheme.textSecondary),
-          hintStyle: const TextStyle(fontSize: 16, color: LKTheme.textMuted),
+          labelStyle: GoogleFonts.cormorantGaramond(fontSize: 16, color: LKTheme.textSecondary),
+          hintStyle: GoogleFonts.cormorantGaramond(fontSize: 16, color: LKTheme.textMuted),
         ),
         useMaterial3: true,
       ),
