@@ -18,20 +18,19 @@ class OkButton extends StatefulWidget {
 }
 
 class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
-  static const double _totalSize = 260.0;
-  static const double _rimSize = 220.0;
-  static const double _faceSize = 192.0;
-  static const double _triggerAngle = 3 * pi / 2; // 270 degrees
+  static const double _triggerAngle = 3 * pi / 2;
 
   double _rotation = 0.0;
   double _prevAngle = 0.0;
   bool _isDragging = false;
   bool _showSuccess = false;
   int _lastHapticTick = 0;
+  bool _hintPlayed = false;
 
   late AnimationController _glowCtrl;
   late Animation<double> _glowAnim;
   late AnimationController _springCtrl;
+  late AnimationController _hintCtrl;
   double _springStart = 0;
 
   @override
@@ -57,41 +56,67 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
         });
       }
     });
+
+    _hintCtrl = AnimationController(
+      duration: const Duration(milliseconds: 1800),
+      vsync: this,
+    );
+    _hintCtrl.addListener(() {
+      if (!_isDragging && !_showSuccess && !_hintPlayed) {
+        final t = _hintCtrl.value;
+        final angle = sin(t * pi) * (pi / 3);
+        setState(() => _rotation = angle);
+      }
+    });
+    _hintCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _hintPlayed = true;
+        setState(() => _rotation = 0);
+      }
+    });
+
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (mounted && !_isDragging && !_showSuccess) {
+        _hintCtrl.forward();
+      }
+    });
   }
 
   @override
   void dispose() {
     _glowCtrl.dispose();
     _springCtrl.dispose();
+    _hintCtrl.dispose();
     super.dispose();
   }
 
-  double _getAngle(Offset localPos) {
-    final center = Offset(_totalSize / 2, _totalSize / 2);
+  double _getAngle(Offset localPos, double totalSize) {
+    final center = Offset(totalSize / 2, totalSize / 2);
     return atan2(localPos.dy - center.dy, localPos.dx - center.dx);
   }
 
-  void _onPanStart(DragStartDetails d) {
+  void _onPanStart(DragStartDetails d, double totalSize) {
     if (widget.isLoading || _showSuccess) return;
     _springCtrl.stop();
+    _hintCtrl.stop();
+    _hintPlayed = true;
     _lastHapticTick = 0;
     setState(() {
       _isDragging = true;
-      _prevAngle = _getAngle(d.localPosition);
+      _prevAngle = _getAngle(d.localPosition, totalSize);
     });
   }
 
-  void _onPanUpdate(DragUpdateDetails d) {
+  void _onPanUpdate(DragUpdateDetails d, double totalSize) {
     if (!_isDragging || widget.isLoading || _showSuccess) return;
 
-    final newAngle = _getAngle(d.localPosition);
+    final newAngle = _getAngle(d.localPosition, totalSize);
     var delta = newAngle - _prevAngle;
     while (delta > pi) delta -= 2 * pi;
     while (delta < -pi) delta += 2 * pi;
 
     final newRotation = (_rotation + delta).clamp(0.0, _triggerAngle + 0.15);
 
-    // Haptic ticks at quarter marks
     final tick = (newRotation / _triggerAngle * 4).floor();
     if (tick > _lastHapticTick && tick <= 3) {
       HapticFeedback.selectionClick();
@@ -141,6 +166,10 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final progress = (_rotation / _triggerAngle).clamp(0.0, 1.0);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final totalSize = (screenWidth * 0.78).clamp(260.0, 340.0);
+    final rimSize = totalSize * 0.85;
+    final faceSize = totalSize * 0.74;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -149,80 +178,92 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
           animation: _glowAnim,
           builder: (context, _) {
             return GestureDetector(
-              onPanStart: _onPanStart,
-              onPanUpdate: _onPanUpdate,
+              onPanStart: (d) => _onPanStart(d, totalSize),
+              onPanUpdate: (d) => _onPanUpdate(d, totalSize),
               onPanEnd: _onPanEnd,
               child: SizedBox(
-                width: _totalSize,
-                height: _totalSize,
+                width: totalSize,
+                height: totalSize,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Progress track + arc
                     CustomPaint(
-                      size: const Size(_totalSize, _totalSize),
+                      size: Size(totalSize, totalSize),
                       painter: _TrackPainter(
                         progress: progress,
                         glowAlpha: _glowAnim.value,
                         isSuccess: _showSuccess,
                       ),
                     ),
-                    // Silver rim
+                    // Silver/platinum rim
                     Container(
-                      width: _rimSize,
-                      height: _rimSize,
+                      width: rimSize,
+                      height: rimSize,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0xFFD0D0D0), Color(0xFF8A8A8A), Color(0xFFB0B0B0), Color(0xFF707070)],
+                          colors: [Color(0xFFE0E0E0), Color(0xFF9E9E9E), Color(0xFFC8C8C8), Color(0xFF808080), Color(0xFFB0B0B0)],
+                          stops: [0.0, 0.25, 0.5, 0.75, 1.0],
                         ),
                         boxShadow: [
-                          BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 16, offset: const Offset(0, 6)),
+                          BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 20, offset: const Offset(0, 8)),
+                          BoxShadow(color: Colors.white.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(-2, -2)),
                         ],
                       ),
                     ),
-                    // Gold face (rotates with user)
+                    // Gold face (rotates)
                     Transform.rotate(
                       angle: _rotation,
-                      child: _buildFace(),
+                      child: _buildFace(faceSize),
                     ),
-                    // Shine highlight (stays still)
+                    // Shine highlight
                     Positioned(
-                      top: 36,
-                      left: 60,
+                      top: totalSize * 0.12,
+                      left: totalSize * 0.18,
                       child: Container(
-                        width: 64,
-                        height: 22,
+                        width: totalSize * 0.22,
+                        height: totalSize * 0.07,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
                           gradient: LinearGradient(
-                            colors: [Colors.white.withValues(alpha: 0.18), Colors.white.withValues(alpha: 0.0)],
+                            colors: [Colors.white.withValues(alpha: 0.22), Colors.white.withValues(alpha: 0.0)],
                           ),
                         ),
                       ),
                     ),
                     // Center text (stays upright)
-                    _buildCenterContent(),
+                    _buildCenterContent(faceSize),
                   ],
                 ),
               ),
             );
           },
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
+        // Hint arrow animation
         AnimatedOpacity(
           opacity: _isDragging || _showSuccess ? 0.0 : 1.0,
           duration: const Duration(milliseconds: 200),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.rotate_right_rounded, size: 16, color: LKTheme.textMuted.withValues(alpha: 0.6)),
-              const SizedBox(width: 4),
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 1500),
+                builder: (context, value, child) {
+                  return Transform.rotate(
+                    angle: sin(value * 2 * pi) * 0.3,
+                    child: child,
+                  );
+                },
+                child: Icon(Icons.rotate_right_rounded, size: 20, color: LKTheme.gold.withValues(alpha: 0.5)),
+              ),
+              const SizedBox(width: 6),
               Text(
                 'Turn the knob',
-                style: TextStyle(fontSize: 13, color: LKTheme.textMuted.withValues(alpha: 0.6), fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.5), fontWeight: FontWeight.w500),
               ),
             ],
           ),
@@ -231,53 +272,52 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildFace() {
+  Widget _buildFace(double faceSize) {
     return Container(
-      width: _faceSize,
-      height: _faceSize,
+      width: faceSize,
+      height: faceSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFEDD87C), Color(0xFFD4A843), Color(0xFFB08930), Color(0xFFD4A843)],
-          stops: [0.0, 0.35, 0.65, 1.0],
+        gradient: const RadialGradient(
+          center: Alignment(-0.3, -0.3),
+          radius: 0.8,
+          colors: [Color(0xFFF0E080), Color(0xFFDDB94E), Color(0xFFBE9530), Color(0xFFD4A843), Color(0xFFE8C96A)],
+          stops: [0.0, 0.3, 0.55, 0.8, 1.0],
         ),
         boxShadow: [
-          BoxShadow(color: const Color(0xFFB08930).withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2)),
-          const BoxShadow(color: Color(0x33000000), blurRadius: 4, offset: Offset(2, 2)),
+          BoxShadow(color: const Color(0xFFB08930).withValues(alpha: 0.5), blurRadius: 12, offset: const Offset(0, 4)),
+          const BoxShadow(color: Color(0x44000000), blurRadius: 6, offset: Offset(3, 3)),
+          BoxShadow(color: const Color(0xFFEDD87C).withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(-1, -1)),
         ],
       ),
       child: Stack(
         children: [
-          // Grip notches around edge
-          ...List.generate(16, (i) {
-            final a = i * (2 * pi / 16) - pi / 2;
-            final r = _faceSize / 2 - 12;
+          // Grip notches
+          ...List.generate(20, (i) {
+            final a = i * (2 * pi / 20) - pi / 2;
+            final r = faceSize / 2 - 14;
             return Positioned(
-              left: _faceSize / 2 + r * cos(a) - 2.5,
-              top: _faceSize / 2 + r * sin(a) - 2.5,
+              left: faceSize / 2 + r * cos(a) - 3,
+              top: faceSize / 2 + r * sin(a) - 3,
               child: Container(
-                width: 5, height: 5,
+                width: 6, height: 6,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF8B6914).withValues(alpha: 0.35),
+                  gradient: RadialGradient(
+                    colors: [const Color(0xFF8B6914).withValues(alpha: 0.5), const Color(0xFF8B6914).withValues(alpha: 0.15)],
+                  ),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 1, offset: const Offset(0.5, 0.5))],
                 ),
               ),
             );
           }),
-          // Indicator dot at top
+          // Indicator arrow at top
           Positioned(
-            left: _faceSize / 2 - 9,
-            top: 3,
-            child: Container(
-              width: 18, height: 18,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _showSuccess ? LKTheme.teal : const Color(0xFF5A3D10),
-                border: Border.all(color: const Color(0xFFEDD87C).withValues(alpha: 0.7), width: 2),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.35), blurRadius: 3, offset: const Offset(0, 1))],
-              ),
+            left: faceSize / 2 - 10,
+            top: 4,
+            child: CustomPaint(
+              size: const Size(20, 20),
+              painter: _ArrowPainter(color: _showSuccess ? LKTheme.teal : const Color(0xFF5A3D10)),
             ),
           ),
         ],
@@ -285,13 +325,16 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildCenterContent() {
+  Widget _buildCenterContent(double faceSize) {
     if (widget.isLoading) {
-      return const SizedBox(
-        width: 50, height: 50,
-        child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 4),
+      return SizedBox(
+        width: faceSize * 0.3, height: faceSize * 0.3,
+        child: const CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 4),
       );
     }
+
+    final fontSize1 = faceSize * 0.14;
+    final fontSize2 = faceSize * 0.24;
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
@@ -300,25 +343,49 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
               key: const ValueKey('success'),
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text('SENT!', style: TextStyle(color: Color(0xFF6B4D1E), fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: 2,
-                    shadows: [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
-                Icon(Icons.check_rounded, color: Color(0xFF5A3D10), size: 40),
+              children: [
+                Text('SENT!', style: TextStyle(color: const Color(0xFF6B4D1E), fontSize: fontSize1 * 1.1, fontWeight: FontWeight.w800, letterSpacing: 2,
+                    shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
+                Icon(Icons.check_rounded, color: const Color(0xFF5A3D10), size: faceSize * 0.22),
               ],
             )
           : Column(
               key: const ValueKey('idle'),
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text('I AM', style: TextStyle(color: Color(0xFF6B4D1E), fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 2,
-                    shadows: [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
-                Text('OKAY!', style: TextStyle(color: Color(0xFF5A3D10), fontSize: 42, fontWeight: FontWeight.w900, letterSpacing: 3, height: 1.0,
-                    shadows: [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
+              children: [
+                Text('I AM', style: TextStyle(color: const Color(0xFF6B4D1E), fontSize: fontSize1, fontWeight: FontWeight.w800, letterSpacing: 3,
+                    shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
+                Text('OKAY!', style: TextStyle(color: const Color(0xFF5A3D10), fontSize: fontSize2, fontWeight: FontWeight.w900, letterSpacing: 4, height: 1.0,
+                    shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
               ],
             ),
     );
   }
+}
+
+class _ArrowPainter extends CustomPainter {
+  final Color color;
+  _ArrowPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final path = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width * 0.8, size.height * 0.7)
+      ..lineTo(size.width / 2, size.height * 0.5)
+      ..lineTo(size.width * 0.2, size.height * 0.7)
+      ..close();
+    canvas.drawPath(path, paint);
+
+    canvas.drawCircle(Offset(size.width / 2, size.height * 0.6), 3, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ArrowPainter old) => old.color != color;
 }
 
 class _TrackPainter extends CustomPainter {
@@ -333,24 +400,22 @@ class _TrackPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final trackR = size.width / 2 - 6;
 
-    // Background track ring
     canvas.drawCircle(
       center, trackR,
       Paint()
-        ..color = const Color(0xFF1C2237)
+        ..color = const Color(0xFF1A2235)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 8,
+        ..strokeWidth = 10,
     );
 
-    // Tick marks on track
     final tickPaint = Paint()
-      ..color = const Color(0xFF2A3040)
+      ..color = const Color(0xFF2A3548)
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round;
-    for (int i = 0; i < 24; i++) {
-      final a = i * (2 * pi / 24) - pi / 2;
-      final inner = trackR - 5;
-      final outer = trackR + 5;
+    for (int i = 0; i < 36; i++) {
+      final a = i * (2 * pi / 36) - pi / 2;
+      final inner = trackR - 6;
+      final outer = trackR + 6;
       canvas.drawLine(
         Offset(center.dx + inner * cos(a), center.dy + inner * sin(a)),
         Offset(center.dx + outer * cos(a), center.dy + outer * sin(a)),
@@ -358,7 +423,6 @@ class _TrackPainter extends CustomPainter {
       );
     }
 
-    // Progress arc
     if (progress > 0.005) {
       final arcColor = isSuccess
           ? const Color(0xFF4ECDC4)
@@ -367,47 +431,41 @@ class _TrackPainter extends CustomPainter {
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: trackR),
         -pi / 2,
-        progress * (3 * pi / 2), // 270 degrees at full
+        progress * (3 * pi / 2),
         false,
         Paint()
           ..color = arcColor
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 8
+          ..strokeWidth = 10
           ..strokeCap = StrokeCap.round,
       );
 
-      // Glow dot at arc end
       final endAngle = -pi / 2 + progress * (3 * pi / 2);
       final dotX = center.dx + trackR * cos(endAngle);
       final dotY = center.dy + trackR * sin(endAngle);
+      canvas.drawCircle(Offset(dotX, dotY), 7, Paint()..color = arcColor);
       canvas.drawCircle(
-        Offset(dotX, dotY), 6,
-        Paint()..color = arcColor,
-      );
-      canvas.drawCircle(
-        Offset(dotX, dotY), 10,
+        Offset(dotX, dotY), 14,
         Paint()
           ..color = arcColor.withValues(alpha: 0.3)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
       );
     }
 
-    // Ambient glow
     if (progress > 0.5 || isSuccess) {
       canvas.drawCircle(
         center, trackR,
         Paint()
           ..color = (isSuccess ? const Color(0xFF4ECDC4) : const Color(0xFFD4A843))
-              .withValues(alpha: isSuccess ? 0.2 : glowAlpha * progress * 0.35)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30),
+              .withValues(alpha: isSuccess ? 0.25 : glowAlpha * progress * 0.4)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 35),
       );
     } else if (progress < 0.01) {
-      // Subtle idle glow
       canvas.drawCircle(
-        center, trackR - 12,
+        center, trackR - 15,
         Paint()
-          ..color = const Color(0xFFD4A843).withValues(alpha: glowAlpha * 0.25)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 35),
+          ..color = const Color(0xFFD4A843).withValues(alpha: glowAlpha * 0.2)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40),
       );
     }
   }
