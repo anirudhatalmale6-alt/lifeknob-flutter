@@ -167,7 +167,7 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final progress = (_rotation / _triggerAngle).clamp(0.0, 1.0);
     final screenWidth = MediaQuery.of(context).size.width;
-    final totalSize = (screenWidth * 0.78).clamp(260.0, 340.0);
+    final totalSize = (screenWidth * 0.88).clamp(280.0, 380.0);
     final rimSize = totalSize * 0.85;
     final faceSize = totalSize * 0.74;
 
