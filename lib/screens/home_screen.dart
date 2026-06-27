@@ -2,12 +2,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
-import '../widgets/ok_button.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,40 +17,65 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isCheckingIn = false;
   String? _lastCheckIn;
-  String? _lastCheckInTime;
   String? _userCode;
   String? _userName;
   String? _sosNumber;
   String? _sosName;
   String? _ambulanceNumber;
-  String? _avatarUrl;
-  late AnimationController _pulseCtrl;
-  late AnimationController _heartbeatCtrl;
+
+  // Knob rotation
+  static const double _triggerAngle = 3 * pi / 2;
+  double _rotation = 0.0;
+  double _prevAngle = 0.0;
+  bool _isDragging = false;
+  bool _showSuccess = false;
+  int _lastHapticTick = 0;
+
+  late AnimationController _springCtrl;
+  late AnimationController _hintCtrl;
+  double _springStart = 0;
+  bool _hintPlayed = false;
 
   @override
   void initState() {
     super.initState();
-    _pulseCtrl = AnimationController(duration: const Duration(milliseconds: 2200), vsync: this)..repeat(reverse: true);
-    _heartbeatCtrl = AnimationController(duration: const Duration(milliseconds: 1500), vsync: this)..repeat();
+    _springCtrl = AnimationController(duration: const Duration(milliseconds: 600), vsync: this);
+    _springCtrl.addListener(() {
+      if (!_isDragging && !_showSuccess) {
+        setState(() => _rotation = _springStart * (1.0 - Curves.easeOut.transform(_springCtrl.value)));
+      }
+    });
+    _hintCtrl = AnimationController(duration: const Duration(milliseconds: 1800), vsync: this);
+    _hintCtrl.addListener(() {
+      if (!_isDragging && !_showSuccess && !_hintPlayed) {
+        setState(() => _rotation = sin(_hintCtrl.value * pi) * (pi / 3));
+      }
+    });
+    _hintCtrl.addStatusListener((s) {
+      if (s == AnimationStatus.completed) { _hintPlayed = true; setState(() => _rotation = 0); }
+    });
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted && !_isDragging) _hintCtrl.forward();
+    });
     _loadUserData();
     _loadLastCheckIn();
   }
 
   @override
-  void dispose() { _pulseCtrl.dispose(); _heartbeatCtrl.dispose(); super.dispose(); }
+  void dispose() { _springCtrl.dispose(); _hintCtrl.dispose(); super.dispose(); }
 
   void _setUserData(dynamic user) {
     if (user == null || !mounted) return;
     setState(() {
       _userCode = user.userCode; _userName = user.name; _sosNumber = user.sosNumber;
-      _sosName = user.sosName; _ambulanceNumber = user.ambulanceNumber; _avatarUrl = user.avatar;
+      _sosName = user.sosName; _ambulanceNumber = user.ambulanceNumber;
     });
   }
 
   Future<void> _loadUserData() async {
     final cached = AuthService().currentUser ?? await AuthService().getSavedUser();
     _setUserData(cached);
-    try { final fresh = await AuthService().refreshProfile(); _setUserData(fresh); } catch (_) {}
+    try { _setUserData(await AuthService().refreshProfile()); } catch (_) {}
   }
 
   Future<void> _loadLastCheckIn() async {
@@ -60,34 +83,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final response = await ApiService().getHistory(page: 1);
       final List data = response['data'] ?? [];
       if (data.isNotEmpty && mounted) {
-        final createdAt = data.first['created_at'];
-        if (createdAt != null) {
-          final dt = DateTime.parse(createdAt);
-          final diff = DateTime.now().difference(dt);
-          final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
-          final amPm = dt.hour >= 12 ? 'PM' : 'AM';
-          setState(() {
-            _lastCheckInTime = '$hour:${dt.minute.toString().padLeft(2, '0')} $amPm';
-            if (diff.inMinutes < 1) _lastCheckIn = 'Just now';
-            else if (diff.inMinutes < 60) _lastCheckIn = '${diff.inMinutes}m ago';
-            else if (diff.inHours < 24) _lastCheckIn = '${diff.inHours}h ago';
-            else _lastCheckIn = '${diff.inDays}d ago';
-          });
-        }
+        final dt = DateTime.parse(data.first['created_at']);
+        final diff = DateTime.now().difference(dt);
+        setState(() {
+          if (diff.inMinutes < 1) _lastCheckIn = 'Just now';
+          else if (diff.inMinutes < 60) _lastCheckIn = '${diff.inMinutes}m ago';
+          else if (diff.inHours < 24) _lastCheckIn = '${diff.inHours}h ago';
+          else _lastCheckIn = '${diff.inDays}d ago';
+        });
       }
     } catch (_) {}
   }
 
-  Future<void> _pickAvatar() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery, maxWidth: 512, maxHeight: 512, imageQuality: 80);
-    if (image == null) return;
+  // Knob gesture handling
+  double _getAngle(Offset pos, Offset center) => atan2(pos.dy - center.dy, pos.dx - center.dx);
+
+  void _onKnobPanStart(DragStartDetails d, Offset center) {
+    if (_isCheckingIn || _showSuccess) return;
+    _springCtrl.stop(); _hintCtrl.stop(); _hintPlayed = true; _lastHapticTick = 0;
+    setState(() { _isDragging = true; _prevAngle = _getAngle(d.localPosition, center); });
+  }
+
+  void _onKnobPanUpdate(DragUpdateDetails d, Offset center) {
+    if (!_isDragging || _isCheckingIn || _showSuccess) return;
+    final newAngle = _getAngle(d.localPosition, center);
+    var delta = newAngle - _prevAngle;
+    while (delta > pi) delta -= 2 * pi;
+    while (delta < -pi) delta += 2 * pi;
+    final newRot = (_rotation + delta).clamp(0.0, _triggerAngle + 0.15);
+    final tick = (newRot / _triggerAngle * 4).floor();
+    if (tick > _lastHapticTick && tick <= 3) { HapticFeedback.selectionClick(); _lastHapticTick = tick; }
+    setState(() { _rotation = newRot; _prevAngle = newAngle; });
+    if (_rotation >= _triggerAngle) _triggerCheckIn();
+  }
+
+  void _onKnobPanEnd(DragEndDetails d) {
+    if (!_isDragging) return;
+    _isDragging = false;
+    if (!_showSuccess) { _springStart = _rotation; _springCtrl.forward(from: 0); }
+  }
+
+  void _triggerCheckIn() {
+    if (_showSuccess) return;
+    HapticFeedback.heavyImpact();
+    setState(() { _isDragging = false; _showSuccess = true; _rotation = _triggerAngle; });
+    _doCheckIn();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() { _showSuccess = false; _rotation = 0; _lastHapticTick = 0; });
+    });
+  }
+
+  Future<void> _doCheckIn() async {
+    setState(() => _isCheckingIn = true);
     try {
-      final bytes = await image.readAsBytes();
-      final result = await ApiService().uploadAvatar(bytes, image.name);
-      final newUrl = result['avatar_url'] as String?;
-      if (newUrl != null && mounted) { await AuthService().refreshProfile(); setState(() => _avatarUrl = newUrl); }
+      await ApiService().checkIn(type: 'ok');
+      if (mounted) setState(() => _lastCheckIn = 'Just now');
     } catch (_) {}
+    finally { if (mounted) setState(() => _isCheckingIn = false); }
   }
 
   void _showCodePopup() {
@@ -98,62 +150,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         padding: const EdgeInsets.all(32),
         decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.3)),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.1)),
-            child: const Icon(Icons.link_rounded, size: 32, color: LKTheme.gold)),
+          Text('YOUR CODE', style: GoogleFonts.cinzel(fontSize: 14, color: LKTheme.textSecondary, fontWeight: FontWeight.w600, letterSpacing: 3)),
           const SizedBox(height: 16),
-          const Text('YOUR CONNECTION CODE', style: TextStyle(fontSize: 14, color: LKTheme.textSecondary, fontWeight: FontWeight.w600, letterSpacing: 1.5)),
-          const SizedBox(height: 12),
-          Text(_userCode!, style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 6)),
+          Text(_userCode!, style: GoogleFonts.cinzel(fontSize: 48, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 6)),
           const SizedBox(height: 16),
-          const Text('Share this code with your family\nso they can connect to you.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.5)),
-          const SizedBox(height: 28),
+          Text('Share this code with your family', style: GoogleFonts.cormorantGaramond(fontSize: 16, color: LKTheme.textSecondary, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
+          const SizedBox(height: 24),
           Row(children: [
-            Expanded(child: OutlinedButton.icon(
-              onPressed: () { Clipboard.setData(ClipboardData(text: _userCode!)); Navigator.pop(ctx); if (mounted) _showBigMessage('Code copied!', '', LKTheme.gold); },
-              icon: const Icon(Icons.copy_rounded, size: 22), label: const Text('Copy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-              style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
+            Expanded(child: OutlinedButton(
+              onPressed: () { Clipboard.setData(ClipboardData(text: _userCode!)); Navigator.pop(ctx); },
+              style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.4)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+              child: Text('COPY', style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700)),
             )),
             const SizedBox(width: 12),
             Expanded(child: Container(
-              decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(12)),
               child: ElevatedButton(onPressed: () => Navigator.pop(ctx),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: const Text('OK', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                child: Text('OK', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w800, color: const Color(0xFF5A3D10)))),
             )),
           ]),
-        ]),
-      ),
-    ));
-  }
-
-  Future<void> _doCheckIn() async {
-    setState(() => _isCheckingIn = true);
-    try {
-      await ApiService().checkIn(type: 'ok');
-      if (mounted) { setState(() { _lastCheckIn = 'Just now'; _lastCheckInTime = 'Now'; }); _showBigMessage('Check-in sent!', 'Your connections have been notified.', LKTheme.teal); }
-    } catch (e) { if (mounted) _showBigMessage('Could not check in', '$e', LKTheme.red); }
-    finally { if (mounted) setState(() => _isCheckingIn = false); }
-  }
-
-  void _showBigMessage(String title, String message, Color color) {
-    showDialog(context: context, builder: (ctx) => Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(32),
-        decoration: LKTheme.glassCard(borderColor: color.withValues(alpha: 0.3)),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(shape: BoxShape.circle, color: color.withValues(alpha: 0.1)),
-            child: Icon(color == LKTheme.red ? Icons.error_rounded : Icons.check_circle_rounded, size: 64, color: color)),
-          const SizedBox(height: 20),
-          Text(title, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: color), textAlign: TextAlign.center),
-          if (message.isNotEmpty) ...[const SizedBox(height: 8), Text(message, style: const TextStyle(fontSize: 18, color: LKTheme.textSecondary), textAlign: TextAlign.center)],
-          const SizedBox(height: 28),
-          SizedBox(width: double.infinity, height: 56, child: Container(
-            decoration: BoxDecoration(gradient: color == LKTheme.red ? LKTheme.redGradient : LinearGradient(colors: [color, color.withValues(alpha: 0.8)]), borderRadius: BorderRadius.circular(16)),
-            child: ElevatedButton(onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-              child: const Text('OK', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
-          )),
         ]),
       ),
     ));
@@ -161,388 +177,203 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future<void> _callContact() async {
     final number = _sosNumber;
-    if (number == null || number.isEmpty) { if (!mounted) return; _showBigMessage('No contact set', 'Go to Systems to add your emergency contact.', LKTheme.gold); return; }
+    if (number == null || number.isEmpty) return;
     final uri = Uri(scheme: 'tel', path: number);
     if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
   Future<void> _callAmbulance() async {
     final number = _ambulanceNumber;
-    if (number == null || number.isEmpty) { if (!mounted) return; _showBigMessage('No ambulance number', 'Go to Systems to set your local ambulance number.', LKTheme.gold); return; }
-    final confirmed = await showDialog<bool>(context: context, builder: (ctx) => Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(32),
-        decoration: LKTheme.glassCard(borderColor: LKTheme.red.withValues(alpha: 0.3)),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.1)),
-            child: const Icon(Icons.local_hospital_rounded, size: 64, color: LKTheme.red)),
-          const SizedBox(height: 20),
-          const Text('Call Ambulance?', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: LKTheme.red)),
-          const SizedBox(height: 8),
-          Text('This will dial $number.\nOnly use in a real emergency.', textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, color: LKTheme.textSecondary, height: 1.4)),
-          const SizedBox(height: 28),
-          Row(children: [
-            Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx, false),
-              style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 16)),
-              child: const Text('Cancel', style: TextStyle(fontSize: 20)))),
-            const SizedBox(width: 12),
-            Expanded(child: Container(
-              decoration: BoxDecoration(gradient: LKTheme.redGradient, borderRadius: BorderRadius.circular(14)),
-              child: ElevatedButton(onPressed: () => Navigator.pop(ctx, true),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 16)),
-                child: const Text('Call Now', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
-            )),
-          ]),
-        ]),
-      ),
-    ));
-    if (confirmed != true) return;
+    if (number == null || number.isEmpty) return;
     final uri = Uri(scheme: 'tel', path: number);
     if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
   @override
   Widget build(BuildContext context) {
-    final String contactLabel = (_sosName != null && _sosName!.isNotEmpty) ? _sosName!.toUpperCase() : 'CONTACT';
+    final progress = (_rotation / _triggerAngle).clamp(0.0, 1.0);
+    final screenW = MediaQuery.of(context).size.width;
+    final screenH = MediaQuery.of(context).size.height;
+    final contactLabel = (_sosName != null && _sosName!.isNotEmpty) ? _sosName!.toUpperCase() : 'CONTACT';
     final displayName = (_userName != null && _userName!.isNotEmpty) ? _userName!.toUpperCase() : 'USER';
 
-    return Scaffold(
-      backgroundColor: LKTheme.bg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // HEADER - Zone 1 (setup) + Zone 2 (logo)
-            GestureDetector(
-              onTap: () {
-                final mainState = context.findAncestorStateOfType<State>();
-                if (mainState != null && mainState is dynamic) {
-                  try { (mainState as dynamic).goHome(); } catch (_) {}
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [const Color(0xFF121B2E), LKTheme.bg],
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    // Zone 1: Avatar with ornate frame
-                    GestureDetector(
-                      onTap: _pickAvatar,
-                      child: SizedBox(
-                        width: 68, height: 68,
-                        child: CustomPaint(
-                          painter: _OrnateFramePainter(),
-                          child: Center(
-                            child: Container(
-                              width: 50, height: 50,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: _avatarUrl != null ? DecorationImage(image: NetworkImage('https://lifeknob.com$_avatarUrl'), fit: BoxFit.cover) : null,
-                                color: LKTheme.bgCardLight,
-                                border: Border.all(color: LKTheme.gold.withValues(alpha: 0.6), width: 1.5),
-                              ),
-                              child: _avatarUrl == null ? Center(child: Text(
-                                _userName != null && _userName!.isNotEmpty ? _userName![0].toUpperCase() : '?',
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.gold))) : null,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(displayName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 1),
-                          maxLines: 1, overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 2),
-                        Text('Last verified:', style: TextStyle(fontSize: 14, color: LKTheme.textSecondary.withValues(alpha: 0.7))),
-                        Text(_lastCheckIn ?? 'Not yet', style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
-                      ]),
-                    ),
-                    // Zone 2: Logo with text
-                    GestureDetector(
-                      onTap: () {},
-                      child: Column(children: [
-                        Container(
-                          width: 74, height: 60,
-                          child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
-                        ),
-                        const Text('LIFE KNOB', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 2)),
-                      ]),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    // Knob center position (relative to screen)
+    final knobCenterY = screenH * 0.42;
+    final knobSize = screenW * 0.78;
 
-            // "TURN THE KNOB" + Zone 3 (QR) row
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 6, 16, 0),
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Text('TURN THE KNOB', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 1.5)),
-                  ),
-                  // Zone 3: QR code button
-                  if (_userCode != null)
-                    GestureDetector(
-                      onTap: _showCodePopup,
-                      child: Container(
-                        width: 50, height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LKTheme.goldGradient,
-                          boxShadow: [
-                            BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 10),
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 3)),
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Layer 1: Background image
+          Image.asset('assets/images/bg_main.jpg', fit: BoxFit.cover, width: screenW, height: screenH),
+
+          // Layer 2: Interactive overlays
+          SafeArea(
+            child: Column(
+              children: [
+                // Zone 1: Header - user info (tappable to setup)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(70, 12, 16, 0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(displayName, style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w800, color: const Color(0xFF6B5530), letterSpacing: 2), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            Text('Last verified:', style: GoogleFonts.cormorantGaramond(fontSize: 13, color: const Color(0xFF8A7A60), fontStyle: FontStyle.italic)),
+                            Text(_lastCheckIn ?? 'Not yet', style: GoogleFonts.cormorantGaramond(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF8A7A60))),
                           ],
                         ),
-                        child: ClipOval(
-                          child: Padding(
-                            padding: const EdgeInsets.all(7),
-                            child: QrImageView(
-                              data: _userCode!,
-                              version: QrVersions.auto,
-                              size: 36,
-                              eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF5A3D10)),
-                              dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Color(0xFF5A3D10)),
-                              backgroundColor: Colors.transparent,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Zone 3: "TURN THE KNOB" + QR
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 16, 0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text('TURN THE KNOB', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF8A7A50), letterSpacing: 3)),
+                      ),
+                      GestureDetector(
+                        onTap: _showCodePopup,
+                        child: const SizedBox(width: 50, height: 50),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Zone 4: Knob area (interactive turn)
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final center = Offset(constraints.maxWidth / 2, constraints.maxHeight * 0.42);
+                      return GestureDetector(
+                        onPanStart: (d) => _onKnobPanStart(d, center),
+                        onPanUpdate: (d) => _onKnobPanUpdate(d, center),
+                        onPanEnd: _onKnobPanEnd,
+                        child: Stack(
+                          children: [
+                            // Transparent gesture area
+                            Container(color: Colors.transparent),
+
+                            // Knob text overlay (centered on the knob area)
+                            Positioned(
+                              left: 0, right: 0,
+                              top: center.dy - 50,
+                              child: _showSuccess
+                                ? Column(
+                                    children: [
+                                      Text('SENT!', style: GoogleFonts.cinzel(fontSize: 36, fontWeight: FontWeight.w800, color: const Color(0xFF27AE60), letterSpacing: 4)),
+                                      const Icon(Icons.check_rounded, color: Color(0xFF27AE60), size: 40),
+                                    ],
+                                  )
+                                : ShaderMask(
+                                    shaderCallback: (bounds) {
+                                      final fillStop = 1.0 - progress;
+                                      return LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: const [Color(0xFF6B5530), Color(0xFF6B5530), Color(0xFF27AE60), Color(0xFF27AE60)],
+                                        stops: [0.0, fillStop, fillStop, 1.0],
+                                      ).createShader(bounds);
+                                    },
+                                    blendMode: BlendMode.srcIn,
+                                    child: Column(
+                                      children: [
+                                        Text('I AM', style: GoogleFonts.cinzel(fontSize: 34, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 6)),
+                                        Text('OKAY!', style: GoogleFonts.cinzel(fontSize: 62, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 5, height: 0.9)),
+                                      ],
+                                    ),
+                                  ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                // "OR CALL FOR HELP" text overlay
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text('OR CALL FOR HELP', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF8A7A50), letterSpacing: 2)),
+                    ],
+                  ),
+                ),
+
+                // Zone 5 & 6: Call buttons (tap zones with text)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+                  child: SizedBox(
+                    height: screenH * 0.1,
+                    child: Row(
+                      children: [
+                        // Direct Line
+                        Expanded(child: GestureDetector(
+                          onTap: _callContact,
+                          child: Container(
+                            color: Colors.transparent,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('DIRECT LINE:', style: GoogleFonts.cinzel(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFFD4C8B0), letterSpacing: 1)),
+                                Text(contactLabel, style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                Text('Non-Emergency Contact', style: GoogleFonts.cormorantGaramond(fontSize: 12, color: const Color(0xFFB0A890), fontStyle: FontStyle.italic)),
+                              ],
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            // Zone 4: THE KNOB
-            Expanded(
-              child: Center(
-                child: OkButton(onPressed: _doCheckIn, isLoading: _isCheckingIn),
-              ),
-            ),
-
-            // EKG divider + Zones 5 & 6
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 6),
-              child: Column(
-                children: [
-                  // Heartbeat "OR CALL FOR HELP"
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10, top: 2),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedBuilder(
-                          animation: _heartbeatCtrl,
-                          builder: (context, _) => CustomPaint(
-                            size: const Size(55, 28),
-                            painter: _HeartbeatPainter(progress: _heartbeatCtrl.value, color: LKTheme.gold),
+                        )),
+                        // Emergency
+                        Expanded(child: GestureDetector(
+                          onTap: _callAmbulance,
+                          child: Container(
+                            color: Colors.transparent,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('EMERGENCY:', style: GoogleFonts.cinzel(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFFD4B8B0), letterSpacing: 1)),
+                                Text('CALL AMBULANCE', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
+                                Text('Immediate Response Required', style: GoogleFonts.cormorantGaramond(fontSize: 12, color: const Color(0xFFC0A0A0), fontStyle: FontStyle.italic)),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text('OR CALL FOR HELP', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.gold.withValues(alpha: 0.8), letterSpacing: 2)),
+                        )),
                       ],
                     ),
                   ),
-                  Row(
-                    children: [
-                      // Zone 5: Direct Line
-                      Expanded(child: GestureDetector(
-                        onTap: _callContact,
-                        child: Container(
-                          height: 100,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF1E2A45), Color(0xFF141D30)]),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFF2A3A55)),
-                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
-                          ),
-                          child: Row(children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 14),
-                              child: Icon(Icons.phone_rounded, color: LKTheme.gold, size: 40,
-                                shadows: [Shadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 8)]),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('DIRECT LINE:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: LKTheme.textPrimary, letterSpacing: 0.5)),
-                                Text(contactLabel, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textPrimary), overflow: TextOverflow.ellipsis),
-                                const Text('Non-Emergency Contact', style: TextStyle(fontSize: 11, color: LKTheme.textMuted)),
-                              ],
-                            )),
-                          ]),
-                        ),
-                      )),
-                      const SizedBox(width: 8),
-                      // Zone 6: Emergency
-                      Expanded(child: GestureDetector(
-                        onTap: _callAmbulance,
-                        child: Container(
-                          height: 100,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF7A1A1A), Color(0xFF4A1010)]),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFF8B2020)),
-                            boxShadow: [BoxShadow(color: LKTheme.red.withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, 4))],
-                          ),
-                          child: Row(children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 12),
-                              child: CustomPaint(size: const Size(42, 48), painter: _ShieldPainter()),
-                            ),
-                            const SizedBox(width: 10),
-                            const Expanded(child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('EMERGENCY:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
-                                Text('CALL AMBULANCE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white)),
-                                Text('Immediate Response Required', style: TextStyle(fontSize: 10, color: Colors.white60)),
-                              ],
-                            )),
-                          ]),
-                        ),
-                      )),
-                    ],
+                ),
+
+                // Nav labels
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
+                  child: SizedBox(
+                    height: 50,
+                    child: Row(
+                      children: [
+                        Expanded(child: GestureDetector(
+                          child: Center(child: Text('LIFE KNOB', style: GoogleFonts.cinzel(fontSize: 10, fontWeight: FontWeight.w700, color: const Color(0xFFB09840), letterSpacing: 2))),
+                        )),
+                        Expanded(child: Center(child: Text('PEOPLE', style: GoogleFonts.cinzel(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFF8A7A60), letterSpacing: 2)))),
+                        Expanded(child: Center(child: Text('SETUP', style: GoogleFonts.cinzel(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFF8A7A60), letterSpacing: 2)))),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
-}
-
-class _OrnateFramePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final r = size.width / 2;
-
-    // Outer decorative ring
-    canvas.drawCircle(center, r - 2, Paint()
-      ..color = const Color(0xFFB08930)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2);
-
-    // Inner ring
-    canvas.drawCircle(center, r - 6, Paint()
-      ..color = const Color(0xFFD4A843).withValues(alpha: 0.5)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1);
-
-    // Corner flourishes (4 decorative dots at N/S/E/W)
-    final flourishPaint = Paint()..color = const Color(0xFFD4A843);
-    for (int i = 0; i < 8; i++) {
-      final angle = i * pi / 4;
-      final fx = center.dx + (r - 4) * cos(angle);
-      final fy = center.dy + (r - 4) * sin(angle);
-      canvas.drawCircle(Offset(fx, fy), 2.5, flourishPaint);
-    }
-
-    // Scrollwork arcs between dots
-    final arcPaint = Paint()
-      ..color = const Color(0xFFD4A843).withValues(alpha: 0.4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    for (int i = 0; i < 8; i++) {
-      final startAngle = i * pi / 4 + pi / 16;
-      canvas.drawArc(Rect.fromCircle(center: center, radius: r - 1), startAngle, pi / 4 - pi / 8, false, arcPaint);
-      canvas.drawArc(Rect.fromCircle(center: center, radius: r - 8), startAngle, pi / 4 - pi / 8, false, arcPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _ShieldPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    // Shield shape
-    final shieldPath = Path()
-      ..moveTo(w / 2, 0)
-      ..quadraticBezierTo(w, 0, w, h * 0.15)
-      ..lineTo(w, h * 0.5)
-      ..quadraticBezierTo(w, h * 0.8, w / 2, h)
-      ..quadraticBezierTo(0, h * 0.8, 0, h * 0.5)
-      ..lineTo(0, h * 0.15)
-      ..quadraticBezierTo(0, 0, w / 2, 0)
-      ..close();
-
-    // Gold gradient fill
-    final shieldPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft, end: Alignment.bottomRight,
-        colors: [Color(0xFFE8C96A), Color(0xFFD4A843), Color(0xFFB08930)],
-      ).createShader(Rect.fromLTWH(0, 0, w, h));
-    canvas.drawPath(shieldPath, shieldPaint);
-
-    // Border
-    canvas.drawPath(shieldPath, Paint()
-      ..color = const Color(0xFFEDD87C).withValues(alpha: 0.5)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5);
-
-    // Red cross
-    final crossPaint = Paint()..color = const Color(0xFFCC2222);
-    final cx = w / 2;
-    final cy = h * 0.48;
-    final cw = w * 0.2;
-    final ch = h * 0.22;
-    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(cx, cy), width: cw, height: ch), const Radius.circular(2)), crossPaint);
-    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(cx, cy), width: ch, height: cw), const Radius.circular(2)), crossPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _HeartbeatPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-  _HeartbeatPainter({required this.progress, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color.withValues(alpha: 0.6)..style = PaintingStyle.stroke..strokeWidth = 1.5..strokeCap = StrokeCap.round;
-    final path = Path();
-    final w = size.width; final h = size.height; final mid = h / 2;
-    path.moveTo(0, mid);
-    path.lineTo(w * 0.25, mid);
-    path.lineTo(w * 0.35, mid - h * 0.4);
-    path.lineTo(w * 0.45, mid + h * 0.3);
-    path.lineTo(w * 0.55, mid - h * 0.15);
-    path.lineTo(w * 0.65, mid);
-    path.lineTo(w, mid);
-    canvas.drawPath(path, paint);
-    final dotX = w * progress;
-    canvas.drawCircle(Offset(dotX, _getY(progress, w, h, mid)), 2.5, Paint()..color = color);
-  }
-
-  double _getY(double t, double w, double h, double mid) {
-    final x = t * w;
-    if (x < w * 0.25) return mid;
-    if (x < w * 0.35) return mid - h * 0.4 * ((x - w * 0.25) / (w * 0.1));
-    if (x < w * 0.45) return mid - h * 0.4 + (mid + h * 0.3 - (mid - h * 0.4)) * ((x - w * 0.35) / (w * 0.1));
-    if (x < w * 0.55) return mid + h * 0.3 - (mid + h * 0.3 - (mid - h * 0.15)) * ((x - w * 0.45) / (w * 0.1));
-    if (x < w * 0.65) return mid - h * 0.15 + (mid - (mid - h * 0.15)) * ((x - w * 0.55) / (w * 0.1));
-    return mid;
-  }
-
-  @override
-  bool shouldRepaint(covariant _HeartbeatPainter old) => old.progress != progress;
 }
