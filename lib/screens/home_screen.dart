@@ -256,44 +256,54 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ]),
                 ),
 
-                // THE KNOB - gold image that rotates
+                // THE KNOB - gold image that rotates with text centered on it
                 Expanded(
                   child: LayoutBuilder(builder: (context, constraints) {
                     final center = Offset(constraints.maxWidth / 2, constraints.maxHeight / 2);
+                    final knobDisplaySize = constraints.maxWidth * 0.88;
                     return GestureDetector(
                       onPanStart: (d) => _onKnobPanStart(d, center),
                       onPanUpdate: (d) => _onKnobPanUpdate(d, center),
                       onPanEnd: _onKnobPanEnd,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Gold knob image (rotates)
-                          Transform.rotate(
-                            angle: _rotation,
-                            child: Image.asset('assets/images/knob_gold.png', width: knobSize, height: knobSize, fit: BoxFit.contain),
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Center(
+                          child: SizedBox(
+                            width: knobDisplaySize,
+                            height: knobDisplaySize,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Gold knob image (rotates)
+                                Transform.rotate(
+                                  angle: _rotation,
+                                  child: Image.asset('assets/images/knob_gold.png', width: knobDisplaySize, height: knobDisplaySize, fit: BoxFit.contain),
+                                ),
+                                // Text overlay centered ON the knob
+                                _showSuccess
+                                  ? Column(mainAxisSize: MainAxisSize.min, children: [
+                                      Text('SENT!', style: GoogleFonts.cinzel(fontSize: 42, fontWeight: FontWeight.w800, color: const Color(0xFF27AE60), letterSpacing: 4)),
+                                      const Icon(Icons.check_rounded, color: Color(0xFF27AE60), size: 48),
+                                    ])
+                                  : ShaderMask(
+                                      shaderCallback: (bounds) {
+                                        final fillStop = 1.0 - progress;
+                                        return LinearGradient(
+                                          begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                                          colors: [darkGold, darkGold, const Color(0xFF27AE60), const Color(0xFF27AE60)],
+                                          stops: [0.0, fillStop, fillStop, 1.0],
+                                        ).createShader(bounds);
+                                      },
+                                      blendMode: BlendMode.srcIn,
+                                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                        Text('I AM', style: GoogleFonts.cinzel(fontSize: 36, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 8)),
+                                        Text('OKAY!', style: GoogleFonts.cinzel(fontSize: 64, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 6, height: 0.85)),
+                                      ]),
+                                    ),
+                              ],
+                            ),
                           ),
-                          // Text overlay (stays upright)
-                          _showSuccess
-                            ? Column(mainAxisSize: MainAxisSize.min, children: [
-                                Text('SENT!', style: GoogleFonts.cinzel(fontSize: 40, fontWeight: FontWeight.w800, color: const Color(0xFF27AE60), letterSpacing: 4)),
-                                const Icon(Icons.check_rounded, color: Color(0xFF27AE60), size: 44),
-                              ])
-                            : ShaderMask(
-                                shaderCallback: (bounds) {
-                                  final fillStop = 1.0 - progress;
-                                  return LinearGradient(
-                                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                                    colors: [darkGold, darkGold, const Color(0xFF27AE60), const Color(0xFF27AE60)],
-                                    stops: [0.0, fillStop, fillStop, 1.0],
-                                  ).createShader(bounds);
-                                },
-                                blendMode: BlendMode.srcIn,
-                                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                                  Text('I AM', style: GoogleFonts.cinzel(fontSize: 38, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 8)),
-                                  Text('OKAY!', style: GoogleFonts.cinzel(fontSize: 68, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 6, height: 0.85)),
-                                ]),
-                              ),
-                        ],
+                        ),
                       ),
                     );
                   }),
