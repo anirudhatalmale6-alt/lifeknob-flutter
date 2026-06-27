@@ -195,41 +195,57 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
                         isSuccess: _showSuccess,
                       ),
                     ),
-                    // Silver/platinum rim
-                    Container(
+                    // Silver rim (image)
+                    SizedBox(
                       width: rimSize,
                       height: rimSize,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFFE0E0E0), Color(0xFF9E9E9E), Color(0xFFC8C8C8), Color(0xFF808080), Color(0xFFB0B0B0)],
-                          stops: [0.0, 0.25, 0.5, 0.75, 1.0],
-                        ),
-                        boxShadow: [
-                          BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 20, offset: const Offset(0, 8)),
-                          BoxShadow(color: Colors.white.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(-2, -2)),
-                        ],
-                      ),
+                      child: Image.asset('assets/images/silver_rim.png', fit: BoxFit.contain),
                     ),
-                    // Gold face (rotates)
+                    // Gold bevel ring
+                    SizedBox(
+                      width: faceSize + 16,
+                      height: faceSize + 16,
+                      child: Image.asset('assets/images/gold_bevel.png', fit: BoxFit.contain),
+                    ),
+                    // Gold coin face (rotates with user)
                     Transform.rotate(
                       angle: _rotation,
-                      child: _buildFace(faceSize),
-                    ),
-                    // Shine highlight
-                    Positioned(
-                      top: totalSize * 0.12,
-                      left: totalSize * 0.18,
-                      child: Container(
-                        width: totalSize * 0.22,
-                        height: totalSize * 0.07,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          gradient: LinearGradient(
-                            colors: [Colors.white.withValues(alpha: 0.22), Colors.white.withValues(alpha: 0.0)],
-                          ),
+                      child: SizedBox(
+                        width: faceSize,
+                        height: faceSize,
+                        child: Stack(
+                          children: [
+                            // Coin face image
+                            ClipOval(
+                              child: Image.asset('assets/images/coin_face.png', width: faceSize, height: faceSize, fit: BoxFit.cover),
+                            ),
+                            // Grip dots
+                            ...List.generate(20, (i) {
+                              final a = i * (2 * pi / 20) - pi / 2;
+                              final r = faceSize / 2 - 12;
+                              return Positioned(
+                                left: faceSize / 2 + r * cos(a) - 3,
+                                top: faceSize / 2 + r * sin(a) - 3,
+                                child: Container(
+                                  width: 6, height: 6,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: const Color(0xFF8B6914).withValues(alpha: 0.4),
+                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 1, offset: const Offset(0.5, 0.5))],
+                                  ),
+                                ),
+                              );
+                            }),
+                            // Arrow indicator at top
+                            Positioned(
+                              left: faceSize / 2 - 10,
+                              top: 2,
+                              child: CustomPaint(
+                                size: const Size(20, 20),
+                                painter: _ArrowPainter(color: _showSuccess ? LKTheme.teal : const Color(0xFF5A3D10)),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -272,78 +288,6 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildFace(double faceSize) {
-    return SizedBox(
-      width: faceSize,
-      height: faceSize,
-      child: Stack(
-        children: [
-          // Gold face with beveled rim
-          Container(
-            width: faceSize,
-            height: faceSize,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const SweepGradient(
-                colors: [Color(0xFFE8C96A), Color(0xFFB08930), Color(0xFFD4A843), Color(0xFFEDD87C), Color(0xFFB08930), Color(0xFFD4A843), Color(0xFFE8C96A)],
-              ),
-              boxShadow: [
-                BoxShadow(color: const Color(0xFFB08930).withValues(alpha: 0.5), blurRadius: 12, offset: const Offset(0, 4)),
-                const BoxShadow(color: Color(0x44000000), blurRadius: 6, offset: Offset(3, 3)),
-              ],
-            ),
-          ),
-          // Inner face with brushed metal
-          Center(
-            child: Container(
-              width: faceSize - 16,
-              height: faceSize - 16,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const RadialGradient(
-                  center: Alignment(-0.2, -0.2),
-                  radius: 0.85,
-                  colors: [Color(0xFFF0E080), Color(0xFFDDB94E), Color(0xFFBE9530), Color(0xFFD4A843), Color(0xFFE8C96A)],
-                  stops: [0.0, 0.3, 0.55, 0.8, 1.0],
-                ),
-              ),
-              child: CustomPaint(
-                painter: _BrushedMetalPainter(),
-              ),
-            ),
-          ),
-          // Grip notches
-          ...List.generate(20, (i) {
-            final a = i * (2 * pi / 20) - pi / 2;
-            final r = faceSize / 2 - 12;
-            return Positioned(
-              left: faceSize / 2 + r * cos(a) - 3,
-              top: faceSize / 2 + r * sin(a) - 3,
-              child: Container(
-                width: 6, height: 6,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [const Color(0xFF8B6914).withValues(alpha: 0.5), const Color(0xFF8B6914).withValues(alpha: 0.15)],
-                  ),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 1, offset: const Offset(0.5, 0.5))],
-                ),
-              ),
-            );
-          }),
-          // Indicator arrow at top
-          Positioned(
-            left: faceSize / 2 - 10,
-            top: 2,
-            child: CustomPaint(
-              size: const Size(20, 20),
-              painter: _ArrowPainter(color: _showSuccess ? LKTheme.teal : const Color(0xFF5A3D10)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildCenterContent(double faceSize, double progress) {
     if (widget.isLoading) {
@@ -397,45 +341,6 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
       ),
     );
   }
-}
-
-class _BrushedMetalPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final r = size.width / 2;
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5;
-
-    for (int i = 0; i < 72; i++) {
-      final angle = i * (2 * pi / 72);
-      final alpha = (i % 2 == 0) ? 0.08 : 0.04;
-      paint.color = const Color(0xFF8B6914).withValues(alpha: alpha);
-      canvas.drawLine(
-        Offset(center.dx + 20 * cos(angle), center.dy + 20 * sin(angle)),
-        Offset(center.dx + (r - 8) * cos(angle), center.dy + (r - 8) * sin(angle)),
-        paint,
-      );
-    }
-
-    // Center star/cross
-    final starPaint = Paint()
-      ..color = const Color(0xFF8B6914).withValues(alpha: 0.15)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    for (int i = 0; i < 4; i++) {
-      final angle = i * (pi / 4) + pi / 8;
-      canvas.drawLine(
-        Offset(center.dx + 8 * cos(angle), center.dy + 8 * sin(angle)),
-        Offset(center.dx + 25 * cos(angle), center.dy + 25 * sin(angle)),
-        starPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _ArrowPainter extends CustomPainter {

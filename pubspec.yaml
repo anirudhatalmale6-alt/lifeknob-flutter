@@ -65,6 +65,9 @@ flutter:
 
   assets:
     - assets/images/logo.png
+    - assets/images/coin_face.png
+    - assets/images/silver_rim.png
+    - assets/images/gold_bevel.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
