@@ -233,8 +233,8 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    // Center text (stays upright)
-                    _buildCenterContent(faceSize),
+                    // Center text (stays upright, color transitions brown→green)
+                    _buildCenterContent(faceSize, progress),
                   ],
                 ),
               ),
@@ -345,7 +345,7 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildCenterContent(double faceSize) {
+  Widget _buildCenterContent(double faceSize, double progress) {
     if (widget.isLoading) {
       return SizedBox(
         width: faceSize * 0.3, height: faceSize * 0.3,
@@ -356,6 +356,10 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
     final fontSize1 = faceSize * 0.14;
     final fontSize2 = faceSize * 0.24;
 
+    // Text color transitions from dark brown to green as knob turns
+    final textColor1 = Color.lerp(const Color(0xFF6B4D1E), const Color(0xFF1B8C3D), progress)!;
+    final textColor2 = Color.lerp(const Color(0xFF5A3D10), const Color(0xFF27AE60), progress)!;
+
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: _showSuccess
@@ -364,9 +368,9 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('SENT!', style: TextStyle(color: const Color(0xFF6B4D1E), fontSize: fontSize1 * 1.1, fontWeight: FontWeight.w800, letterSpacing: 2,
+                Text('SENT!', style: TextStyle(color: const Color(0xFF1B8C3D), fontSize: fontSize1 * 1.1, fontWeight: FontWeight.w800, letterSpacing: 2,
                     shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
-                Icon(Icons.check_rounded, color: const Color(0xFF5A3D10), size: faceSize * 0.22),
+                Icon(Icons.check_rounded, color: const Color(0xFF27AE60), size: faceSize * 0.22),
               ],
             )
           : Column(
@@ -374,9 +378,9 @@ class _OkButtonState extends State<OkButton> with TickerProviderStateMixin {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('I AM', style: TextStyle(color: const Color(0xFF6B4D1E), fontSize: fontSize1, fontWeight: FontWeight.w800, letterSpacing: 3,
+                Text('I AM', style: TextStyle(color: textColor1, fontSize: fontSize1, fontWeight: FontWeight.w800, letterSpacing: 3,
                     shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
-                Text('OKAY!', style: TextStyle(color: const Color(0xFF5A3D10), fontSize: fontSize2, fontWeight: FontWeight.w900, letterSpacing: 4, height: 1.0,
+                Text('OKAY!', style: TextStyle(color: textColor2, fontSize: fontSize2, fontWeight: FontWeight.w900, letterSpacing: 4, height: 1.0,
                     shadows: const [Shadow(color: Color(0x40FFFFFF), offset: Offset(0, 1), blurRadius: 1)])),
               ],
             ),

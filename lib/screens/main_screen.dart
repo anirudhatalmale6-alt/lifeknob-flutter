@@ -140,33 +140,23 @@ class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMi
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 20 : 16,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? LKTheme.gold.withValues(alpha: 0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                icon,
-                size: isSelected ? 28 : 24,
-                color: isSelected ? LKTheme.gold : LKTheme.textMuted,
-              ),
+            Icon(
+              icon,
+              size: isSelected ? 30 : 26,
+              color: isSelected ? LKTheme.gold : LKTheme.textMuted,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected ? LKTheme.gold : LKTheme.textMuted,
-                letterSpacing: 0.3,
+                letterSpacing: 1,
               ),
             ),
           ],
