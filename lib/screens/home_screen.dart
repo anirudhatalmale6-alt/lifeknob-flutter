@@ -204,14 +204,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final darkGold = const Color(0xFF6B5530);
 
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Layer 1: Frosted glass background
-          Image.asset('assets/images/bg_phone.png', fit: BoxFit.cover),
+      backgroundColor: const Color(0xFFD0D0D0),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Layer 1: Frosted glass background
+              Image.asset('assets/images/bg_phone.png', fit: BoxFit.cover),
 
-          // Layer 2: All content
-          SafeArea(
+              // Layer 2: All content
+              SafeArea(
             child: Column(
               children: [
                 // HEADER ROW
@@ -349,6 +353,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ],
+      ),
+        ),
       ),
     );
   }
