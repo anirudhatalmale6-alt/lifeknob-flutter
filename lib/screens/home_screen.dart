@@ -211,74 +211,70 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: SafeArea(
         child: Column(
           children: [
-            // HEADER - bigger, more premium
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: _pickAvatar,
-                    child: Container(
-                      width: 56, height: 56,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: LKTheme.gold, width: 3),
-                        boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.25), blurRadius: 16)],
-                        image: _avatarUrl != null ? DecorationImage(image: NetworkImage('https://lifeknob.com$_avatarUrl'), fit: BoxFit.cover) : null,
-                        color: LKTheme.bgCardLight,
-                      ),
-                      child: _avatarUrl == null ? Center(child: Text(
-                        _userName != null && _userName!.isNotEmpty ? _userName![0].toUpperCase() : '?',
-                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: LKTheme.gold))) : null,
-                    ),
+            // HEADER - Zone 1 (setup) + Zone 2 (logo)
+            GestureDetector(
+              onTap: () {
+                final mainState = context.findAncestorStateOfType<State>();
+                if (mainState != null && mainState is dynamic) {
+                  try { (mainState as dynamic).goHome(); } catch (_) {}
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                    colors: [const Color(0xFF121B2E), LKTheme.bg],
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(displayName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 1)),
-                      const SizedBox(height: 3),
-                      Row(children: [
-                        if (_lastCheckIn != null) Container(
-                          width: 10, height: 10,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.teal,
-                            boxShadow: [BoxShadow(color: LKTheme.teal.withValues(alpha: 0.5), blurRadius: 6)]),
-                        ),
-                        if (_lastCheckIn != null) const SizedBox(width: 6),
-                        Text(
-                          _lastCheckIn != null ? 'Verified: $_lastCheckIn' : 'Not verified yet',
-                          style: TextStyle(fontSize: 14, color: _lastCheckIn != null ? LKTheme.teal : LKTheme.textMuted, fontWeight: FontWeight.w600),
-                        ),
-                      ]),
-                    ]),
-                  ),
-                  // Logo - gold knob icon
-                  GestureDetector(
-                    onTap: _showCodePopup,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      child: Column(children: [
-                        Container(
-                          width: 48, height: 48,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LKTheme.goldGradient,
-                            boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 12)],
+                ),
+                child: Row(
+                  children: [
+                    // Zone 1: Avatar with ornate frame
+                    GestureDetector(
+                      onTap: _pickAvatar,
+                      child: SizedBox(
+                        width: 68, height: 68,
+                        child: CustomPaint(
+                          painter: _OrnateFramePainter(),
+                          child: Center(
+                            child: Container(
+                              width: 50, height: 50,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: _avatarUrl != null ? DecorationImage(image: NetworkImage('https://lifeknob.com$_avatarUrl'), fit: BoxFit.cover) : null,
+                                color: LKTheme.bgCardLight,
+                                border: Border.all(color: LKTheme.gold.withValues(alpha: 0.6), width: 1.5),
+                              ),
+                              child: _avatarUrl == null ? Center(child: Text(
+                                _userName != null && _userName!.isNotEmpty ? _userName![0].toUpperCase() : '?',
+                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.gold))) : null,
+                            ),
                           ),
-                          child: Stack(alignment: Alignment.center, children: [
-                            const Icon(Icons.favorite, color: Color(0xFF5A3D10), size: 24),
-                            Positioned(top: 6, child: Container(width: 6, height: 6,
-                              decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF5A3D10)))),
-                          ]),
                         ),
-                        const SizedBox(height: 3),
-                        const Text('LIFE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 2, height: 1)),
-                        const Text('KNOB', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 2, height: 1.2)),
-                        if (_userCode != null)
-                          Text(_userCode!, style: TextStyle(fontSize: 7, color: LKTheme.gold.withValues(alpha: 0.4), letterSpacing: 0.5)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(displayName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 1)),
+                        const SizedBox(height: 2),
+                        Text('Last verified:', style: TextStyle(fontSize: 14, color: LKTheme.textSecondary.withValues(alpha: 0.7))),
+                        Text(_lastCheckIn ?? 'Not yet', style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
                       ]),
                     ),
-                  ),
-                ],
+                    // Zone 2: Logo
+                    GestureDetector(
+                      onTap: _showCodePopup,
+                      child: Container(
+                        width: 72, height: 72,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -334,77 +330,68 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
 
-            // I NEED HELP
+            // I NEED HELP - Zones 5 & 6
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 6),
               child: Column(
                 children: [
-                  const Text('I NEED HELP!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.red, letterSpacing: 2)),
+                  const Text('I NEED HELP!', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: LKTheme.red, letterSpacing: 2)),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      // Direct Line
+                      // Zone 5: Direct Line
                       Expanded(child: GestureDetector(
                         onTap: _callContact,
                         child: Container(
-                          height: 90,
+                          height: 100,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF2A2A3E), Color(0xFF1A1A2E)]),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3)),
-                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
+                            gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF1E2A45), Color(0xFF141D30)]),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFF2A3A55)),
+                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
                           ),
                           child: Row(children: [
-                            Container(
-                              margin: const EdgeInsets.only(left: 14),
-                              width: 48, height: 48,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle, gradient: LKTheme.goldGradient,
-                                boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 8)],
-                              ),
-                              child: const Icon(Icons.phone_rounded, color: Color(0xFF5A3D10), size: 24),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 14),
+                              child: Icon(Icons.phone_rounded, color: LKTheme.gold, size: 40,
+                                shadows: [Shadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 8)]),
                             ),
                             const SizedBox(width: 12),
                             Expanded(child: Column(
                               mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('DIRECT LINE:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 0.5)),
-                                Text(contactLabel, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: LKTheme.textPrimary), overflow: TextOverflow.ellipsis),
-                                const Text('Non-Emergency', style: TextStyle(fontSize: 10, color: LKTheme.textMuted)),
+                                const Text('DIRECT LINE:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: LKTheme.textPrimary, letterSpacing: 0.5)),
+                                Text(contactLabel, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textPrimary), overflow: TextOverflow.ellipsis),
+                                const Text('Non-Emergency Contact', style: TextStyle(fontSize: 11, color: LKTheme.textMuted)),
                               ],
                             )),
                           ]),
                         ),
                       )),
-                      const SizedBox(width: 10),
-                      // Emergency
+                      const SizedBox(width: 8),
+                      // Zone 6: Emergency
                       Expanded(child: GestureDetector(
                         onTap: _callAmbulance,
                         child: Container(
-                          height: 90,
+                          height: 100,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFAA2222), Color(0xFF6B1515)]),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: LKTheme.red.withValues(alpha: 0.4)),
-                            boxShadow: [BoxShadow(color: LKTheme.red.withValues(alpha: 0.2), blurRadius: 12, offset: const Offset(0, 4))],
+                            gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF7A1A1A), Color(0xFF4A1010)]),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFF8B2020)),
+                            boxShadow: [BoxShadow(color: LKTheme.red.withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, 4))],
                           ),
                           child: Row(children: [
-                            Container(
-                              margin: const EdgeInsets.only(left: 14),
-                              width: 48, height: 48,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.15),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-                              ),
-                              child: const Icon(Icons.local_hospital_rounded, color: Colors.white, size: 24),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 12),
+                              child: CustomPaint(size: const Size(42, 48), painter: _ShieldPainter()),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 10),
                             const Expanded(child: Column(
                               mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('EMERGENCY:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white70, letterSpacing: 0.5)),
-                                Text('AMBULANCE', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
-                                Text('Immediate Response', style: TextStyle(fontSize: 10, color: Colors.white54)),
+                                Text('EMERGENCY:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
+                                Text('CALL AMBULANCE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white)),
+                                Text('Immediate Response Required', style: TextStyle(fontSize: 10, color: Colors.white60)),
                               ],
                             )),
                           ]),
@@ -420,6 +407,94 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
+}
+
+class _OrnateFramePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2;
+
+    // Outer decorative ring
+    canvas.drawCircle(center, r - 2, Paint()
+      ..color = const Color(0xFFB08930)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2);
+
+    // Inner ring
+    canvas.drawCircle(center, r - 6, Paint()
+      ..color = const Color(0xFFD4A843).withValues(alpha: 0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1);
+
+    // Corner flourishes (4 decorative dots at N/S/E/W)
+    final flourishPaint = Paint()..color = const Color(0xFFD4A843);
+    for (int i = 0; i < 8; i++) {
+      final angle = i * pi / 4;
+      final fx = center.dx + (r - 4) * cos(angle);
+      final fy = center.dy + (r - 4) * sin(angle);
+      canvas.drawCircle(Offset(fx, fy), 2.5, flourishPaint);
+    }
+
+    // Scrollwork arcs between dots
+    final arcPaint = Paint()
+      ..color = const Color(0xFFD4A843).withValues(alpha: 0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    for (int i = 0; i < 8; i++) {
+      final startAngle = i * pi / 4 + pi / 16;
+      canvas.drawArc(Rect.fromCircle(center: center, radius: r - 1), startAngle, pi / 4 - pi / 8, false, arcPaint);
+      canvas.drawArc(Rect.fromCircle(center: center, radius: r - 8), startAngle, pi / 4 - pi / 8, false, arcPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _ShieldPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    // Shield shape
+    final shieldPath = Path()
+      ..moveTo(w / 2, 0)
+      ..quadraticBezierTo(w, 0, w, h * 0.15)
+      ..lineTo(w, h * 0.5)
+      ..quadraticBezierTo(w, h * 0.8, w / 2, h)
+      ..quadraticBezierTo(0, h * 0.8, 0, h * 0.5)
+      ..lineTo(0, h * 0.15)
+      ..quadraticBezierTo(0, 0, w / 2, 0)
+      ..close();
+
+    // Gold gradient fill
+    final shieldPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft, end: Alignment.bottomRight,
+        colors: [Color(0xFFE8C96A), Color(0xFFD4A843), Color(0xFFB08930)],
+      ).createShader(Rect.fromLTWH(0, 0, w, h));
+    canvas.drawPath(shieldPath, shieldPaint);
+
+    // Border
+    canvas.drawPath(shieldPath, Paint()
+      ..color = const Color(0xFFEDD87C).withValues(alpha: 0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5);
+
+    // Red cross
+    final crossPaint = Paint()..color = const Color(0xFFCC2222);
+    final cx = w / 2;
+    final cy = h * 0.48;
+    final cw = w * 0.2;
+    final ch = h * 0.22;
+    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(cx, cy), width: cw, height: ch), const Radius.circular(2)), crossPaint);
+    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(cx, cy), width: ch, height: cw), const Radius.circular(2)), crossPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _HeartbeatPainter extends CustomPainter {
