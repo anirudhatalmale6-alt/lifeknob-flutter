@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
@@ -262,81 +263,93 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         Text(_lastCheckIn ?? 'Not yet', style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
                       ]),
                     ),
-                    // Zone 2: Logo
+                    // Zone 2: Logo with text
                     GestureDetector(
-                      onTap: _showCodePopup,
-                      child: Container(
-                        width: 72, height: 72,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
+                      onTap: () {},
+                      child: Column(children: [
+                        Container(
+                          width: 74, height: 60,
+                          child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
                         ),
-                        child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
-                      ),
+                        const Text('LIFE KNOB', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 2)),
+                      ]),
                     ),
                   ],
                 ),
               ),
             ),
 
-            // MAIN - Are you okay + BIG knob
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            // "TURN THE KNOB" + Zone 3 (QR) row
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 6, 16, 0),
+              child: Row(
                 children: [
-                  AnimatedBuilder(
-                    animation: _pulseCtrl,
-                    builder: (context, child) {
-                      return Text(
-                        'Are you okay?',
-                        style: TextStyle(
-                          fontSize: 34,
-                          fontWeight: FontWeight.w700,
-                          color: LKTheme.teal.withValues(alpha: 0.6 + _pulseCtrl.value * 0.4),
-                          letterSpacing: 0.5,
-                        ),
-                      );
-                    },
+                  const Expanded(
+                    child: Text('TURN THE KNOB', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 1.5)),
                   ),
-                  const SizedBox(height: 6),
-
-                  OkButton(onPressed: _doCheckIn, isLoading: _isCheckingIn),
-
-                  const SizedBox(height: 4),
-
-                  // Heartbeat + verification
-                  if (_lastCheckIn != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AnimatedBuilder(
-                            animation: _heartbeatCtrl,
-                            builder: (context, _) => CustomPaint(
-                              size: const Size(44, 22),
-                              painter: _HeartbeatPainter(progress: _heartbeatCtrl.value, color: LKTheme.gold),
+                  // Zone 3: QR code button
+                  if (_userCode != null)
+                    GestureDetector(
+                      onTap: _showCodePopup,
+                      child: Container(
+                        width: 50, height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LKTheme.goldGradient,
+                          boxShadow: [
+                            BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 10),
+                            BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 3)),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: Padding(
+                            padding: const EdgeInsets.all(7),
+                            child: QrImageView(
+                              data: _userCode!,
+                              version: QrVersions.auto,
+                              size: 36,
+                              eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF5A3D10)),
+                              dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Color(0xFF5A3D10)),
+                              backgroundColor: Colors.transparent,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Flexible(child: Text(
-                            'Verified @ ${_lastCheckInTime ?? _lastCheckIn} - ${_userName ?? "User"}\'s Check-in',
-                            style: TextStyle(fontSize: 12, color: LKTheme.gold.withValues(alpha: 0.6), fontWeight: FontWeight.w500),
-                            overflow: TextOverflow.ellipsis,
-                          )),
-                        ],
+                        ),
                       ),
                     ),
                 ],
               ),
             ),
 
-            // I NEED HELP - Zones 5 & 6
+            // Zone 4: THE KNOB
+            Expanded(
+              child: Center(
+                child: OkButton(onPressed: _doCheckIn, isLoading: _isCheckingIn),
+              ),
+            ),
+
+            // EKG divider + Zones 5 & 6
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 10, 6),
               child: Column(
                 children: [
-                  const Text('I NEED HELP!', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: LKTheme.red, letterSpacing: 2)),
-                  const SizedBox(height: 10),
+                  // Heartbeat "OR CALL FOR HELP"
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10, top: 2),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedBuilder(
+                          animation: _heartbeatCtrl,
+                          builder: (context, _) => CustomPaint(
+                            size: const Size(55, 28),
+                            painter: _HeartbeatPainter(progress: _heartbeatCtrl.value, color: LKTheme.gold),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text('OR CALL FOR HELP', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.gold.withValues(alpha: 0.8), letterSpacing: 2)),
+                      ],
+                    ),
+                  ),
                   Row(
                     children: [
                       // Zone 5: Direct Line

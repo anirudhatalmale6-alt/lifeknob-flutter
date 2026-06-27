@@ -77,9 +77,9 @@ class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMi
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _navItem(Icons.dashboard_rounded, 'Dashboard', 0),
-                    _navItem(Icons.list_alt_rounded, 'Logs', 1),
-                    _navItem(Icons.settings_rounded, 'Systems', 2),
+                    _navItem(Icons.explore_rounded, 'DASHBOARD', 0),
+                    _navItem(Icons.receipt_long_rounded, 'LOGS', 1),
+                    _navItem(Icons.settings_rounded, 'SYSTEMS', 2),
                   ],
                 ),
               ),
