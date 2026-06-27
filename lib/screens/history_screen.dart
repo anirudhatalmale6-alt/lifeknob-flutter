@@ -104,22 +104,35 @@ class HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _deleteConnection(Connection conn) async {
     final confirmed = await showDialog<bool>(context: context, builder: (ctx) => Dialog(
-      backgroundColor: LKTheme.bgCard, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(padding: const EdgeInsets.all(28), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.delete_rounded, size: 48, color: LKTheme.red),
-        const SizedBox(height: 12),
-        Text('Remove ${conn.name}?', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary), textAlign: TextAlign.center),
-        const SizedBox(height: 20),
-        Row(children: [
-          Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx, false),
-            style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-            child: const Text('Cancel', style: TextStyle(fontSize: 16)))),
-          const SizedBox(width: 12),
-          Expanded(child: ElevatedButton(onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: LKTheme.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-            child: const Text('Remove', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)))),
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(28),
+        decoration: LKTheme.glassCard(borderColor: LKTheme.red.withValues(alpha: 0.2)),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.1)),
+            child: const Icon(Icons.person_remove_rounded, size: 36, color: LKTheme.red),
+          ),
+          const SizedBox(height: 16),
+          Text('Remove ${conn.name}?', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary), textAlign: TextAlign.center),
+          const SizedBox(height: 8),
+          const Text('They will see you as disconnected', style: TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
+          const SizedBox(height: 24),
+          Row(children: [
+            Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx, false),
+              style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
+              child: const Text('Cancel', style: TextStyle(fontSize: 16)))),
+            const SizedBox(width: 12),
+            Expanded(child: Container(
+              decoration: BoxDecoration(gradient: LKTheme.redGradient, borderRadius: BorderRadius.circular(14)),
+              child: ElevatedButton(onPressed: () => Navigator.pop(ctx, true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                child: const Text('Remove', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+            )),
+          ]),
         ]),
-      ])),
+      ),
     ));
     if (confirmed != true) return;
     try {
@@ -131,26 +144,34 @@ class HistoryScreenState extends State<HistoryScreen> {
   Future<void> _editConnection(Connection conn) async {
     final ctrl = TextEditingController(text: conn.name);
     final newName = await showDialog<String>(context: context, builder: (ctx) => Dialog(
-      backgroundColor: LKTheme.bgCard, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(padding: const EdgeInsets.all(28), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Text('Edit name', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
-        const SizedBox(height: 16),
-        Container(
-          decoration: BoxDecoration(color: LKTheme.bgCardLight, borderRadius: BorderRadius.circular(8), border: Border.all(color: LKTheme.border)),
-          child: TextField(controller: ctrl, autofocus: true, maxLength: 50,
-            style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary),
-            decoration: const InputDecoration(counterText: '', border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12)))),
-        const SizedBox(height: 20),
-        Row(children: [
-          Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx),
-            style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-            child: const Text('Cancel', style: TextStyle(fontSize: 16)))),
-          const SizedBox(width: 12),
-          Expanded(child: ElevatedButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)))),
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(28),
+        decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.2)),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Edit name', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(color: LKTheme.bgCardLight, borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.border)),
+            child: TextField(controller: ctrl, autofocus: true, maxLength: 50,
+              style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary),
+              decoration: const InputDecoration(counterText: '', border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 14)))),
+          const SizedBox(height: 20),
+          Row(children: [
+            Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx),
+              style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
+              child: const Text('Cancel', style: TextStyle(fontSize: 16)))),
+            const SizedBox(width: 12),
+            Expanded(child: Container(
+              decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+              child: ElevatedButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+            )),
+          ]),
         ]),
-      ])),
+      ),
     ));
     ctrl.dispose();
     if (newName == null || newName.isEmpty || newName == conn.name) return;
@@ -162,16 +183,28 @@ class HistoryScreenState extends State<HistoryScreen> {
 
   void _showMsg(String msg) {
     showDialog(context: context, builder: (ctx) => Dialog(
-      backgroundColor: LKTheme.bgCard, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(padding: const EdgeInsets.all(28), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.info_rounded, size: 48, color: LKTheme.gold),
-        const SizedBox(height: 12),
-        Text(msg, style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary), textAlign: TextAlign.center),
-        const SizedBox(height: 20),
-        SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('OK', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))),
-      ])),
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(28),
+        decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.2)),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.1)),
+            child: const Icon(Icons.info_rounded, size: 36, color: LKTheme.gold),
+          ),
+          const SizedBox(height: 16),
+          Text(msg, style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary, height: 1.4), textAlign: TextAlign.center),
+          const SizedBox(height: 24),
+          SizedBox(width: double.infinity, height: 48, child: Container(
+            decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              child: const Text('OK', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          )),
+        ]),
+      ),
     ));
   }
 
@@ -184,113 +217,312 @@ class HistoryScreenState extends State<HistoryScreen> {
           ? const Center(child: CircularProgressIndicator(color: LKTheme.gold))
           : _error != null
             ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.1)),
+                  child: const Icon(Icons.wifi_off_rounded, size: 48, color: LKTheme.red),
+                ),
+                const SizedBox(height: 16),
                 Text('$_error', style: const TextStyle(color: LKTheme.textMuted, fontSize: 14), textAlign: TextAlign.center),
                 const SizedBox(height: 16),
-                GestureDetector(onTap: _loadData, child: const Text('Try Again', style: TextStyle(color: LKTheme.gold, fontSize: 16, fontWeight: FontWeight.w600, decoration: TextDecoration.underline))),
+                GestureDetector(onTap: _loadData, child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.5))),
+                  child: const Text('Try Again', style: TextStyle(color: LKTheme.gold, fontSize: 16, fontWeight: FontWeight.w600)),
+                )),
               ]))
             : RefreshIndicator(color: LKTheme.gold, backgroundColor: LKTheme.bgCard, onRefresh: _loadData,
                 child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 500),
                 child: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 16), children: [
 
-                  // Connection rows
-                  ..._connections.map(_buildConnectionRow),
+                  // Page title
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16, top: 4),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: LKTheme.gold.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.people_rounded, color: LKTheme.gold, size: 24),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(child: Text('My People', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.textPrimary))),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: LKTheme.gold.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: LKTheme.gold.withValues(alpha: 0.15)),
+                          ),
+                          child: Text(
+                            '$_activeCount / $_maxConnections',
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: LKTheme.gold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-                  // Limit message (inactive connections don't count)
+                  // Connection cards
+                  ..._connections.map(_buildConnectionCard),
+
+                  // Limit message
                   if (_activeCount >= _maxConnections && _connections.isNotEmpty)
                     Padding(padding: const EdgeInsets.only(top: 8, bottom: 4),
                       child: GestureDetector(
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SubscriptionScreen(onGoHome: () { Navigator.pop(context); widget.onGoHome?.call(); }))),
-                        child: const Text("You can't connect more people, need membership plan",
-                          style: TextStyle(fontSize: 14, color: LKTheme.red, fontWeight: FontWeight.w500)))),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: LKTheme.gold.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: LKTheme.gold.withValues(alpha: 0.15)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.star_rounded, size: 20, color: LKTheme.gold.withValues(alpha: 0.7)),
+                              const SizedBox(width: 10),
+                              const Expanded(child: Text("Upgrade plan for more connections", style: TextStyle(fontSize: 14, color: LKTheme.gold, fontWeight: FontWeight.w500))),
+                              const Icon(Icons.chevron_right_rounded, size: 20, color: LKTheme.gold),
+                            ],
+                          ),
+                        ),
+                      )),
 
-                  // Add new connection row
+                  // Add new connection
                   if (_activeCount < _maxConnections) ...[
-                    const SizedBox(height: 8),
-                    _buildAddRow(),
+                    const SizedBox(height: 16),
+                    _buildAddSection(),
                   ],
 
                   // Empty state
                   if (_connections.isEmpty)
-                    const Padding(padding: EdgeInsets.only(top: 40),
-                      child: Text('Add someone\'s code to connect', style: TextStyle(fontSize: 14, color: LKTheme.textMuted), textAlign: TextAlign.center)),
+                    Padding(padding: const EdgeInsets.only(top: 48),
+                      child: Column(children: [
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: LKTheme.gold.withValues(alpha: 0.06),
+                          ),
+                          child: Icon(Icons.people_outline_rounded, size: 56, color: LKTheme.gold.withValues(alpha: 0.4)),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text('No connections yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: LKTheme.textSecondary)),
+                        const SizedBox(height: 8),
+                        const Text('Add someone\'s code below\nto connect with them', style: TextStyle(fontSize: 14, color: LKTheme.textMuted, height: 1.4), textAlign: TextAlign.center),
+                      ]),
+                    ),
                 ])))),
       ),
     );
   }
 
-  Widget _buildConnectionRow(Connection conn) {
+  Widget _buildConnectionCard(Connection conn) {
     final isOverdue = conn.isAccepted && conn.isOverdue;
     final isPending = conn.isPending;
     final isInactive = conn.isInactive;
 
+    Color statusColor = LKTheme.green;
+    String statusText = 'Connected';
+    IconData statusIcon = Icons.check_circle_rounded;
+
+    if (isInactive) {
+      statusColor = LKTheme.textMuted;
+      statusText = 'Disconnected';
+      statusIcon = Icons.link_off_rounded;
+    } else if (isPending) {
+      statusColor = LKTheme.gold;
+      statusText = 'Waiting...';
+      statusIcon = Icons.hourglass_top_rounded;
+    } else if (isOverdue) {
+      statusColor = LKTheme.red;
+      statusText = 'Overdue';
+      statusIcon = Icons.warning_rounded;
+    }
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: isInactive ? LKTheme.bgCard.withValues(alpha: 0.5) : LKTheme.bgCard,
-        borderRadius: BorderRadius.circular(12),
-        border: isOverdue ? Border.all(color: LKTheme.red, width: 2) : null,
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Expanded(child: Text(conn.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700,
-              color: isInactive ? LKTheme.textMuted : isOverdue ? LKTheme.red : LKTheme.textPrimary))),
-          Text(conn.userCode, style: TextStyle(fontSize: 14, letterSpacing: 1.5, fontWeight: FontWeight.w700,
-              color: isInactive ? LKTheme.textMuted : isOverdue ? LKTheme.red : LKTheme.gold)),
-        ]),
-        const SizedBox(height: 6),
-        if (isInactive)
-          const Text('Disconnected', style: TextStyle(fontSize: 14, color: LKTheme.textMuted, fontStyle: FontStyle.italic))
-        else if (isPending)
-          const Text('Waiting for the other side to add your code...', style: TextStyle(fontSize: 14, color: LKTheme.textMuted, fontStyle: FontStyle.italic))
-        else ...[
-          Text('Connected', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isOverdue ? LKTheme.red : LKTheme.green)),
-          const SizedBox(height: 2),
-          Text(
-            'Last verified: ${conn.lastCheckInText}',
-            style: TextStyle(fontSize: 13, color: isOverdue ? LKTheme.red : LKTheme.green),
-          ),
+        gradient: isInactive ? null : LKTheme.cardGradient,
+        color: isInactive ? LKTheme.bgCard.withValues(alpha: 0.4) : null,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isOverdue ? LKTheme.red.withValues(alpha: 0.4) : LKTheme.border.withValues(alpha: 0.5),
+          width: isOverdue ? 1.5 : 0.5,
+        ),
+        boxShadow: isInactive ? null : [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 8, offset: const Offset(0, 2)),
         ],
-        const SizedBox(height: 8),
-        Row(children: [
-          if (!isInactive) ...[
-            GestureDetector(onTap: () => _editConnection(conn),
-              child: const Text('edit', style: TextStyle(fontSize: 13, color: LKTheme.gold, decoration: TextDecoration.underline))),
-            const SizedBox(width: 20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Avatar circle
+                Container(
+                  width: 46, height: 46,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isInactive ? LKTheme.bgCardLight : statusColor.withValues(alpha: 0.1),
+                    border: Border.all(color: statusColor.withValues(alpha: isInactive ? 0.2 : 0.4), width: 2),
+                  ),
+                  child: Center(child: Text(
+                    conn.name.isNotEmpty ? conn.name[0].toUpperCase() : '?',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: isInactive ? LKTheme.textMuted : statusColor),
+                  )),
+                ),
+                const SizedBox(width: 14),
+                // Name and code
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(conn.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700,
+                      color: isInactive ? LKTheme.textMuted : LKTheme.textPrimary)),
+                    const SizedBox(height: 2),
+                    Text(conn.userCode, style: TextStyle(fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.w600,
+                      color: isInactive ? LKTheme.textMuted.withValues(alpha: 0.6) : LKTheme.gold.withValues(alpha: 0.6))),
+                  ],
+                )),
+                // Status badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(statusIcon, size: 14, color: statusColor),
+                      const SizedBox(width: 4),
+                      Text(statusText, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            if (!isInactive && !isPending) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: (isOverdue ? LKTheme.red : LKTheme.teal).withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.monitor_heart_outlined, size: 16, color: isOverdue ? LKTheme.red : LKTheme.teal),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Last verified: ${conn.lastCheckInText}',
+                      style: TextStyle(fontSize: 13, color: isOverdue ? LKTheme.red : LKTheme.teal, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            if (isPending) ...[
+              const SizedBox(height: 8),
+              Text('Waiting for the other side to add your code...', style: TextStyle(fontSize: 13, color: LKTheme.textMuted.withValues(alpha: 0.7), fontStyle: FontStyle.italic)),
+            ],
+
+            const SizedBox(height: 12),
+            Row(children: [
+              if (!isInactive) ...[
+                GestureDetector(
+                  onTap: () => _editConnection(conn),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: LKTheme.gold.withValues(alpha: 0.06),
+                      border: Border.all(color: LKTheme.gold.withValues(alpha: 0.15)),
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(Icons.edit_rounded, size: 14, color: LKTheme.gold.withValues(alpha: 0.7)),
+                      const SizedBox(width: 4),
+                      Text('edit', style: TextStyle(fontSize: 12, color: LKTheme.gold.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
+                    ]),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              GestureDetector(
+                onTap: () => _deleteConnection(conn),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: LKTheme.red.withValues(alpha: 0.04),
+                    border: Border.all(color: LKTheme.red.withValues(alpha: 0.1)),
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(Icons.close_rounded, size: 14, color: LKTheme.textMuted.withValues(alpha: 0.6)),
+                    const SizedBox(width: 4),
+                    Text('remove', style: TextStyle(fontSize: 12, color: LKTheme.textMuted.withValues(alpha: 0.6), fontWeight: FontWeight.w500)),
+                  ]),
+                ),
+              ),
+            ]),
           ],
-          GestureDetector(onTap: () => _deleteConnection(conn),
-            child: const Text('remove', style: TextStyle(fontSize: 13, color: LKTheme.textMuted, decoration: TextDecoration.underline))),
-        ]),
-      ]),
+        ),
+      ),
     );
   }
 
   InputDecoration _fieldDeco(String hint, IconData icon) {
     return InputDecoration(hintText: hint, counterText: '',
       prefixIcon: Icon(icon, color: LKTheme.gold),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: LKTheme.border)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: LKTheme.gold, width: 2)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: LKTheme.border)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: LKTheme.gold, width: 2)),
       filled: true, fillColor: LKTheme.bgCardLight);
   }
 
-  Widget _buildAddRow() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text("Enter the other person's details:", style: TextStyle(fontSize: 14, color: LKTheme.textMuted)),
-      const SizedBox(height: 8),
-      TextField(controller: _nameCtrl, maxLength: 50,
-        style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary),
-        decoration: _fieldDeco('Their name (e.g. My Son)', Icons.person_rounded)),
-      const SizedBox(height: 10),
-      TextField(controller: _codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
-        decoration: _fieldDeco('Their code', Icons.link_rounded)),
-      const SizedBox(height: 12),
-      SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
-        onPressed: _isAdding ? null : _connectPeople,
-        child: _isAdding
-          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
-          : const Text('+ CONNECT PEOPLE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-      )),
-    ]);
+  Widget _buildAddSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.1)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(
+          children: [
+            Icon(Icons.person_add_rounded, size: 20, color: LKTheme.gold.withValues(alpha: 0.7)),
+            const SizedBox(width: 8),
+            const Text("Add a connection", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text("Enter the other person's details:", style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
+        const SizedBox(height: 14),
+        TextField(controller: _nameCtrl, maxLength: 50,
+          style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary),
+          decoration: _fieldDeco('Their name (e.g. My Son)', Icons.person_rounded)),
+        const SizedBox(height: 10),
+        TextField(controller: _codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
+          decoration: _fieldDeco('Their code', Icons.link_rounded)),
+        const SizedBox(height: 14),
+        SizedBox(width: double.infinity, height: 50, child: Container(
+          decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+          child: ElevatedButton.icon(
+            onPressed: _isAdding ? null : _connectPeople,
+            icon: _isAdding ? null : const Icon(Icons.add_rounded, size: 22, color: Color(0xFF5A3D10)),
+            label: _isAdding
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
+              : const Text('CONNECT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10))),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+          ),
+        )),
+      ]),
+    );
   }
 }

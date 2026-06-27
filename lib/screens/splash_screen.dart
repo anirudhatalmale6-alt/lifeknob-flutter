@@ -11,29 +11,37 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+  late AnimationController _fadeCtrl;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _scaleAnim;
+  late AnimationController _glowCtrl;
+  late Animation<double> _glowAnim;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
+    _fadeCtrl = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeIn),
+    );
+    _scaleAnim = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOutBack),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    _glowCtrl = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+    _glowAnim = Tween<double>(begin: 0.2, end: 0.5).animate(
+      CurvedAnimation(parent: _glowCtrl, curve: Curves.easeInOut),
     );
 
-    _controller.forward();
+    _fadeCtrl.forward();
     _initApp();
   }
 
@@ -70,7 +78,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   void dispose() {
-    _controller.dispose();
+    _fadeCtrl.dispose();
+    _glowCtrl.dispose();
     super.dispose();
   }
 
@@ -80,54 +89,60 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       backgroundColor: LKTheme.bg,
       body: Center(
         child: FadeTransition(
-          opacity: _fadeAnimation,
+          opacity: _fadeAnim,
           child: ScaleTransition(
-            scale: _scaleAnimation,
+            scale: _scaleAnim,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LKTheme.goldGradient,
-                    boxShadow: [
-                      BoxShadow(
-                        color: LKTheme.gold.withValues(alpha: 0.3),
-                        blurRadius: 30,
-                        spreadRadius: 5,
+                AnimatedBuilder(
+                  animation: _glowAnim,
+                  builder: (context, child) {
+                    return Container(
+                      width: 130,
+                      height: 130,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LKTheme.goldGradient,
+                        boxShadow: [
+                          BoxShadow(
+                            color: LKTheme.gold.withValues(alpha: _glowAnim.value),
+                            blurRadius: 40,
+                            spreadRadius: 5,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: const Icon(Icons.favorite, color: Color(0xFF5A3D10), size: 60),
+                      child: const Icon(Icons.favorite, color: Color(0xFF5A3D10), size: 60),
+                    );
+                  },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
                 const Text(
                   'LifeKnob',
                   style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 38,
+                    fontWeight: FontWeight.w800,
                     color: LKTheme.gold,
                     letterSpacing: 1.5,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Silence is the alarm',
                   style: TextStyle(
                     fontSize: 16,
-                    color: LKTheme.textSecondary,
-                    letterSpacing: 0.5,
+                    color: LKTheme.textSecondary.withValues(alpha: 0.7),
+                    letterSpacing: 1,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
-                const SizedBox(height: 40),
-                const SizedBox(
-                  width: 30,
-                  height: 30,
+                const SizedBox(height: 48),
+                SizedBox(
+                  width: 28,
+                  height: 28,
                   child: CircularProgressIndicator(
-                    color: LKTheme.gold,
-                    strokeWidth: 3,
+                    color: LKTheme.gold.withValues(alpha: 0.6),
+                    strokeWidth: 2.5,
                   ),
                 ),
               ],

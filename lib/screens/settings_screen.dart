@@ -70,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'ambulance_number': _ambulanceController.text.trim(),
       });
       await AuthService().refreshProfile();
-      if (mounted) _showBigMessage('Settings saved!', '', LKTheme.gold);
+      if (mounted) _showBigMessage('Settings saved!', '', LKTheme.teal);
     } catch (e) {
       if (mounted) _showBigMessage('Could not save', '$e', LKTheme.red);
     } finally {
@@ -82,22 +82,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: LKTheme.bgCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
+        backgroundColor: Colors.transparent,
+        child: Container(
           padding: const EdgeInsets.all(32),
+          decoration: LKTheme.glassCard(borderColor: color.withValues(alpha: 0.3)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(color == LKTheme.red ? Icons.error_rounded : Icons.check_circle_rounded, size: 72, color: color),
-              const SizedBox(height: 16),
-              Text(title, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: color), textAlign: TextAlign.center),
-              if (message.isNotEmpty) ...[const SizedBox(height: 8), Text(message, style: const TextStyle(fontSize: 18, color: LKTheme.textSecondary), textAlign: TextAlign.center)],
-              const SizedBox(height: 24),
-              SizedBox(width: double.infinity, height: 56, child: ElevatedButton(
-                onPressed: () => Navigator.pop(ctx),
-                style: ElevatedButton.styleFrom(backgroundColor: color, foregroundColor: color == LKTheme.gold ? Colors.black : Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                child: const Text('OK', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: color.withValues(alpha: 0.1)),
+                child: Icon(color == LKTheme.red ? Icons.error_rounded : Icons.check_circle_rounded, size: 56, color: color),
+              ),
+              const SizedBox(height: 20),
+              Text(title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color), textAlign: TextAlign.center),
+              if (message.isNotEmpty) ...[const SizedBox(height: 8), Text(message, style: const TextStyle(fontSize: 16, color: LKTheme.textSecondary), textAlign: TextAlign.center)],
+              const SizedBox(height: 28),
+              SizedBox(width: double.infinity, height: 52, child: Container(
+                decoration: BoxDecoration(
+                  gradient: color == LKTheme.red ? LKTheme.redGradient : LinearGradient(colors: [color, color.withValues(alpha: 0.8)]),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                  child: const Text('OK', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                ),
               )),
             ],
           ),
@@ -111,14 +121,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: LKTheme.bgCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
+        backgroundColor: Colors.transparent,
+        child: Container(
           padding: const EdgeInsets.all(32),
+          decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.3)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('YOUR CODE', style: TextStyle(fontSize: 18, color: LKTheme.textSecondary, fontWeight: FontWeight.w500)),
+              const Text('YOUR CODE', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, fontWeight: FontWeight.w500, letterSpacing: 1)),
               const SizedBox(height: 16),
               Text(_userCode!, style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 6)),
               const SizedBox(height: 20),
@@ -127,13 +137,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: () { Clipboard.setData(ClipboardData(text: _userCode!)); Navigator.pop(ctx); },
                   icon: const Icon(Icons.copy_rounded, size: 22),
                   label: const Text('Copy', style: TextStyle(fontSize: 18)),
-                  style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: const BorderSide(color: LKTheme.gold), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                  style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
                 )),
                 const SizedBox(width: 12),
-                Expanded(child: ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  style: ElevatedButton.styleFrom(backgroundColor: LKTheme.gold, foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: const Text('OK', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Expanded(child: Container(
+                  decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                    child: const Text('OK', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  ),
                 )),
               ]),
             ],
@@ -148,10 +161,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: LKTheme.bgCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
+        backgroundColor: Colors.transparent,
+        child: Container(
           padding: const EdgeInsets.all(24),
+          decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.2)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -179,22 +192,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: LKTheme.bgCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
+        backgroundColor: Colors.transparent,
+        child: Container(
           padding: const EdgeInsets.all(32),
+          decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.2)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.refresh_rounded, size: 64, color: LKTheme.gold),
-              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.1)),
+                child: const Icon(Icons.refresh_rounded, size: 48, color: LKTheme.gold),
+              ),
+              const SizedBox(height: 20),
               const Text('Start Again?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
               const SizedBox(height: 8),
               const Text('Go through the setup steps\nagain to review or update\nyour details.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
               const SizedBox(height: 24),
-              SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Start Again', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(width: double.infinity, height: 52, child: Container(
+                decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                  child: const Text('Start Again', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
               )),
               const SizedBox(height: 8),
               Center(child: GestureDetector(
@@ -228,120 +249,172 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Row(children: [
-                const Icon(Icons.settings_rounded, color: LKTheme.textSecondary, size: 28),
-                const SizedBox(width: 10),
-                const Expanded(child: Text('Set Up', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
-                if (widget.onGoHome != null)
-                  GestureDetector(
-                    onTap: widget.onGoHome,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(20)),
-                      child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(Icons.home_rounded, size: 18, color: Color(0xFF5A3D10)),
-                        SizedBox(width: 6),
-                        Text('Home', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF5A3D10))),
-                      ]),
-                    ),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: LKTheme.textSecondary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: const Icon(Icons.tune_rounded, color: LKTheme.textSecondary, size: 24),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(child: Text('Set Up', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.textPrimary))),
               ]),
             ),
 
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _card([
-                      Row(children: [
-                        Container(width: 56, height: 56,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
-                          child: Center(child: Text(
-                            _userName != null && _userName!.isNotEmpty ? _userName![0].toUpperCase() : '?',
-                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: LKTheme.gold),
-                          )),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(_userName ?? '-', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
-                          Text(_userEmail ?? '-', style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
-                        ])),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(border: Border.all(color: _plan == 'paid' ? LKTheme.gold : LKTheme.border), borderRadius: BorderRadius.circular(12)),
-                          child: Text(_plan == 'paid' ? 'Premium' : 'Free', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _plan == 'paid' ? LKTheme.gold : LKTheme.textMuted)),
-                        ),
-                      ]),
-                      const SizedBox(height: 14),
-                      _infoRow(Icons.phone_rounded, 'Phone', _userPhone ?? '-'),
-                      const SizedBox(height: 8),
-                      GestureDetector(onTap: _showCodePopup, child: _infoRow(Icons.link_rounded, 'Your Code', _userCode ?? '-', isCode: true)),
-                    ]),
-                    const SizedBox(height: 12),
-
-                    _card([
-                      const Row(children: [
-                        Icon(Icons.local_hospital_rounded, color: LKTheme.red, size: 24),
-                        SizedBox(width: 10),
-                        Text('Ambulance Number', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
-                      ]),
-                      const SizedBox(height: 12),
-                      _inputField(controller: _ambulanceController, hint: 'e.g. 000, 911, 112', icon: Icons.phone_rounded, iconColor: LKTheme.red, maxLength: 20, keyboard: TextInputType.phone),
-                      const Padding(padding: EdgeInsets.only(top: 6), child: Text('Red "CALL AMBULANCE" button on home', style: TextStyle(fontSize: 12, color: LKTheme.textMuted))),
-                    ]),
-                    const SizedBox(height: 12),
-
-                    _card([
-                      const Row(children: [
-                        Icon(Icons.phone_in_talk_rounded, color: LKTheme.blue, size: 24),
-                        SizedBox(width: 10),
-                        Text('Emergency Contact', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
-                      ]),
-                      const SizedBox(height: 12),
-                      _inputField(controller: _sosNameController, hint: 'Contact name', icon: Icons.person_rounded, iconColor: LKTheme.blue, maxLength: 50),
-                      const SizedBox(height: 8),
-                      _inputField(controller: _sosPhoneController, hint: 'Phone number', icon: Icons.phone_rounded, iconColor: LKTheme.blue, maxLength: 20, keyboard: TextInputType.phone),
-                      const Padding(padding: EdgeInsets.only(top: 6), child: Text('Blue "DIRECT LINE" button on home', style: TextStyle(fontSize: 12, color: LKTheme.textMuted))),
-                    ]),
-                    const SizedBox(height: 12),
-
-                    _card([
-                      GestureDetector(
-                        onTap: _showLanguageSelector,
-                        child: Row(children: [
-                          const Icon(Icons.language_rounded, color: LKTheme.gold, size: 24),
-                          const SizedBox(width: 12),
-                          const Expanded(child: Text('Language', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary))),
-                          Text(_language, style: const TextStyle(fontSize: 16, color: LKTheme.gold, fontWeight: FontWeight.w600)),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.chevron_right_rounded, color: LKTheme.textMuted, size: 22),
+                    // Profile card
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: LKTheme.premiumCard,
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(children: [
+                          Container(width: 56, height: 56,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LKTheme.goldGradient,
+                              boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.2), blurRadius: 8)],
+                            ),
+                            child: Center(child: Text(
+                              _userName != null && _userName!.isNotEmpty ? _userName![0].toUpperCase() : '?',
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF5A3D10)),
+                            )),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(_userName ?? '-', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                            const SizedBox(height: 2),
+                            Text(_userEmail ?? '-', style: const TextStyle(fontSize: 13, color: LKTheme.textSecondary)),
+                          ])),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: _plan == 'paid' ? LKTheme.gold.withValues(alpha: 0.1) : Colors.transparent,
+                              border: Border.all(color: _plan == 'paid' ? LKTheme.gold.withValues(alpha: 0.4) : LKTheme.border),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(_plan == 'paid' ? 'Premium' : 'Free', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _plan == 'paid' ? LKTheme.gold : LKTheme.textMuted)),
+                          ),
                         ]),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: LKTheme.bgCardLight.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(children: [
+                            _infoRow(Icons.phone_rounded, 'Phone', _userPhone ?? '-'),
+                            Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Divider(color: LKTheme.border.withValues(alpha: 0.5), height: 1)),
+                            GestureDetector(onTap: _showCodePopup, child: _infoRow(Icons.link_rounded, 'Your Code', _userCode ?? '-', isCode: true)),
+                          ]),
+                        ),
+                      ]),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Ambulance card
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: LKTheme.premiumCard,
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.1)),
+                            child: const Icon(Icons.local_hospital_rounded, color: LKTheme.red, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text('Ambulance Number', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                        ]),
+                        const SizedBox(height: 14),
+                        _inputField(controller: _ambulanceController, hint: 'e.g. 000, 911, 112', icon: Icons.phone_rounded, iconColor: LKTheme.red, maxLength: 20, keyboard: TextInputType.phone),
+                        const Padding(padding: EdgeInsets.only(top: 8), child: Text('Red "CALL AMBULANCE" button on home', style: TextStyle(fontSize: 12, color: LKTheme.textMuted))),
+                      ]),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Emergency contact card
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: LKTheme.premiumCard,
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.blue.withValues(alpha: 0.1)),
+                            child: const Icon(Icons.phone_in_talk_rounded, color: LKTheme.blue, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text('Emergency Contact', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                        ]),
+                        const SizedBox(height: 14),
+                        _inputField(controller: _sosNameController, hint: 'Contact name', icon: Icons.person_rounded, iconColor: LKTheme.blue, maxLength: 50),
+                        const SizedBox(height: 10),
+                        _inputField(controller: _sosPhoneController, hint: 'Phone number', icon: Icons.phone_rounded, iconColor: LKTheme.blue, maxLength: 20, keyboard: TextInputType.phone),
+                        const Padding(padding: EdgeInsets.only(top: 8), child: Text('Blue "DIRECT LINE" button on home', style: TextStyle(fontSize: 12, color: LKTheme.textMuted))),
+                      ]),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Language + Legal
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      decoration: LKTheme.premiumCard,
+                      child: Column(children: [
+                        GestureDetector(
+                          onTap: _showLanguageSelector,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                            child: Row(children: [
+                              Icon(Icons.language_rounded, color: LKTheme.gold.withValues(alpha: 0.7), size: 22),
+                              const SizedBox(width: 14),
+                              const Expanded(child: Text('Language', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary))),
+                              Text(_language, style: TextStyle(fontSize: 15, color: LKTheme.gold.withValues(alpha: 0.7), fontWeight: FontWeight.w600)),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.chevron_right_rounded, color: LKTheme.textMuted, size: 22),
+                            ]),
+                          ),
+                        ),
+                        Divider(color: LKTheme.border.withValues(alpha: 0.5), height: 1, indent: 20, endIndent: 20),
+                        GestureDetector(onTap: () => _showLegalPage('Terms and Conditions'), child: _linkRow(Icons.description_rounded, 'Terms and Conditions')),
+                        Divider(color: LKTheme.border.withValues(alpha: 0.5), height: 1, indent: 20, endIndent: 20),
+                        GestureDetector(onTap: () => _showLegalPage('Privacy Policy'), child: _linkRow(Icons.lock_rounded, 'Privacy Policy')),
+                      ]),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Save button
+                    SizedBox(height: 56, child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LKTheme.goldGradient,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.25), blurRadius: 16, offset: const Offset(0, 4))],
                       ),
-                    ]),
-                    const SizedBox(height: 12),
-
-                    _card([
-                      GestureDetector(onTap: () => _showLegalPage('Terms and Conditions'), child: _linkRow(Icons.description_rounded, 'Terms and Conditions')),
-                      Divider(color: LKTheme.border, height: 1),
-                      GestureDetector(onTap: () => _showLegalPage('Privacy Policy'), child: _linkRow(Icons.lock_rounded, 'Privacy Policy')),
-                    ]),
-                    const SizedBox(height: 20),
-
-                    SizedBox(height: 60, child: Container(
-                      decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))]),
                       child: ElevatedButton(
                         onPressed: _isSaving ? null : _saveSettings,
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                         child: _isSaving
                             ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
                             : const Text('Save Settings'),
                       ),
                     )),
 
-                    const SizedBox(height: 16),
-                    Center(child: GestureDetector(onTap: _startAgain, child: const Text('Start Again', style: TextStyle(fontSize: 13, color: LKTheme.textMuted, decoration: TextDecoration.underline)))),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 20),
+                    Center(child: GestureDetector(onTap: _startAgain, child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: LKTheme.border),
+                      ),
+                      child: const Text('Start Again', style: TextStyle(fontSize: 13, color: LKTheme.textMuted, fontWeight: FontWeight.w500)),
+                    ))),
+                    const SizedBox(height: 12),
                     const Center(child: Text('LifeKnob v1.0.0', style: TextStyle(fontSize: 10, color: LKTheme.textMuted))),
                     const SizedBox(height: 16),
                   ],
@@ -354,22 +427,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _card(List<Widget> children) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: LKTheme.border)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
-    );
-  }
-
   Widget _infoRow(IconData icon, String label, String value, {bool isCode = false}) {
     return Row(children: [
-      Icon(icon, size: 20, color: isCode ? LKTheme.gold : LKTheme.textMuted),
+      Icon(icon, size: 18, color: isCode ? LKTheme.gold : LKTheme.textMuted),
       const SizedBox(width: 10),
-      Text(label, style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary)),
+      Text(label, style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
       const Spacer(),
-      Text(value, style: TextStyle(fontSize: 15, fontWeight: isCode ? FontWeight.w800 : FontWeight.w500, color: isCode ? LKTheme.gold : LKTheme.textPrimary, letterSpacing: isCode ? 2 : 0)),
-      if (isCode) ...[const SizedBox(width: 4), const Icon(Icons.zoom_in_rounded, size: 16, color: LKTheme.textMuted)],
+      Text(value, style: TextStyle(fontSize: 14, fontWeight: isCode ? FontWeight.w800 : FontWeight.w500, color: isCode ? LKTheme.gold : LKTheme.textPrimary, letterSpacing: isCode ? 2 : 0)),
+      if (isCode) ...[const SizedBox(width: 4), Icon(Icons.zoom_in_rounded, size: 14, color: LKTheme.textMuted.withValues(alpha: 0.6))],
     ]);
   }
 
@@ -378,17 +443,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
       controller: controller,
       maxLength: maxLength,
       keyboardType: keyboard,
-      style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-      decoration: InputDecoration(hintText: hint, counterText: '', prefixIcon: Icon(icon, color: iconColor, size: 22)),
+      style: const TextStyle(fontSize: 17, color: LKTheme.textPrimary),
+      decoration: InputDecoration(
+        hintText: hint,
+        counterText: '',
+        prefixIcon: Icon(icon, color: iconColor, size: 20),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: LKTheme.border)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: iconColor, width: 2)),
+        filled: true,
+        fillColor: LKTheme.bgCardLight,
+      ),
     );
   }
 
   Widget _linkRow(IconData icon, String label) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       child: Row(children: [
-        Icon(icon, size: 20, color: LKTheme.textMuted),
-        const SizedBox(width: 12),
+        Icon(icon, size: 18, color: LKTheme.textMuted),
+        const SizedBox(width: 14),
         Expanded(child: Text(label, style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary))),
         const Icon(Icons.chevron_right_rounded, color: LKTheme.textMuted, size: 22),
       ]),
@@ -415,9 +488,9 @@ class _LegalPage extends StatelessWidget {
               child: Row(children: [
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.bgCard), child: const Icon(Icons.arrow_back_rounded, size: 24, color: LKTheme.textPrimary)),
+                  child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: LKTheme.bgCard, border: Border.all(color: LKTheme.border)), child: const Icon(Icons.arrow_back_rounded, size: 22, color: LKTheme.textPrimary)),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Expanded(child: Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
               ]),
             ),
