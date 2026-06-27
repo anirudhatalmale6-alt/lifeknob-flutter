@@ -257,7 +257,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(displayName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 1)),
+                        Text(displayName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 1),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 2),
                         Text('Last verified:', style: TextStyle(fontSize: 14, color: LKTheme.textSecondary.withValues(alpha: 0.7))),
                         Text(_lastCheckIn ?? 'Not yet', style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, fontWeight: FontWeight.w600)),
