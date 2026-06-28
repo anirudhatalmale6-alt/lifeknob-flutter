@@ -60,18 +60,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         setState(() => _rotation = _springStart * (1.0 - Curves.easeOut.transform(_springCtrl.value)));
       }
     });
-    _hintCtrl = AnimationController(duration: const Duration(milliseconds: 1800), vsync: this);
-    _hintCtrl.addListener(() {
-      if (!_isDragging && !_showSuccess && !_hintPlayed) {
-        setState(() => _rotation = sin(_hintCtrl.value * pi) * (pi / 3));
+    _hintCtrl = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
+    _hintCtrl.addStatusListener((s) {
+      if (s == AnimationStatus.completed) {
+        _hintPlayed = true;
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) _rockCtrl.repeat();
+        });
       }
     });
-    _hintCtrl.addStatusListener((s) {
-      if (s == AnimationStatus.completed) { _hintPlayed = true; setState(() => _rotation = 0); }
-    });
     _ekgCtrl = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this)..repeat();
-    _rockCtrl = AnimationController(duration: const Duration(milliseconds: 4500), vsync: this)..repeat();
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    _rockCtrl = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
+    Future.delayed(const Duration(milliseconds: 1000), () {
       if (mounted && !_isDragging) _hintCtrl.forward();
     });
     _loadUserData();
@@ -312,10 +312,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             child: Container(
                               color: Colors.transparent,
                               child: Center(child: AnimatedBuilder(
-                                animation: _rockCtrl,
+                                animation: Listenable.merge([_hintCtrl, _rockCtrl]),
                                 builder: (context, child) {
-                                  final t = _rockCtrl.value;
-                                  final rockAngle = (_isDragging || _showFailed || _showSuccess || progress > 0.01) ? 0.0 : (t < 0.33 ? sin(t / 0.33 * 2 * pi) * 0.08 : 0.0);
+                                  double rockAngle = 0.0;
+                                  if (!_isDragging && !_showFailed && !_showSuccess && progress < 0.01) {
+                                    if (!_hintPlayed) {
+                                      rockAngle = sin(_hintCtrl.value * pi) * (pi / 3);
+                                    } else {
+                                      final t = _rockCtrl.value;
+                                      rockAngle = t < 0.5 ? sin(t / 0.5 * 2 * pi) * (pi / 18) : 0.0;
+                                    }
+                                  }
                                   return Transform.rotate(angle: rockAngle, child: child);
                                 },
                                 child: SizedBox(
