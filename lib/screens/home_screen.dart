@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         final dt = DateTime.parse(data.first['created_at']);
         final diff = DateTime.now().difference(dt);
         setState(() {
-          if (diff.inMinutes < 60) _lastSuccessTime = dt;
+          _lastSuccessTime = dt;
           if (diff.inMinutes < 1) _lastCheckIn = 'Just now';
           else if (diff.inMinutes < 60) _lastCheckIn = '${diff.inMinutes}m ago';
           else if (diff.inHours < 24) _lastCheckIn = '${diff.inHours}h ago';
@@ -115,6 +115,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   bool get _isRecentSuccess => _lastSuccessTime != null && DateTime.now().difference(_lastSuccessTime!).inMinutes < 60;
+  bool get _isOverdue => _lastSuccessTime == null || DateTime.now().difference(_lastSuccessTime!).inHours >= 24;
 
   double _getAngle(Offset pos, Offset center) => atan2(pos.dy - center.dy, pos.dx - center.dx);
 
@@ -362,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       gradient: RadialGradient(
-                                        colors: _showFailed ? [red, const Color(0xFFAA0E19)] : (_showSuccess || _isRecentSuccess) ? [green, const Color(0xFF2D5234)] : [faceGray, faceDarkGray],
+                                        colors: _showFailed ? [red, const Color(0xFFAA0E19)] : (_showSuccess || _isRecentSuccess) ? [green, const Color(0xFF2D5234)] : _isOverdue ? [red, const Color(0xFFAA0E19)] : [faceGray, faceDarkGray],
                                         stops: const [0.7, 1.0],
                                       ),
                                       boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
@@ -380,6 +381,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       shaderCallback: (bounds) {
                                         if (_isRecentSuccess) {
                                           return LinearGradient(colors: [green, green]).createShader(bounds);
+                                        }
+                                        if (_isOverdue) {
+                                          return LinearGradient(colors: [Colors.white.withValues(alpha: 0.7), Colors.white.withValues(alpha: 0.7)]).createShader(bounds);
                                         }
                                         return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
                                       },
