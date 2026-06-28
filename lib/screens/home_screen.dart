@@ -46,8 +46,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   static const Color green = Color(0xFF386641);
   static const Color red = Color(0xFFC1121F);
   static const Color textGray = Color(0xFF8A9AAA);
-  static const Color faceGray = Color(0xFFD0D0D0);
-  static const Color faceDarkGray = Color(0xFFB8B8B8);
+  static const Color faceGray = Color(0xFFDCDCDC);
+  static const Color faceDarkGray = Color(0xFFC4C4C4);
 
   @override
   void initState() {
@@ -209,6 +209,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final lastVerified = _lastCheckIn ?? 'Not yet';
 
     return Scaffold(
+      backgroundColor: navy,
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500),
@@ -232,13 +233,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             GestureDetector(
                               onTap: () => widget.onTabChange?.call(2),
                               child: Container(
-                                width: h * 0.07, height: h * 0.07,
+                                width: h * 0.08, height: h * 0.08,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: gold, width: 3),
-                                  color: gold.withValues(alpha: 0.15),
+                                  border: Border.all(color: gold, width: 3.5),
+                                  color: gold.withValues(alpha: 0.12),
                                 ),
-                                child: Icon(Icons.person, color: gold, size: h * 0.038),
+                                child: Icon(Icons.person, color: gold, size: h * 0.042),
                               ),
                             ),
                             const SizedBox(width: 6),
@@ -249,8 +250,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: h * 0.03, fontWeight: FontWeight.w500, color: gold), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                  Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: h * 0.018, fontWeight: FontWeight.w300, color: cream)),
-                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: cream)),
+                                  Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: min(h * 0.018, 14.0), fontWeight: FontWeight.w300, color: cream), maxLines: 1),
+                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: min(h * 0.02, 16.0), fontWeight: FontWeight.w400, color: cream), maxLines: 1),
                                 ],
                               ),
                             )),
@@ -271,14 +272,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         gradient: LinearGradient(colors: [gold.withValues(alpha: 0.05), gold, gold, gold.withValues(alpha: 0.05)]),
                       )),
 
-                      // ═══ KNOB AREA with 4 corner elements ═══
+                      // ═══ TURN THE KNOB + QR — own section ═══
                       SizedBox(
-                        height: h * 0.47,
+                        height: h * 0.055,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 6, right: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: h * 0.032, fontWeight: FontWeight.w500, color: gold))),
+                              GestureDetector(
+                                onTap: _showCodePopup,
+                                child: Container(
+                                  width: h * 0.06, height: h * 0.06,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: gold, width: 2.5),
+                                    color: navyMid,
+                                  ),
+                                  child: ClipOval(child: Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: _userCode != null
+                                      ? QrImageView(data: _userCode!, size: h * 0.048, backgroundColor: Colors.transparent, eyeStyle: const QrEyeStyle(color: gold, eyeShape: QrEyeShape.circle), dataModuleStyle: const QrDataModuleStyle(color: gold, dataModuleShape: QrDataModuleShape.circle))
+                                      : Icon(Icons.qr_code_2, color: gold, size: h * 0.035),
+                                  )),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // ═══ KNOB — own section ═══
+                      SizedBox(
+                        height: h * 0.38,
                         child: LayoutBuilder(builder: (context, kc) {
                           final areaW = kc.maxWidth;
                           final areaH = kc.maxHeight;
                           final center = Offset(areaW / 2, areaH / 2);
-                          final knobSize = min(areaW * 0.92, areaH * 0.88);
+                          final knobSize = min(areaW * 0.92, areaH * 0.98);
                           final goldRingW = knobSize * 0.058;
                           final dialSize = knobSize - goldRingW * 2;
                           final faceSize = knobSize * 0.75;
@@ -287,9 +319,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             onPanStart: (d) => _onKnobPanStart(d, center),
                             onPanUpdate: (d) => _onKnobPanUpdate(d, center),
                             onPanEnd: _onKnobPanEnd,
-                            child: Stack(children: [
-                              // Knob centered
-                              Center(child: SizedBox(
+                            child: Container(
+                              color: Colors.transparent,
+                              child: Center(child: SizedBox(
                                 width: knobSize, height: knobSize,
                                 child: Stack(alignment: Alignment.center, children: [
                                   Container(
@@ -346,55 +378,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ),
                                 ]),
                               )),
-
-                              // Top-left corner: TURN THE KNOB
-                              Positioned(
-                                left: 4, top: 2,
-                                child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: h * 0.032, fontWeight: FontWeight.w500, color: gold)),
-                              ),
-
-                              // Top-right corner: QR code
-                              Positioned(
-                                right: 2, top: 0,
-                                child: GestureDetector(
-                                  onTap: _showCodePopup,
-                                  child: Container(
-                                    width: h * 0.07, height: h * 0.07,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: gold, width: 2),
-                                      color: navyMid,
-                                    ),
-                                    child: ClipOval(child: Padding(
-                                      padding: const EdgeInsets.all(4),
-                                      child: _userCode != null
-                                        ? QrImageView(data: _userCode!, size: h * 0.055, backgroundColor: Colors.transparent, eyeStyle: const QrEyeStyle(color: gold, eyeShape: QrEyeShape.circle), dataModuleStyle: const QrDataModuleStyle(color: gold, dataModuleShape: QrDataModuleShape.circle))
-                                        : Icon(Icons.qr_code_2, color: gold, size: h * 0.04),
-                                    )),
-                                  ),
-                                ),
-                              ),
-
-                              // Bottom-left corner: heartbeat EKG
-                              Positioned(
-                                left: 4, bottom: 4,
-                                child: SizedBox(
-                                  width: w * 0.35, height: h * 0.04,
-                                  child: AnimatedBuilder(
-                                    animation: _ekgCtrl,
-                                    builder: (context, _) => CustomPaint(painter: _EkgPainter(progress: _ekgCtrl.value, color: gold)),
-                                  ),
-                                ),
-                              ),
-
-                              // Bottom-right corner: OR CALL FOR HELP
-                              Positioned(
-                                right: 4, bottom: 4,
-                                child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: h * 0.032, fontWeight: FontWeight.w500, color: gold)),
-                              ),
-                            ]),
+                            ),
                           );
                         }),
+                      ),
+
+                      // ═══ EKG + OR CALL FOR HELP — own section ═══
+                      SizedBox(
+                        height: h * 0.05,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 6, right: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: w * 0.22, height: h * 0.035,
+                                child: AnimatedBuilder(
+                                  animation: _ekgCtrl,
+                                  builder: (context, _) => CustomPaint(painter: _EkgPainter(progress: _ekgCtrl.value, color: gold)),
+                                ),
+                              ),
+                              const Spacer(),
+                              Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: h * 0.032, fontWeight: FontWeight.w500, color: gold)),
+                            ],
+                          ),
+                        ),
                       ),
 
                       // ═══ ZONE 5 + 6: Call buttons — edge to edge ═══
