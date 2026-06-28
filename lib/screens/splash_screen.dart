@@ -57,8 +57,14 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   Future<void> _initApp() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
+    // DEBUG: skip auth check to preview zones layout
+    final uri = Uri.base;
+    if (uri.queryParameters.containsKey('debug')) {
+      Navigator.pushReplacementNamed(context, '/home');
+      return;
+    }
 
     final isLoggedIn = await AuthService().isLoggedIn();
     if (isLoggedIn) {

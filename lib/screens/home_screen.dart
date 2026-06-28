@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final void Function(int)? onTabChange;
+  const HomeScreen({super.key, this.onTabChange});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -32,8 +35,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   late AnimationController _springCtrl;
   late AnimationController _hintCtrl;
+  late AnimationController _ekgCtrl;
   double _springStart = 0;
   bool _hintPlayed = false;
+
+  static const Color navy = Color(0xFF003049);
+  static const Color navyMid = Color(0xFF08394F);
+  static const Color gold = Color(0xFFDDA15E);
+  static const Color cream = Color(0xFFFDF0D5);
+  static const Color green = Color(0xFF386641);
+  static const Color red = Color(0xFFC1121F);
+  static const Color textGray = Color(0xFF8A9AAA);
+  static const Color faceGray = Color(0xFFD0D0D0);
+  static const Color faceDarkGray = Color(0xFFB8B8B8);
 
   @override
   void initState() {
@@ -53,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _hintCtrl.addStatusListener((s) {
       if (s == AnimationStatus.completed) { _hintPlayed = true; setState(() => _rotation = 0); }
     });
+    _ekgCtrl = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this)..repeat();
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted && !_isDragging) _hintCtrl.forward();
     });
@@ -61,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   @override
-  void dispose() { _springCtrl.dispose(); _hintCtrl.dispose(); super.dispose(); }
+  void dispose() { _springCtrl.dispose(); _hintCtrl.dispose(); _ekgCtrl.dispose(); super.dispose(); }
 
   void _setUserData(dynamic user) {
     if (user == null || !mounted) return;
@@ -108,11 +123,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     var delta = newAngle - _prevAngle;
     while (delta > pi) delta -= 2 * pi;
     while (delta < -pi) delta += 2 * pi;
-    final newRot = (_rotation + delta).clamp(0.0, _triggerAngle + 0.15);
-    final tick = (newRot / _triggerAngle * 4).floor();
+    final newRot = (_rotation + delta).clamp(-_triggerAngle - 0.15, _triggerAngle + 0.15);
+    final tick = (newRot.abs() / _triggerAngle * 4).floor();
     if (tick > _lastHapticTick && tick <= 3) { HapticFeedback.selectionClick(); _lastHapticTick = tick; }
     setState(() { _rotation = newRot; _prevAngle = newAngle; });
-    if (_rotation >= _triggerAngle) _triggerCheckIn();
+    if (_rotation.abs() >= _triggerAngle) _triggerCheckIn();
   }
 
   void _onKnobPanEnd(DragEndDetails d) {
@@ -146,30 +161,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       backgroundColor: Colors.transparent,
       child: Container(
         padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.95),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 20)],
-        ),
+        decoration: BoxDecoration(color: navy, borderRadius: BorderRadius.circular(20), border: Border.all(color: gold, width: 2)),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text('YOUR CODE', style: GoogleFonts.cinzel(fontSize: 14, color: const Color(0xFF8A7A60), fontWeight: FontWeight.w600, letterSpacing: 3)),
+          Text('YOUR CODE', style: GoogleFonts.barlowCondensed(fontSize: 14, color: gold, fontWeight: FontWeight.w600, letterSpacing: 3)),
           const SizedBox(height: 16),
-          Text(_userCode!, style: GoogleFonts.cinzel(fontSize: 48, fontWeight: FontWeight.w900, color: const Color(0xFFB08930), letterSpacing: 6)),
-          const SizedBox(height: 16),
-          Text('Share this code with your family', style: GoogleFonts.cormorantGaramond(fontSize: 16, color: const Color(0xFF8A7A60), fontStyle: FontStyle.italic), textAlign: TextAlign.center),
+          Text(_userCode!, style: GoogleFonts.barlowCondensed(fontSize: 48, fontWeight: FontWeight.w900, color: cream, letterSpacing: 6)),
+          const SizedBox(height: 12),
+          Text('Share this code with your family', style: GoogleFonts.barlowCondensed(fontSize: 16, color: cream.withValues(alpha: 0.7), fontStyle: FontStyle.italic), textAlign: TextAlign.center),
           const SizedBox(height: 24),
           Row(children: [
             Expanded(child: OutlinedButton(
               onPressed: () { Clipboard.setData(ClipboardData(text: _userCode!)); Navigator.pop(ctx); },
-              style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFFB08930), side: const BorderSide(color: Color(0xFFD4A843)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-              child: Text('COPY', style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w700)),
+              style: OutlinedButton.styleFrom(foregroundColor: gold, side: const BorderSide(color: gold), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+              child: Text('COPY', style: GoogleFonts.barlowCondensed(fontSize: 14, fontWeight: FontWeight.w700)),
             )),
             const SizedBox(width: 12),
-            Expanded(child: Container(
-              decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(12)),
-              child: ElevatedButton(onPressed: () => Navigator.pop(ctx),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: Text('OK', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w800, color: const Color(0xFF5A3D10)))),
+            Expanded(child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(backgroundColor: gold, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+              child: Text('OK', style: GoogleFonts.barlowCondensed(fontSize: 16, fontWeight: FontWeight.w800, color: navy)),
             )),
           ]),
         ]),
@@ -193,179 +203,364 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final progress = (_rotation / _triggerAngle).clamp(0.0, 1.0);
-    final screenW = MediaQuery.of(context).size.width;
-    final screenH = MediaQuery.of(context).size.height;
-    final contactLabel = (_sosName != null && _sosName!.isNotEmpty) ? _sosName!.toUpperCase() : 'CONTACT';
+    final progress = (_rotation.abs() / _triggerAngle).clamp(0.0, 1.0);
+    final contactLabel = (_sosName != null && _sosName!.isNotEmpty) ? _sosName!.toUpperCase() : '';
     final displayName = (_userName != null && _userName!.isNotEmpty) ? _userName!.toUpperCase() : 'USER';
-
-    final knobSize = screenW * 0.82;
-    final goldColor = const Color(0xFF8A7A50);
-    final darkGold = const Color(0xFF6B5530);
+    final lastVerified = _lastCheckIn ?? 'Not yet';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFD0D0D0),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Layer 1: Frosted glass background
-              Image.asset('assets/images/bg_phone.png', fit: BoxFit.cover),
+          child: Container(
+            color: navy,
+            child: SafeArea(
+              bottom: false,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final h = constraints.maxHeight;
+                  final w = constraints.maxWidth;
 
-              // Layer 2: All content
-              SafeArea(
-            child: Column(
-              children: [
-                // HEADER ROW
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: Row(
+                  return Column(
                     children: [
-                      // Avatar placeholder (over the bg avatar area)
-                      const SizedBox(width: 52),
-                      const SizedBox(width: 10),
-                      // User info
-                      Expanded(child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(displayName, style: GoogleFonts.cinzel(fontSize: 20, fontWeight: FontWeight.w800, color: darkGold, letterSpacing: 2), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text('Last verified:', style: GoogleFonts.cormorantGaramond(fontSize: 14, color: goldColor, fontStyle: FontStyle.italic)),
-                          Text(_lastCheckIn ?? 'Not yet', style: GoogleFonts.cinzel(fontSize: 14, fontWeight: FontWeight.w600, color: goldColor)),
-                        ],
-                      )),
-                      // Logo area
-                      GestureDetector(
-                        onTap: _showCodePopup,
-                        child: Image.asset('assets/images/logo.png', width: 65, height: 55, fit: BoxFit.contain),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // TURN THE KNOB + QR
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 16, 0),
-                  child: Row(children: [
-                    Expanded(child: Text('TURN THE KNOB', style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w700, color: goldColor, letterSpacing: 3))),
-                    GestureDetector(
-                      onTap: _showCodePopup,
-                      child: Container(width: 48, height: 48, color: Colors.transparent),
-                    ),
-                  ]),
-                ),
-
-                // THE KNOB - gold image that rotates with text centered on it
-                Expanded(
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    final center = Offset(constraints.maxWidth / 2, constraints.maxHeight / 2);
-                    final knobDisplaySize = constraints.maxWidth * 0.88;
-                    return GestureDetector(
-                      onPanStart: (d) => _onKnobPanStart(d, center),
-                      onPanUpdate: (d) => _onKnobPanUpdate(d, center),
-                      onPanEnd: _onKnobPanEnd,
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Center(
-                          child: SizedBox(
-                            width: knobDisplaySize,
-                            height: knobDisplaySize,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Gold knob image (rotates)
-                                Transform.rotate(
-                                  angle: _rotation,
-                                  child: Image.asset('assets/images/knob_gold.png', width: knobDisplaySize, height: knobDisplaySize, fit: BoxFit.contain),
+                      // ═══ HEADER — avatar + name | logo ═══
+                      SizedBox(
+                        height: h * 0.13,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 6, right: 2),
+                          child: Row(children: [
+                            GestureDetector(
+                              onTap: () => widget.onTabChange?.call(2),
+                              child: Container(
+                                width: h * 0.07, height: h * 0.07,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: gold, width: 3),
+                                  color: gold.withValues(alpha: 0.15),
                                 ),
-                                // Text overlay centered ON the knob
-                                _showSuccess
-                                  ? Column(mainAxisSize: MainAxisSize.min, children: [
-                                      Text('SENT!', style: GoogleFonts.cinzel(fontSize: 42, fontWeight: FontWeight.w800, color: const Color(0xFF27AE60), letterSpacing: 4)),
-                                      const Icon(Icons.check_rounded, color: Color(0xFF27AE60), size: 48),
-                                    ])
-                                  : ShaderMask(
-                                      shaderCallback: (bounds) {
-                                        final fillStop = 1.0 - progress;
-                                        return LinearGradient(
-                                          begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                                          colors: [darkGold, darkGold, const Color(0xFF27AE60), const Color(0xFF27AE60)],
-                                          stops: [0.0, fillStop, fillStop, 1.0],
-                                        ).createShader(bounds);
-                                      },
-                                      blendMode: BlendMode.srcIn,
-                                      child: Column(mainAxisSize: MainAxisSize.min, children: [
-                                        Text('I AM', style: GoogleFonts.cinzel(fontSize: 36, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 8)),
-                                        Text('OKAY!', style: GoogleFonts.cinzel(fontSize: 64, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 6, height: 0.85)),
-                                      ]),
-                                    ),
-                              ],
+                                child: Icon(Icons.person, color: gold, size: h * 0.038),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 6),
+                            Expanded(child: GestureDetector(
+                              onTap: () => widget.onTabChange?.call(2),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: h * 0.03, fontWeight: FontWeight.w500, color: gold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: h * 0.018, fontWeight: FontWeight.w300, color: cream)),
+                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: cream)),
+                                ],
+                              ),
+                            )),
+                            // Logo — fills whole right area
+                            GestureDetector(
+                              onTap: _showCodePopup,
+                              child: SizedBox(
+                                height: h * 0.12,
+                                child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.fitHeight),
+                              ),
+                            ),
+                          ]),
                         ),
                       ),
-                    );
-                  }),
-                ),
 
-                // OR CALL FOR HELP
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                  child: Text('OR CALL FOR HELP', style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w700, color: goldColor, letterSpacing: 3), textAlign: TextAlign.center),
-                ),
+                      // Gold divider
+                      Container(height: 1.5, margin: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: [gold.withValues(alpha: 0.05), gold, gold, gold.withValues(alpha: 0.05)]),
+                      )),
 
-                // CALL BUTTONS
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                  child: Row(children: [
-                    // Direct Line
-                    Expanded(child: GestureDetector(
-                      onTap: _callContact,
-                      child: Container(
-                        height: 90,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          image: const DecorationImage(image: AssetImage('assets/images/btn_blue.png'), fit: BoxFit.cover),
-                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 4))],
-                        ),
-                        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          Text('DIRECT LINE:', style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.9), letterSpacing: 1)),
-                          Text(contactLabel, style: GoogleFonts.cinzel(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text('Non-Emergency Contact', style: GoogleFonts.cormorantGaramond(fontSize: 12, color: Colors.white.withValues(alpha: 0.7), fontStyle: FontStyle.italic)),
-                        ])),
+                      // ═══ KNOB AREA with 4 corner elements ═══
+                      SizedBox(
+                        height: h * 0.47,
+                        child: LayoutBuilder(builder: (context, kc) {
+                          final areaW = kc.maxWidth;
+                          final areaH = kc.maxHeight;
+                          final center = Offset(areaW / 2, areaH / 2);
+                          final knobSize = min(areaW * 0.92, areaH * 0.88);
+                          final goldRingW = knobSize * 0.058;
+                          final dialSize = knobSize - goldRingW * 2;
+                          final faceSize = knobSize * 0.75;
+
+                          return GestureDetector(
+                            onPanStart: (d) => _onKnobPanStart(d, center),
+                            onPanUpdate: (d) => _onKnobPanUpdate(d, center),
+                            onPanEnd: _onKnobPanEnd,
+                            child: Stack(children: [
+                              // Knob centered
+                              Center(child: SizedBox(
+                                width: knobSize, height: knobSize,
+                                child: Stack(alignment: Alignment.center, children: [
+                                  Container(
+                                    width: knobSize, height: knobSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft, end: Alignment.bottomRight,
+                                        colors: [gold.withValues(alpha: 0.9), gold, gold, gold.withValues(alpha: 0.85)],
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(color: gold.withValues(alpha: 0.3), blurRadius: 25, spreadRadius: 3),
+                                        BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 12, offset: const Offset(0, 4)),
+                                      ],
+                                    ),
+                                  ),
+                                  Transform.rotate(
+                                    angle: _rotation,
+                                    child: CustomPaint(
+                                      size: Size(dialSize, dialSize),
+                                      painter: _DialPainter(navy: navy, tickColor: cream.withValues(alpha: 0.8)),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: faceSize, height: faceSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: RadialGradient(colors: [faceGray, faceDarkGray], stops: const [0.7, 1.0]),
+                                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: faceSize * 0.9, height: faceSize * 0.72,
+                                    child: _showSuccess
+                                      ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                          FittedBox(fit: BoxFit.scaleDown, child: Text('SENT!', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.3, fontWeight: FontWeight.w800, color: green, letterSpacing: 4))),
+                                          Icon(Icons.check_rounded, color: green, size: faceSize * 0.2),
+                                        ]))
+                                      : ShaderMask(
+                                          shaderCallback: (bounds) {
+                                            final fs = 1.0 - progress;
+                                            return LinearGradient(
+                                              begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                                              colors: [const Color(0xFF808080), const Color(0xFF808080), green, green],
+                                              stops: [0.0, fs, fs, 1.0],
+                                            ).createShader(bounds);
+                                          },
+                                          blendMode: BlendMode.srcIn,
+                                          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                            FittedBox(fit: BoxFit.scaleDown, child: Text('I AM', style: GoogleFonts.robotoSlab(fontSize: faceSize * 0.24, fontWeight: FontWeight.w500, color: Colors.white, letterSpacing: 8))),
+                                            FittedBox(fit: BoxFit.scaleDown, child: Text('OKAY!', style: GoogleFonts.robotoSlab(fontSize: faceSize * 0.38, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 4, height: 1.0))),
+                                          ]),
+                                        ),
+                                  ),
+                                ]),
+                              )),
+
+                              // Top-left corner: TURN THE KNOB
+                              Positioned(
+                                left: 4, top: 2,
+                                child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: h * 0.032, fontWeight: FontWeight.w500, color: gold)),
+                              ),
+
+                              // Top-right corner: QR code
+                              Positioned(
+                                right: 2, top: 0,
+                                child: GestureDetector(
+                                  onTap: _showCodePopup,
+                                  child: Container(
+                                    width: h * 0.07, height: h * 0.07,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: gold, width: 2),
+                                      color: navyMid,
+                                    ),
+                                    child: ClipOval(child: Padding(
+                                      padding: const EdgeInsets.all(4),
+                                      child: _userCode != null
+                                        ? QrImageView(data: _userCode!, size: h * 0.055, backgroundColor: Colors.transparent, eyeStyle: const QrEyeStyle(color: gold, eyeShape: QrEyeShape.circle), dataModuleStyle: const QrDataModuleStyle(color: gold, dataModuleShape: QrDataModuleShape.circle))
+                                        : Icon(Icons.qr_code_2, color: gold, size: h * 0.04),
+                                    )),
+                                  ),
+                                ),
+                              ),
+
+                              // Bottom-left corner: heartbeat EKG
+                              Positioned(
+                                left: 4, bottom: 4,
+                                child: SizedBox(
+                                  width: w * 0.35, height: h * 0.04,
+                                  child: AnimatedBuilder(
+                                    animation: _ekgCtrl,
+                                    builder: (context, _) => CustomPaint(painter: _EkgPainter(progress: _ekgCtrl.value, color: gold)),
+                                  ),
+                                ),
+                              ),
+
+                              // Bottom-right corner: OR CALL FOR HELP
+                              Positioned(
+                                right: 4, bottom: 4,
+                                child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: h * 0.032, fontWeight: FontWeight.w500, color: gold)),
+                              ),
+                            ]),
+                          );
+                        }),
                       ),
-                    )),
-                    const SizedBox(width: 8),
-                    // Emergency
-                    Expanded(child: GestureDetector(
-                      onTap: _callAmbulance,
-                      child: Container(
-                        height: 90,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          image: const DecorationImage(image: AssetImage('assets/images/btn_red.png'), fit: BoxFit.cover),
-                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 4))],
-                        ),
-                        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          Text('EMERGENCY:', style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.9), letterSpacing: 1)),
-                          Text('CALL AMBULANCE', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
-                          Text('Immediate Response Required', style: GoogleFonts.cormorantGaramond(fontSize: 11, color: Colors.white.withValues(alpha: 0.7), fontStyle: FontStyle.italic)),
-                        ])),
-                      ),
-                    )),
-                  ]),
-                ),
 
-                // BOTTOM NAV
-                const SizedBox(height: 6),
-              ],
+                      // ═══ ZONE 5 + 6: Call buttons — edge to edge ═══
+                      SizedBox(
+                        height: h * 0.20,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 3, right: 3, bottom: 3),
+                          child: Row(children: [
+                            Expanded(child: GestureDetector(
+                              onTap: _callContact,
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1A5276),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                                    BoxShadow(color: const Color(0xFF1A5276).withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
+                                  ],
+                                ),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                  Icon(Icons.phone, color: gold, size: h * 0.055),
+                                  SizedBox(height: h * 0.012),
+                                  Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: h * 0.028, fontWeight: FontWeight.w700, color: cream)),
+                                  SizedBox(height: h * 0.006),
+                                  contactLabel.isNotEmpty
+                                    ? Text(contactLabel, style: GoogleFonts.robotoSlab(fontSize: h * 0.024, fontWeight: FontWeight.w400, color: gold), maxLines: 1, overflow: TextOverflow.ellipsis)
+                                    : Text('........', style: TextStyle(fontSize: h * 0.022, color: gold.withValues(alpha: 0.6), letterSpacing: 5)),
+                                ]),
+                              ),
+                            )),
+                            Expanded(child: GestureDetector(
+                              onTap: _callAmbulance,
+                              child: Container(
+                                margin: const EdgeInsets.only(left: 2),
+                                decoration: BoxDecoration(
+                                  color: red,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                                    BoxShadow(color: red.withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
+                                  ],
+                                ),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                  Icon(Icons.health_and_safety, color: gold, size: h * 0.055),
+                                  SizedBox(height: h * 0.012),
+                                  Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: h * 0.028, fontWeight: FontWeight.w700, color: cream)),
+                                  SizedBox(height: h * 0.006),
+                                  Text('#FDFOD5', style: GoogleFonts.robotoSlab(fontSize: h * 0.024, fontWeight: FontWeight.w400, color: gold)),
+                                ]),
+                              ),
+                            )),
+                          ]),
+                        ),
+                      ),
+
+                      // ═══ ZONE 7 + 8 + 9: Nav — no borders, no frames ═══
+                      SizedBox(
+                        height: h * 0.10,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 3, right: 3),
+                          child: Row(children: [
+                            _navZoneLogo('LIFE KNOB', 0, h),
+                            _navZone(Icons.people, 'PEOPLE', 1, h),
+                            _navZone(Icons.tune, 'SETUP', 2, h),
+                          ]),
+                        ),
+                      ),
+                      SafeArea(top: false, child: const SizedBox(height: 2)),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
-        ],
-      ),
         ),
       ),
     );
   }
+
+  Widget _navZoneLogo(String label, int index, double h) {
+    return Expanded(child: GestureDetector(
+      onTap: () => widget.onTabChange?.call(index),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(width: h * 0.045, height: h * 0.045, child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain)),
+        const SizedBox(height: 4),
+        Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: gold), textAlign: TextAlign.center),
+      ]),
+    ));
+  }
+
+  Widget _navZone(IconData icon, String label, int index, double h) {
+    return Expanded(child: GestureDetector(
+      onTap: () => widget.onTabChange?.call(index),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(icon, color: gold, size: h * 0.045),
+        const SizedBox(height: 4),
+        Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: gold), textAlign: TextAlign.center),
+      ]),
+    ));
+  }
+}
+
+class _DialPainter extends CustomPainter {
+  final Color navy;
+  final Color tickColor;
+  _DialPainter({required this.navy, required this.tickColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+
+    canvas.drawCircle(center, radius, Paint()..color = navy);
+
+    final tickPaint = Paint()..color = tickColor..strokeWidth = 1.5..strokeCap = StrokeCap.round;
+    final longTickPaint = Paint()..color = tickColor..strokeWidth = 2.5..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < 60; i++) {
+      final angle = (i * 6) * pi / 180;
+      final isLong = i % 5 == 0;
+      final outerR = radius - 3;
+      final innerR = isLong ? radius - 20 : radius - 10;
+
+      final p1 = Offset(center.dx + outerR * cos(angle), center.dy + outerR * sin(angle));
+      final p2 = Offset(center.dx + innerR * cos(angle), center.dy + innerR * sin(angle));
+      canvas.drawLine(p2, p1, isLong ? longTickPaint : tickPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _EkgPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+  _EkgPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color..strokeWidth = 2.5..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
+    final h = size.height / 2;
+    final w = size.width;
+
+    final path = Path()
+      ..moveTo(0, h)..lineTo(w * 0.15, h)
+      ..lineTo(w * 0.2, h - 4)..lineTo(w * 0.22, h + 2)
+      ..lineTo(w * 0.26, h - h * 0.8)..lineTo(w * 0.32, h + h * 0.4)
+      ..lineTo(w * 0.36, h - 3)..lineTo(w * 0.4, h)
+      ..lineTo(w * 0.55, h)
+      ..lineTo(w * 0.58, h - 3)..lineTo(w * 0.6, h + 2)
+      ..lineTo(w * 0.64, h - h * 0.5)..lineTo(w * 0.7, h + h * 0.3)
+      ..lineTo(w * 0.74, h - 2)..lineTo(w * 0.78, h)
+      ..lineTo(w, h);
+
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, w * progress, size.height));
+    canvas.drawPath(path, paint);
+    canvas.restore();
+
+    if (progress > 0.05 && progress < 0.95) {
+      canvas.drawCircle(Offset(w * progress, h), 3, Paint()..color = color);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _EkgPainter old) => old.progress != progress;
 }

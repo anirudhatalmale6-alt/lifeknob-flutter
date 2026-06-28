@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 import 'home_screen.dart';
@@ -12,41 +11,17 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => MainScreenState();
 }
 
-class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
+class MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final _historyKey = GlobalKey<HistoryScreenState>();
-  late AnimationController _navAnim;
 
   void goHome() {
     setState(() => _currentIndex = 0);
   }
 
-  late final List<Widget> _screens;
-
-  @override
-  void initState() {
-    super.initState();
-    _navAnim = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-    _screens = [
-      const HomeScreen(),
-      HistoryScreen(key: _historyKey, onGoHome: goHome),
-      SettingsScreen(onGoHome: goHome),
-    ];
-  }
-
-  @override
-  void dispose() {
-    _navAnim.dispose();
-    super.dispose();
-  }
-
   void _onTabChanged(int index) {
     if (index == _currentIndex) return;
     setState(() => _currentIndex = index);
-    _navAnim.forward(from: 0);
     if (index == 1) {
       _historyKey.currentState?.ensureLoaded();
     }
@@ -54,113 +29,17 @@ class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      HomeScreen(onTabChange: _onTabChanged),
+      HistoryScreen(key: _historyKey, onGoHome: goHome),
+      SettingsScreen(onGoHome: goHome),
+    ];
+
     return Scaffold(
       backgroundColor: LKTheme.bg,
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: LKTheme.bgCard.withValues(alpha: 0.95),
-          border: Border(top: BorderSide(color: LKTheme.border.withValues(alpha: 0.3))),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, -4)),
-          ],
-        ),
-        child: ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _logoNavItem(0),
-                    _navItem(Icons.person_rounded, 'PEOPLE', 1),
-                    _navItem(Icons.tune_rounded, 'SETUP', 2),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _logoNavItem(int index) {
-    final isSelected = _currentIndex == index;
-    return GestureDetector(
-      onTap: () => _onTabChanged(index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-        padding: EdgeInsets.symmetric(horizontal: isSelected ? 16 : 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? LKTheme.gold.withValues(alpha: 0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: isSelected ? 30 : 26,
-              height: isSelected ? 30 : 26,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: isSelected ? LKTheme.goldGradient : null,
-                color: isSelected ? null : LKTheme.textMuted,
-              ),
-              child: Icon(Icons.favorite, size: isSelected ? 16 : 14, color: isSelected ? const Color(0xFF5A3D10) : LKTheme.bg),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'LIFE KNOB',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? LKTheme.gold : LKTheme.textMuted,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _navItem(IconData icon, String label, int index) {
-    final isSelected = _currentIndex == index;
-    return GestureDetector(
-      onTap: () => _onTabChanged(index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: isSelected ? 30 : 26,
-              color: isSelected ? LKTheme.gold : LKTheme.textMuted,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? LKTheme.gold : LKTheme.textMuted,
-                letterSpacing: 1,
-              ),
-            ),
-          ],
-        ),
+        children: screens,
       ),
     );
   }
