@@ -363,15 +363,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         if (_showFailed) {
                                           return LinearGradient(colors: [Colors.white.withValues(alpha: 0.7), Colors.white.withValues(alpha: 0.7)]).createShader(bounds);
                                         }
-                                        if (progress < 0.01) {
-                                          return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
-                                        }
-                                        final fillStop = 1.0 - progress;
-                                        return LinearGradient(
-                                          begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                                          colors: [const Color(0xFFA0A0A0), const Color(0xFFA0A0A0), green, green],
-                                          stops: [0.0, fillStop, fillStop, 1.0],
-                                        ).createShader(bounds);
+                                        return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
                                       },
                                       blendMode: BlendMode.srcIn,
                                       child: Transform.rotate(angle: -0.75, child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain)),
