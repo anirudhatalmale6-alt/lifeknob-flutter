@@ -366,7 +366,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ),
                                   SizedBox(
                                     width: faceSize * 0.65, height: faceSize * 0.65,
-                                    child: ClipRect(child: ShaderMask(
+                                    child: (_isDragging || progress > 0.01) && !_showSuccess && !_showFailed
+                                      ? Center(child: Text('${(progress * 100).round()}%', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.25, fontWeight: FontWeight.w700, color: Color.lerp(const Color(0xFFA0A0A0), green, progress)!)))
+                                      : ClipRect(child: ShaderMask(
                                       shaderCallback: (bounds) {
                                         if (_showSuccess) {
                                           return LinearGradient(colors: [green, green]).createShader(bounds);
