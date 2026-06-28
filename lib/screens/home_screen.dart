@@ -374,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         ).createShader(bounds);
                                       },
                                       blendMode: BlendMode.srcIn,
-                                      child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain),
+                                      child: Transform.rotate(angle: -0.75, child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain)),
                                     ),
                                   ),
                                 ]),
