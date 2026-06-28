@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final tick = (newRot.abs() / _triggerAngle * 4).floor();
     if (tick > _lastHapticTick && tick <= 3) { HapticFeedback.selectionClick(); _lastHapticTick = tick; }
     setState(() { _rotation = newRot; _prevAngle = newAngle; });
-    if (_rotation.abs() >= _triggerAngle * 0.98) _triggerCheckIn();
+    if (_rotation.abs() >= _triggerAngle) _triggerCheckIn();
   }
 
   void _onKnobPanEnd(DragEndDetails d) {
