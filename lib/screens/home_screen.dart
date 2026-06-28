@@ -250,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   border: Border.all(color: gold, width: 2.5),
                                   color: gold.withValues(alpha: 0.1),
                                 ),
-                                child: Icon(Icons.person_outline, color: gold, size: h * 0.04),
+                                child: Icon(Icons.qr_code_2, color: gold, size: h * 0.035),
                               ),
                             ),
                             const SizedBox(width: 8),
