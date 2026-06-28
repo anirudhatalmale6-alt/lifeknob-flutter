@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         setState(() => _rotation = _springStart * (1.0 - Curves.easeOut.transform(_springCtrl.value)));
       }
     });
-    _hintCtrl = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
+    _hintCtrl = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this);
     _hintCtrl.addStatusListener((s) {
       if (s == AnimationStatus.completed) {
         _hintPlayed = true;
@@ -317,7 +317,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   double rockAngle = 0.0;
                                   if (!_isDragging && !_showFailed && !_showSuccess && progress < 0.01) {
                                     if (!_hintPlayed) {
-                                      rockAngle = sin(_hintCtrl.value * 2 * pi) * (pi / 3) * (1.0 - _hintCtrl.value);
+                                      final ht = _hintCtrl.value;
+                                      rockAngle = sin(ht * 5 * pi) * (pi / 3) * exp(-4 * ht);
                                     } else {
                                       final t = _rockCtrl.value;
                                       rockAngle = t < 0.5 ? sin(t / 0.5 * 2 * pi) * (pi / 18) : 0.0;
