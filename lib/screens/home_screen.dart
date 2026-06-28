@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final tick = (newRot.abs() / _triggerAngle * 4).floor();
     if (tick > _lastHapticTick && tick <= 3) { HapticFeedback.selectionClick(); _lastHapticTick = tick; }
     setState(() { _rotation = newRot; _prevAngle = newAngle; });
-    if (_rotation.abs() >= _triggerAngle) _triggerCheckIn();
+    if (_rotation.abs() >= _triggerAngle * 0.98) _triggerCheckIn();
   }
 
   void _onKnobPanEnd(DragEndDetails d) {
@@ -363,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       gradient: RadialGradient(
-                                        colors: _showFailed ? [red, const Color(0xFFAA0E19)] : (_showSuccess || _isRecentSuccess) ? [green, const Color(0xFF2D5234)] : _isOverdue ? [red, const Color(0xFFAA0E19)] : [faceGray, faceDarkGray],
+                                        colors: _showFailed ? [red, const Color(0xFFAA0E19)] : (_showSuccess || _isRecentSuccess) ? [green, const Color(0xFF2D5234)] : [faceGray, faceDarkGray],
                                         stops: const [0.7, 1.0],
                                       ),
                                       boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
@@ -383,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                           return LinearGradient(colors: [green, green]).createShader(bounds);
                                         }
                                         if (_isOverdue) {
-                                          return LinearGradient(colors: [Colors.white.withValues(alpha: 0.7), Colors.white.withValues(alpha: 0.7)]).createShader(bounds);
+                                          return LinearGradient(colors: [red, red]).createShader(bounds);
                                         }
                                         return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
                                       },
