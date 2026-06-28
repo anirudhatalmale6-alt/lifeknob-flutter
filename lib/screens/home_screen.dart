@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (s == AnimationStatus.completed) { _hintPlayed = true; setState(() => _rotation = 0); }
     });
     _ekgCtrl = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this)..repeat();
-    _rockCtrl = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this)..repeat();
+    _rockCtrl = AnimationController(duration: const Duration(milliseconds: 4500), vsync: this)..repeat();
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted && !_isDragging) _hintCtrl.forward();
     });
@@ -260,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: h * 0.03, fontWeight: FontWeight.w500, color: gold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.032, 20), fontWeight: FontWeight.w600, color: gold), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: min(h * 0.018, 14.0), fontWeight: FontWeight.w300, color: cream), maxLines: 1),
                                   Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: min(h * 0.02, 16.0), fontWeight: FontWeight.w400, color: cream), maxLines: 1),
                                 ],
@@ -290,14 +290,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Expanded(child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold))),
+                              Expanded(child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold)))),
                               GestureDetector(
                                 onTap: _showCodePopup,
                                 child: Container(
                                   width: max(h * 0.065, 44), height: max(h * 0.065, 44),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: gold.withValues(alpha: 0.6), width: 2),
+                                    border: Border.all(color: gold.withValues(alpha: 0.8), width: 2),
                                     color: navyMid,
                                   ),
                                   child: ClipOval(child: Padding(
@@ -371,7 +371,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     child: AnimatedBuilder(
                                       animation: _rockCtrl,
                                       builder: (context, child) {
-                                        final rockAngle = (_isDragging || _showFailed || _showSuccess || progress > 0.01) ? 0.0 : sin(_rockCtrl.value * 2 * pi) * 0.06;
+                                        final t = _rockCtrl.value;
+                                        final rockAngle = (_isDragging || _showFailed || _showSuccess || progress > 0.01) ? 0.0 : (t < 0.33 ? sin(t / 0.33 * 2 * pi) * 0.08 : 0.0);
                                         return Transform.rotate(angle: rockAngle, child: child);
                                       },
                                       child: ShaderMask(
@@ -420,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 ),
                               ),
                               const Spacer(),
-                              Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold)),
+                              Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold)))),
                             ],
                           ),
                         ),
@@ -444,15 +445,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     BoxShadow(color: const Color(0xFF1A5276).withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
                                   ],
                                 ),
-                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                  Icon(Icons.phone, color: gold, size: h * 0.06),
-                                  SizedBox(height: h * 0.015),
-                                  Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: cream)),
-                                  SizedBox(height: h * 0.004),
-                                  contactLabel.isNotEmpty
-                                    ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.022, 14), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
-                                    : Text('........', style: TextStyle(fontSize: h * 0.022, color: gold.withValues(alpha: 0.6), letterSpacing: 5)),
-                                ]),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                    Icon(Icons.phone, color: gold, size: h * 0.06),
+                                    SizedBox(height: h * 0.012),
+                                    FittedBox(fit: BoxFit.scaleDown, child: Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: cream))),
+                                    SizedBox(height: h * 0.004),
+                                    contactLabel.isNotEmpty
+                                      ? FittedBox(fit: BoxFit.scaleDown, child: Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.022, 14), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center))
+                                      : Text('........', style: TextStyle(fontSize: h * 0.022, color: gold.withValues(alpha: 0.6), letterSpacing: 5)),
+                                  ]),
+                                ),
                               ),
                             )),
                             Expanded(child: GestureDetector(
@@ -467,13 +471,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     BoxShadow(color: red.withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
                                   ],
                                 ),
-                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                  Icon(Icons.health_and_safety, color: gold, size: h * 0.06),
-                                  SizedBox(height: h * 0.015),
-                                  Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: cream)),
-                                  SizedBox(height: h * 0.004),
-                                  Text('#FDFOD5', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.022, 14), fontWeight: FontWeight.w400, color: gold)),
-                                ]),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                    Icon(Icons.health_and_safety, color: gold, size: h * 0.06),
+                                    SizedBox(height: h * 0.012),
+                                    FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: cream))),
+                                    SizedBox(height: h * 0.004),
+                                    FittedBox(fit: BoxFit.scaleDown, child: Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.022, 14), fontWeight: FontWeight.w400, color: gold))),
+                                  ]),
+                                ),
                               ),
                             )),
                           ]),
