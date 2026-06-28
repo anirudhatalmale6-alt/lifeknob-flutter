@@ -339,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     angle: _rotation,
                                     child: CustomPaint(
                                       size: Size(dialSize, dialSize),
-                                      painter: _DialPainter(navy: navy, tickColor: cream.withValues(alpha: 0.8)),
+                                      painter: _DialPainter(navy: navy, tickColor: cream.withValues(alpha: 0.8), progress: progress),
                                     ),
                                   ),
                                   Container(
@@ -354,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   SizedBox(
-                                    width: faceSize * 0.55, height: faceSize * 0.55,
+                                    width: faceSize * 0.7, height: faceSize * 0.7,
                                     child: ShaderMask(
                                       shaderCallback: (bounds) {
                                         if (_showSuccess) {
@@ -520,7 +520,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 class _DialPainter extends CustomPainter {
   final Color navy;
   final Color tickColor;
-  _DialPainter({required this.navy, required this.tickColor});
+  final double progress;
+  final Color progressColor;
+  final Color trackColor;
+  _DialPainter({required this.navy, required this.tickColor, this.progress = 0.0, this.progressColor = const Color(0xFF386641), this.trackColor = const Color(0x40DDA15E)});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -528,6 +531,15 @@ class _DialPainter extends CustomPainter {
     final radius = size.width / 2;
 
     canvas.drawCircle(center, radius, Paint()..color = navy);
+
+    final arcRadius = radius * 0.78;
+    final arcPaint = Paint()..color = trackColor..strokeWidth = 4..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
+    canvas.drawArc(Rect.fromCircle(center: center, radius: arcRadius), -pi / 2, 3 * pi / 2, false, arcPaint);
+
+    if (progress > 0.01) {
+      final fillPaint = Paint()..color = progressColor..strokeWidth = 5..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
+      canvas.drawArc(Rect.fromCircle(center: center, radius: arcRadius), -pi / 2, 3 * pi / 2 * progress, false, fillPaint);
+    }
 
     final tickPaint = Paint()..color = tickColor..strokeWidth = 1.5..strokeCap = StrokeCap.round;
     final longTickPaint = Paint()..color = tickColor..strokeWidth = 2.5..strokeCap = StrokeCap.round;
@@ -545,7 +557,7 @@ class _DialPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _DialPainter old) => old.progress != progress;
 }
 
 class _EkgPainter extends CustomPainter {
