@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         setState(() => _rotation = _springStart * (1.0 - Curves.easeOut.transform(_springCtrl.value)));
       }
     });
-    _hintCtrl = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this);
+    _hintCtrl = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this);
     _hintCtrl.addStatusListener((s) {
       if (s == AnimationStatus.completed) {
         _hintPlayed = true;
@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       }
     });
     _ekgCtrl = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this)..repeat();
-    _rockCtrl = AnimationController(duration: const Duration(milliseconds: 3500), vsync: this);
+    _rockCtrl = AnimationController(duration: const Duration(milliseconds: 4500), vsync: this);
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted && !_isDragging) _hintCtrl.forward();
     });
@@ -321,9 +321,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       rockAngle = sin(ht * 5 * pi) * (pi / 3) * exp(-4 * ht);
                                     } else {
                                       final t = _rockCtrl.value;
-                                      if (t < 0.6) {
-                                        final st = t / 0.6;
-                                        rockAngle = sin(st * 3 * pi) * (pi / 18) * (1.0 - st * 0.5);
+                                      if (t < 0.65) {
+                                        final st = t / 0.65;
+                                        rockAngle = sin(st * 3 * pi) * (pi / 18) * exp(-2 * st);
                                       }
                                     }
                                   }
