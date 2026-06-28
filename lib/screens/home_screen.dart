@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       }
     });
     _ekgCtrl = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this)..repeat();
-    _rockCtrl = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
+    _rockCtrl = AnimationController(duration: const Duration(milliseconds: 3500), vsync: this);
     Future.delayed(const Duration(milliseconds: 1000), () {
       if (mounted && !_isDragging) _hintCtrl.forward();
     });
@@ -321,7 +321,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       rockAngle = sin(ht * 5 * pi) * (pi / 3) * exp(-4 * ht);
                                     } else {
                                       final t = _rockCtrl.value;
-                                      rockAngle = t < 0.5 ? sin(t / 0.5 * 2 * pi) * (pi / 18) : 0.0;
+                                      if (t < 0.6) {
+                                        final st = t / 0.6;
+                                        rockAngle = sin(st * 3 * pi) * (pi / 18) * (1.0 - st * 0.5);
+                                      }
                                     }
                                   }
                                   return Transform.rotate(angle: rockAngle, child: child);
