@@ -287,28 +287,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         height: max(h * 0.065, 48),
                         child: Padding(
                           padding: const EdgeInsets.only(left: 6, right: 6),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold)))),
-                              GestureDetector(
-                                onTap: _showCodePopup,
-                                child: Container(
-                                  width: max(h * 0.065, 44), height: max(h * 0.065, 44),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: gold.withValues(alpha: 0.8), width: 2),
-                                    color: navyMid,
-                                  ),
-                                  child: ClipOval(child: Padding(
-                                    padding: const EdgeInsets.all(4),
-                                    child: _userCode != null
-                                      ? QrImageView(data: _userCode!, size: max(h * 0.055, 34), backgroundColor: Colors.transparent, eyeStyle: const QrEyeStyle(color: gold, eyeShape: QrEyeShape.circle), dataModuleStyle: const QrDataModuleStyle(color: gold, dataModuleShape: QrDataModuleShape.circle))
-                                      : Icon(Icons.qr_code_2, color: gold, size: max(h * 0.04, 28)),
-                                  )),
-                                ),
-                              ),
-                            ],
+                          child: Center(
+                            child: FittedBox(fit: BoxFit.scaleDown, child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold))),
                           ),
                         ),
                       ),
@@ -367,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   SizedBox(
-                                    width: faceSize * 0.5, height: faceSize * 0.5,
+                                    width: faceSize * 0.38, height: faceSize * 0.38,
                                     child: AnimatedBuilder(
                                       animation: _rockCtrl,
                                       builder: (context, child) {
@@ -409,14 +389,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       SizedBox(
                         height: max(h * 0.06, 42),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Expanded(child: Center(
-                                child: FittedBox(fit: BoxFit.scaleDown, child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold))),
-                              )),
+                              FittedBox(fit: BoxFit.scaleDown, child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold))),
                               Expanded(child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                padding: const EdgeInsets.only(left: 12, right: 4),
                                 child: SizedBox(
                                   height: max(h * 0.04, 28),
                                   child: AnimatedBuilder(
