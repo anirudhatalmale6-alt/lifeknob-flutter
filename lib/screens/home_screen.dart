@@ -433,8 +433,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     FittedBox(fit: BoxFit.scaleDown, child: Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
                                     SizedBox(height: h * 0.006),
                                     contactLabel.isNotEmpty
-                                      ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.032, 19), fontWeight: FontWeight.w500, color: cream), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
-                                      : Text('........', style: TextStyle(fontSize: h * 0.028, color: cream.withValues(alpha: 0.5), letterSpacing: 5)),
+                                      ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.024, 15), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
+                                      : Text('........', style: TextStyle(fontSize: h * 0.022, color: gold.withValues(alpha: 0.6), letterSpacing: 5)),
                                   ]),
                               ),
                             )),
@@ -455,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     SizedBox(height: h * 0.01),
                                     FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
                                     SizedBox(height: h * 0.006),
-                                    Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.032, 19), fontWeight: FontWeight.w500, color: cream), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                                    Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.024, 15), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
                                   ]),
                               ),
                             )),
