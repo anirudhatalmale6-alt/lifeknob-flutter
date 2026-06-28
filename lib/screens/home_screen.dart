@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         setState(() => _rotation = _springStart * (1.0 - Curves.easeOut.transform(_springCtrl.value)));
       }
     });
-    _hintCtrl = AnimationController(duration: const Duration(milliseconds: 4500), vsync: this);
+    _hintCtrl = AnimationController(duration: const Duration(milliseconds: 7000), vsync: this);
     _hintCtrl.addStatusListener((s) {
       if (s == AnimationStatus.completed) {
         _hintPlayed = true;
