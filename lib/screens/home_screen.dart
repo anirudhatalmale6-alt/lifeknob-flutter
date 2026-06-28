@@ -366,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
                                       },
                                       blendMode: BlendMode.srcIn,
-                                      child: Transform.translate(offset: const Offset(6, 0), child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain)),
+                                      child: Transform.translate(offset: const Offset(10, 0), child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain)),
                                     )),
                                   ),
                                 ]),
