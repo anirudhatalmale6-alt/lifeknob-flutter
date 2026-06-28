@@ -427,16 +427,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     BoxShadow(color: const Color(0xFF1A5276).withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
                                   ],
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                  child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                                    Icon(Icons.phone, color: gold, size: h * 0.055),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                    Icon(Icons.phone, color: gold, size: h * 0.05),
+                                    SizedBox(height: h * 0.01),
                                     FittedBox(fit: BoxFit.scaleDown, child: Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
+                                    SizedBox(height: h * 0.006),
                                     contactLabel.isNotEmpty
                                       ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.02, 13), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
                                       : Text('........', style: TextStyle(fontSize: h * 0.02, color: gold.withValues(alpha: 0.6), letterSpacing: 5)),
                                   ]),
-                                ),
                               ),
                             )),
                             Expanded(child: GestureDetector(
@@ -451,14 +450,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     BoxShadow(color: red.withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
                                   ],
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                  child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                                    Icon(Icons.health_and_safety, color: gold, size: h * 0.055),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                    Icon(Icons.health_and_safety, color: gold, size: h * 0.05),
+                                    SizedBox(height: h * 0.01),
                                     FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
+                                    SizedBox(height: h * 0.006),
                                     Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.02, 13), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
                                   ]),
-                                ),
                               ),
                             )),
                           ]),
@@ -500,7 +498,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         SizedBox(
           width: h * 0.04, height: h * 0.04,
-          child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: ColorFilter.mode(Colors.white.withValues(alpha: 0.7), BlendMode.srcIn), fit: BoxFit.contain),
+          child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: const ColorFilter.mode(gold, BlendMode.srcIn), fit: BoxFit.contain),
         ),
         const SizedBox(height: 4),
         Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.7)), textAlign: TextAlign.center),
@@ -512,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Expanded(child: GestureDetector(
       onTap: () => widget.onTabChange?.call(index),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(icon, color: Colors.white.withValues(alpha: 0.7), size: h * 0.045),
+        Icon(icon, color: gold, size: h * 0.045),
         const SizedBox(height: 4),
         Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.7)), textAlign: TextAlign.center),
       ]),
