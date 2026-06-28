@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showSuccess = false;
   bool _showFailed = false;
   DateTime? _lastSuccessTime;
+  bool _dataLoaded = false;
   int _lastHapticTick = 0;
 
   late AnimationController _springCtrl;
@@ -100,22 +101,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     try {
       final response = await ApiService().getHistory(page: 1);
       final List data = response['data'] ?? [];
-      if (data.isNotEmpty && mounted) {
-        final dt = DateTime.parse(data.first['created_at']);
-        final diff = DateTime.now().difference(dt);
-        setState(() {
-          _lastSuccessTime = dt;
-          if (diff.inMinutes < 1) _lastCheckIn = 'Just now';
-          else if (diff.inMinutes < 60) _lastCheckIn = '${diff.inMinutes}m ago';
-          else if (diff.inHours < 24) _lastCheckIn = '${diff.inHours}h ago';
-          else _lastCheckIn = '${diff.inDays}d ago';
-        });
+      if (mounted) {
+        if (data.isNotEmpty) {
+          final dt = DateTime.parse(data.first['created_at']);
+          final diff = DateTime.now().difference(dt);
+          setState(() {
+            _lastSuccessTime = dt; _dataLoaded = true;
+            if (diff.inMinutes < 1) _lastCheckIn = 'Just now';
+            else if (diff.inMinutes < 60) _lastCheckIn = '${diff.inMinutes}m ago';
+            else if (diff.inHours < 24) _lastCheckIn = '${diff.inHours}h ago';
+            else _lastCheckIn = '${diff.inDays}d ago';
+          });
+        } else {
+          setState(() => _dataLoaded = true);
+        }
       }
-    } catch (_) {}
+    } catch (_) { if (mounted) setState(() => _dataLoaded = true); }
   }
 
   bool get _isRecentSuccess => _lastSuccessTime != null && DateTime.now().difference(_lastSuccessTime!).inMinutes < 60;
-  bool get _isOverdue => _lastSuccessTime == null || DateTime.now().difference(_lastSuccessTime!).inHours >= 24;
+  bool get _isOverdue => _dataLoaded && (_lastSuccessTime == null || DateTime.now().difference(_lastSuccessTime!).inHours >= 24);
 
   double _getAngle(Offset pos, Offset center) => atan2(pos.dy - center.dy, pos.dx - center.dx);
 
@@ -144,9 +149,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (!_showSuccess) {
       if (_rotation.abs() > 0.3) {
         setState(() => _showFailed = true);
-        Future.delayed(const Duration(seconds: 5), () {
-          if (mounted) setState(() => _showFailed = false);
-        });
       }
       _springStart = _rotation; _springCtrl.forward(from: 0);
     }
