@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isDragging = false;
   bool _showSuccess = false;
   bool _showFailed = false;
-  String _knobState = 'idle';
+  DateTime? _lastSuccessTime;
   int _lastHapticTick = 0;
 
   late AnimationController _springCtrl;
@@ -104,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         final dt = DateTime.parse(data.first['created_at']);
         final diff = DateTime.now().difference(dt);
         setState(() {
+          if (diff.inMinutes < 60) _lastSuccessTime = dt;
           if (diff.inMinutes < 1) _lastCheckIn = 'Just now';
           else if (diff.inMinutes < 60) _lastCheckIn = '${diff.inMinutes}m ago';
           else if (diff.inHours < 24) _lastCheckIn = '${diff.inHours}h ago';
@@ -112,6 +113,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       }
     } catch (_) {}
   }
+
+  bool get _isRecentSuccess => _lastSuccessTime != null && DateTime.now().difference(_lastSuccessTime!).inMinutes < 60;
 
   double _getAngle(Offset pos, Offset center) => atan2(pos.dy - center.dy, pos.dx - center.dx);
 
@@ -139,8 +142,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _isDragging = false;
     if (!_showSuccess) {
       if (_rotation.abs() > 0.3) {
-        setState(() { _showFailed = true; _knobState = 'failed'; });
-        Future.delayed(const Duration(milliseconds: 1800), () {
+        setState(() => _showFailed = true);
+        Future.delayed(const Duration(seconds: 5), () {
           if (mounted) setState(() => _showFailed = false);
         });
       }
@@ -151,9 +154,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _triggerCheckIn() {
     if (_showSuccess) return;
     HapticFeedback.heavyImpact();
-    setState(() { _isDragging = false; _showSuccess = true; _showFailed = false; _knobState = 'success'; _rotation = _triggerAngle; });
+    setState(() { _isDragging = false; _showSuccess = true; _showFailed = false; _lastSuccessTime = DateTime.now(); _rotation = _triggerAngle; });
     _doCheckIn();
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted) setState(() { _showSuccess = false; _rotation = 0; _lastHapticTick = 0; });
     });
   }
@@ -359,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       gradient: RadialGradient(
-                                        colors: (_showFailed || _knobState == 'failed') ? [red, const Color(0xFFAA0E19)] : _knobState == 'success' ? [green, const Color(0xFF2D5234)] : [faceGray, faceDarkGray],
+                                        colors: _showFailed ? [red, const Color(0xFFAA0E19)] : (_showSuccess || _isRecentSuccess) ? [green, const Color(0xFF2D5234)] : [faceGray, faceDarkGray],
                                         stops: const [0.7, 1.0],
                                       ),
                                       boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
@@ -375,11 +378,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       ? Center(child: Text('${(progress * 100).round()}%', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.25, fontWeight: FontWeight.w700, color: progress >= 1.0 ? green : Color.lerp(red, gold, progress)!)))
                                       : ClipRect(child: ShaderMask(
                                       shaderCallback: (bounds) {
-                                        if (_knobState == 'success') {
+                                        if (_isRecentSuccess) {
                                           return LinearGradient(colors: [green, green]).createShader(bounds);
-                                        }
-                                        if (_knobState == 'failed') {
-                                          return LinearGradient(colors: [red, red]).createShader(bounds);
                                         }
                                         return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
                                       },
