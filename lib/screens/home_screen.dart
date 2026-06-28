@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
     _ekgCtrl = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this)..repeat();
     _rockCtrl = AnimationController(duration: const Duration(milliseconds: 3500), vsync: this);
-    Future.delayed(const Duration(milliseconds: 1000), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted && !_isDragging) _hintCtrl.forward();
     });
     _loadUserData();
