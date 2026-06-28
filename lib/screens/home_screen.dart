@@ -355,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ),
                                   SizedBox(
                                     width: faceSize * 0.65, height: faceSize * 0.65,
-                                    child: ShaderMask(
+                                    child: ClipRect(child: ShaderMask(
                                       shaderCallback: (bounds) {
                                         if (_showSuccess) {
                                           return LinearGradient(colors: [green, green]).createShader(bounds);
@@ -366,8 +366,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
                                       },
                                       blendMode: BlendMode.srcIn,
-                                      child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain),
-                                    ),
+                                      child: Transform.translate(offset: const Offset(3, 0), child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain)),
+                                    )),
                                   ),
                                 ]),
                               ))),
