@@ -354,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   SizedBox(
-                                    width: faceSize * 0.42, height: faceSize * 0.42,
+                                    width: faceSize * 0.55, height: faceSize * 0.55,
                                     child: ShaderMask(
                                       shaderCallback: (bounds) {
                                         if (_showSuccess) {
