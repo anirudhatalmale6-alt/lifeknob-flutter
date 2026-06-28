@@ -26,12 +26,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String? _sosName;
   String? _ambulanceNumber;
 
-  static const double _triggerAngle = 3 * pi / 2;
+  static const double _triggerAngle = pi;
   double _rotation = 0.0;
   double _prevAngle = 0.0;
   bool _isDragging = false;
   bool _showSuccess = false;
   bool _showFailed = false;
+  String _knobState = 'idle';
   int _lastHapticTick = 0;
 
   late AnimationController _springCtrl;
@@ -138,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _isDragging = false;
     if (!_showSuccess) {
       if (_rotation.abs() > 0.3) {
-        setState(() => _showFailed = true);
+        setState(() { _showFailed = true; _knobState = 'failed'; });
         Future.delayed(const Duration(milliseconds: 1800), () {
           if (mounted) setState(() => _showFailed = false);
         });
@@ -150,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _triggerCheckIn() {
     if (_showSuccess) return;
     HapticFeedback.heavyImpact();
-    setState(() { _isDragging = false; _showSuccess = true; _showFailed = false; _rotation = _triggerAngle; });
+    setState(() { _isDragging = false; _showSuccess = true; _showFailed = false; _knobState = 'success'; _rotation = _triggerAngle; });
     _doCheckIn();
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) setState(() { _showSuccess = false; _rotation = 0; _lastHapticTick = 0; });
@@ -358,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       gradient: RadialGradient(
-                                        colors: _showFailed ? [red, const Color(0xFFAA0E19)] : [faceGray, faceDarkGray],
+                                        colors: (_showFailed || _knobState == 'failed') ? [red, const Color(0xFFAA0E19)] : _knobState == 'success' ? [green, const Color(0xFF2D5234)] : [faceGray, faceDarkGray],
                                         stops: const [0.7, 1.0],
                                       ),
                                       boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
@@ -367,16 +368,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   SizedBox(
                                     width: faceSize * 0.65, height: faceSize * 0.65,
                                     child: _showFailed
-                                      ? Center(child: Text('TRY AGAIN', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.15, fontWeight: FontWeight.w700, color: Colors.white), textAlign: TextAlign.center))
-                                      : (_isDragging || progress > 0.01) && !_showSuccess
+                                      ? Center(child: Text('TRY\nAGAIN', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.14, fontWeight: FontWeight.w700, color: cream), textAlign: TextAlign.center))
+                                      : _showSuccess
+                                      ? Center(child: Text('THANK\nYOU', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.14, fontWeight: FontWeight.w700, color: cream), textAlign: TextAlign.center))
+                                      : (_isDragging || progress > 0.01)
                                       ? Center(child: Text('${(progress * 100).round()}%', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.25, fontWeight: FontWeight.w700, color: progress >= 1.0 ? green : Color.lerp(red, gold, progress)!)))
                                       : ClipRect(child: ShaderMask(
                                       shaderCallback: (bounds) {
-                                        if (_showSuccess) {
+                                        if (_knobState == 'success') {
                                           return LinearGradient(colors: [green, green]).createShader(bounds);
                                         }
-                                        if (_showFailed) {
-                                          return LinearGradient(colors: [Colors.white.withValues(alpha: 0.7), Colors.white.withValues(alpha: 0.7)]).createShader(bounds);
+                                        if (_knobState == 'failed') {
+                                          return LinearGradient(colors: [red, red]).createShader(bounds);
                                         }
                                         return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
                                       },
@@ -541,11 +544,11 @@ class _DialPainter extends CustomPainter {
 
     final arcRadius = radius * 0.78;
     final arcPaint = Paint()..color = trackColor..strokeWidth = 4..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
-    canvas.drawArc(Rect.fromCircle(center: center, radius: arcRadius), -pi / 2, 3 * pi / 2, false, arcPaint);
+    canvas.drawArc(Rect.fromCircle(center: center, radius: arcRadius), -pi / 2, pi, false, arcPaint);
 
     if (progress > 0.01) {
       final fillPaint = Paint()..color = progressColor..strokeWidth = 5..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
-      canvas.drawArc(Rect.fromCircle(center: center, radius: arcRadius), -pi / 2, 3 * pi / 2 * progress, false, fillPaint);
+      canvas.drawArc(Rect.fromCircle(center: center, radius: arcRadius), -pi / 2, pi * progress, false, fillPaint);
     }
 
     final tickPaint = Paint()..color = tickColor..strokeWidth = 1.5..strokeCap = StrokeCap.round;
