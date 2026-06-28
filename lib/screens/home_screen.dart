@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String? _sosNumber;
   String? _sosName;
   String? _ambulanceNumber;
+  bool _isFreeUser = true;
 
   static const double _triggerAngle = pi;
   double _rotation = 0.0;
@@ -88,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _userCode = user.userCode; _userName = user.name; _sosNumber = user.sosNumber;
       _sosName = user.sosName; _ambulanceNumber = user.ambulanceNumber;
+      _isFreeUser = user.isFree;
     });
   }
 
@@ -302,7 +304,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // ═══ KNOB — own section ═══
                       SizedBox(
-                        height: h * 0.36,
+                        height: _isFreeUser ? h * 0.28 : h * 0.36,
                         child: LayoutBuilder(builder: (context, kc) {
                           final areaW = kc.maxWidth;
                           final areaH = kc.maxHeight;
@@ -399,6 +401,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           );
                         }),
                       ),
+
+                      // ═══ AD BANNER (free users) ═══
+                      if (_isFreeUser) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Column(children: [
+                            Container(
+                              height: h * 0.08,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: gold.withValues(alpha: 0.3), width: 1),
+                                borderRadius: BorderRadius.circular(8),
+                                color: navy.withValues(alpha: 0.5),
+                              ),
+                              child: Center(child: Text('AD', style: GoogleFonts.barlowCondensed(fontSize: 14, color: gold.withValues(alpha: 0.3)))),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 2, right: 4),
+                                child: GestureDetector(
+                                  onTap: () => widget.onTabChange?.call(2),
+                                  child: Text('Remove ads', style: GoogleFonts.robotoSlab(fontSize: 11, color: gold, fontStyle: FontStyle.italic)),
+                                ),
+                              ),
+                            ),
+                          ]),
+                        ),
+                      ],
 
                       // ═══ OR CALL FOR HELP | EKG ═══
                       SizedBox(
