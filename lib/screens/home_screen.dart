@@ -242,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           padding: const EdgeInsets.only(left: 6, right: 2),
                           child: Row(children: [
                             GestureDetector(
-                              onTap: () => widget.onTabChange?.call(2),
+                              onTap: _showCodePopup,
                               child: Container(
                                 width: h * 0.08, height: h * 0.08,
                                 decoration: BoxDecoration(
@@ -250,7 +250,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   border: Border.all(color: gold, width: 3.5),
                                   color: gold.withValues(alpha: 0.12),
                                 ),
-                                child: Icon(Icons.person, color: gold, size: h * 0.042),
+                                child: Center(child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6),
+                                    child: Text(_userCode ?? '?', style: GoogleFonts.barlowCondensed(fontSize: h * 0.022, fontWeight: FontWeight.w800, color: gold, letterSpacing: 1)),
+                                  ),
+                                )),
                               ),
                             ),
                             const SizedBox(width: 6),
@@ -367,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   SizedBox(
-                                    width: faceSize * 0.6, height: faceSize * 0.6,
+                                    width: faceSize * 0.5, height: faceSize * 0.5,
                                     child: AnimatedBuilder(
                                       animation: _rockCtrl,
                                       builder: (context, child) {
