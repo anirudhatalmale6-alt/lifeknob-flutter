@@ -255,14 +255,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 ],
                               ),
                             )),
-                            // Logo — fills whole right area
-                            GestureDetector(
+                            // Logo — responsive, scales with available space
+                            Expanded(child: GestureDetector(
                               onTap: _showCodePopup,
-                              child: SizedBox(
-                                height: h * 0.12,
-                                child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.fitHeight),
-                              ),
-                            ),
+                              child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain),
+                            )),
                           ]),
                         ),
                       ),
