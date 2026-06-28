@@ -317,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   double rockAngle = 0.0;
                                   if (!_isDragging && !_showFailed && !_showSuccess && progress < 0.01) {
                                     if (!_hintPlayed) {
-                                      rockAngle = sin(_hintCtrl.value * pi) * (pi / 3);
+                                      rockAngle = sin(_hintCtrl.value * 2 * pi) * (pi / 3) * (1.0 - _hintCtrl.value);
                                     } else {
                                       final t = _rockCtrl.value;
                                       rockAngle = t < 0.5 ? sin(t / 0.5 * 2 * pi) * (pi / 18) : 0.0;
