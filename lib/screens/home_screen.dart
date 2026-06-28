@@ -31,11 +31,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   double _prevAngle = 0.0;
   bool _isDragging = false;
   bool _showSuccess = false;
+  bool _showFailed = false;
   int _lastHapticTick = 0;
 
   late AnimationController _springCtrl;
   late AnimationController _hintCtrl;
   late AnimationController _ekgCtrl;
+  late AnimationController _rockCtrl;
   double _springStart = 0;
   bool _hintPlayed = false;
 
@@ -68,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (s == AnimationStatus.completed) { _hintPlayed = true; setState(() => _rotation = 0); }
     });
     _ekgCtrl = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this)..repeat();
+    _rockCtrl = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this)..repeat();
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted && !_isDragging) _hintCtrl.forward();
     });
@@ -76,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   @override
-  void dispose() { _springCtrl.dispose(); _hintCtrl.dispose(); _ekgCtrl.dispose(); super.dispose(); }
+  void dispose() { _springCtrl.dispose(); _hintCtrl.dispose(); _ekgCtrl.dispose(); _rockCtrl.dispose(); super.dispose(); }
 
   void _setUserData(dynamic user) {
     if (user == null || !mounted) return;
@@ -114,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _onKnobPanStart(DragStartDetails d, Offset center) {
     if (_isCheckingIn || _showSuccess) return;
     _springCtrl.stop(); _hintCtrl.stop(); _hintPlayed = true; _lastHapticTick = 0;
-    setState(() { _isDragging = true; _prevAngle = _getAngle(d.localPosition, center); });
+    setState(() { _isDragging = true; _showFailed = false; _prevAngle = _getAngle(d.localPosition, center); });
   }
 
   void _onKnobPanUpdate(DragUpdateDetails d, Offset center) {
@@ -133,13 +136,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _onKnobPanEnd(DragEndDetails d) {
     if (!_isDragging) return;
     _isDragging = false;
-    if (!_showSuccess) { _springStart = _rotation; _springCtrl.forward(from: 0); }
+    if (!_showSuccess) {
+      if (_rotation.abs() > 0.3) {
+        setState(() => _showFailed = true);
+        Future.delayed(const Duration(milliseconds: 1800), () {
+          if (mounted) setState(() => _showFailed = false);
+        });
+      }
+      _springStart = _rotation; _springCtrl.forward(from: 0);
+    }
   }
 
   void _triggerCheckIn() {
     if (_showSuccess) return;
     HapticFeedback.heavyImpact();
-    setState(() { _isDragging = false; _showSuccess = true; _rotation = _triggerAngle; });
+    setState(() { _isDragging = false; _showSuccess = true; _showFailed = false; _rotation = _triggerAngle; });
     _doCheckIn();
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) setState(() { _showSuccess = false; _rotation = 0; _lastHapticTick = 0; });
@@ -255,12 +266,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 ],
                               ),
                             )),
-                            // Logo — white letters PNG, header only
                             Expanded(child: Padding(
                               padding: const EdgeInsets.all(4),
                               child: GestureDetector(
                                 onTap: _showCodePopup,
-                                child: Image.asset('assets/images/lifeknob_logo_white.png', fit: BoxFit.contain),
+                                child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', fit: BoxFit.contain),
                               ),
                             )),
                           ]),
@@ -349,32 +359,43 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     width: faceSize, height: faceSize,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      gradient: RadialGradient(colors: [faceGray, faceDarkGray], stops: const [0.7, 1.0]),
+                                      gradient: RadialGradient(
+                                        colors: _showFailed ? [red, const Color(0xFFAA0E19)] : [faceGray, faceDarkGray],
+                                        stops: const [0.7, 1.0],
+                                      ),
                                       boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
                                     ),
                                   ),
                                   SizedBox(
-                                    width: faceSize * 0.9, height: faceSize * 0.72,
-                                    child: _showSuccess
-                                      ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                                          FittedBox(fit: BoxFit.scaleDown, child: Text('SENT!', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.3, fontWeight: FontWeight.w800, color: green, letterSpacing: 4))),
-                                          Icon(Icons.check_rounded, color: green, size: faceSize * 0.2),
-                                        ]))
-                                      : ShaderMask(
-                                          shaderCallback: (bounds) {
-                                            final fs = 1.0 - progress;
-                                            return LinearGradient(
-                                              begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                                              colors: [const Color(0xFF808080), const Color(0xFF808080), green, green],
-                                              stops: [0.0, fs, fs, 1.0],
-                                            ).createShader(bounds);
-                                          },
-                                          blendMode: BlendMode.srcIn,
-                                          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                            FittedBox(fit: BoxFit.scaleDown, child: Text('I AM', style: GoogleFonts.robotoSlab(fontSize: faceSize * 0.24, fontWeight: FontWeight.w500, color: Colors.white, letterSpacing: 8))),
-                                            FittedBox(fit: BoxFit.scaleDown, child: Text('OKAY!', style: GoogleFonts.robotoSlab(fontSize: faceSize * 0.38, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 4, height: 1.0))),
-                                          ]),
-                                        ),
+                                    width: faceSize * 0.6, height: faceSize * 0.6,
+                                    child: AnimatedBuilder(
+                                      animation: _rockCtrl,
+                                      builder: (context, child) {
+                                        final rockAngle = (_isDragging || _showFailed || _showSuccess || progress > 0.01) ? 0.0 : sin(_rockCtrl.value * 2 * pi) * 0.06;
+                                        return Transform.rotate(angle: rockAngle, child: child);
+                                      },
+                                      child: ShaderMask(
+                                        shaderCallback: (bounds) {
+                                          if (_showSuccess) {
+                                            return LinearGradient(colors: [green, green]).createShader(bounds);
+                                          }
+                                          if (_showFailed) {
+                                            return LinearGradient(colors: [Colors.white.withValues(alpha: 0.7), Colors.white.withValues(alpha: 0.7)]).createShader(bounds);
+                                          }
+                                          if (progress < 0.01) {
+                                            return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
+                                          }
+                                          final fillStop = 1.0 - progress;
+                                          return LinearGradient(
+                                            begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                                            colors: [const Color(0xFFA0A0A0), const Color(0xFFA0A0A0), green, green],
+                                            stops: [0.0, fillStop, fillStop, 1.0],
+                                          ).createShader(bounds);
+                                        },
+                                        blendMode: BlendMode.srcIn,
+                                        child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain),
+                                      ),
+                                    ),
                                   ),
                                 ]),
                               )),
@@ -392,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               SizedBox(
-                                width: w * 0.25, height: max(h * 0.04, 28),
+                                width: w * 0.35, height: max(h * 0.04, 28),
                                 child: AnimatedBuilder(
                                   animation: _ekgCtrl,
                                   builder: (context, _) => CustomPaint(painter: _EkgPainter(progress: _ekgCtrl.value, color: gold)),
@@ -424,12 +445,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ],
                                 ),
                                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                  Icon(Icons.phone, color: gold, size: h * 0.055),
-                                  SizedBox(height: h * 0.012),
-                                  Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.028, 18), fontWeight: FontWeight.w700, color: cream)),
-                                  SizedBox(height: h * 0.006),
+                                  Icon(Icons.phone, color: gold, size: h * 0.06),
+                                  SizedBox(height: h * 0.015),
+                                  Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: cream)),
+                                  SizedBox(height: h * 0.004),
                                   contactLabel.isNotEmpty
-                                    ? Text(contactLabel, style: GoogleFonts.robotoSlab(fontSize: h * 0.024, fontWeight: FontWeight.w400, color: gold), maxLines: 1, overflow: TextOverflow.ellipsis)
+                                    ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.022, 14), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
                                     : Text('........', style: TextStyle(fontSize: h * 0.022, color: gold.withValues(alpha: 0.6), letterSpacing: 5)),
                                 ]),
                               ),
@@ -447,11 +468,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ],
                                 ),
                                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                  Icon(Icons.health_and_safety, color: gold, size: h * 0.055),
-                                  SizedBox(height: h * 0.012),
-                                  Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.028, 18), fontWeight: FontWeight.w700, color: cream)),
-                                  SizedBox(height: h * 0.006),
-                                  Text('#FDFOD5', style: GoogleFonts.robotoSlab(fontSize: h * 0.024, fontWeight: FontWeight.w400, color: gold)),
+                                  Icon(Icons.health_and_safety, color: gold, size: h * 0.06),
+                                  SizedBox(height: h * 0.015),
+                                  Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: cream)),
+                                  SizedBox(height: h * 0.004),
+                                  Text('#FDFOD5', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.022, 14), fontWeight: FontWeight.w400, color: gold)),
                                 ]),
                               ),
                             )),
@@ -459,7 +480,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
 
-                      // ═══ ZONE 7 + 8 + 9: Nav — no borders, no frames ═══
+                      // Gold divider before nav
+                      Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: [gold.withValues(alpha: 0.05), gold.withValues(alpha: 0.5), gold.withValues(alpha: 0.5), gold.withValues(alpha: 0.05)]),
+                      )),
+
+                      // ═══ ZONE 7 + 8 + 9: Nav ═══
                       SizedBox(
                         height: h * 0.10,
                         child: Padding(
@@ -487,7 +513,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Expanded(child: GestureDetector(
       onTap: () => widget.onTabChange?.call(index),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(Icons.eco, color: gold, size: h * 0.04),
+        SizedBox(
+          width: h * 0.04, height: h * 0.04,
+          child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: const ColorFilter.mode(gold, BlendMode.srcIn), fit: BoxFit.contain),
+        ),
         const SizedBox(height: 4),
         Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: gold), textAlign: TextAlign.center),
       ]),
@@ -544,10 +573,13 @@ class _EkgPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color..strokeWidth = 2.5..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
     final h = size.height / 2;
     final w = size.width;
 
+    final basePaint = Paint()..color = color.withValues(alpha: 0.3)..strokeWidth = 1.5..style = PaintingStyle.stroke;
+    canvas.drawLine(Offset(0, h), Offset(w, h), basePaint);
+
+    final paint = Paint()..color = color..strokeWidth = 2.5..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
     final path = Path()
       ..moveTo(0, h)..lineTo(w * 0.15, h)
       ..lineTo(w * 0.2, h - 4)..lineTo(w * 0.22, h + 2)
