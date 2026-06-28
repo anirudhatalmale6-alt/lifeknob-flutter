@@ -244,13 +244,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             GestureDetector(
                               onTap: _showCodePopup,
                               child: Container(
-                                width: h * 0.07, height: h * 0.07,
+                                width: h * 0.085, height: h * 0.085,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(color: gold, width: 2.5),
                                   color: gold.withValues(alpha: 0.1),
                                 ),
-                                child: Icon(Icons.qr_code_2, color: gold, size: h * 0.035),
+                                child: Icon(Icons.qr_code_2, color: gold, size: h * 0.04),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -262,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 children: [
                                   Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.032, 20), fontWeight: FontWeight.w600, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: min(h * 0.016, 12.0), fontWeight: FontWeight.w300, color: Colors.white.withValues(alpha: 0.45)), maxLines: 1),
-                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: min(h * 0.02, 16.0), fontWeight: FontWeight.w600, color: Colors.white), maxLines: 1),
+                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: min(h * 0.02, 16.0), fontWeight: FontWeight.w600, color: gold), maxLines: 1),
                                 ],
                               ),
                             )),
@@ -347,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   SizedBox(
-                                    width: faceSize * 0.38, height: faceSize * 0.38,
+                                    width: faceSize * 0.3, height: faceSize * 0.3,
                                     child: AnimatedBuilder(
                                       animation: _rockCtrl,
                                       builder: (context, child) {
@@ -433,8 +433,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     FittedBox(fit: BoxFit.scaleDown, child: Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
                                     SizedBox(height: h * 0.006),
                                     contactLabel.isNotEmpty
-                                      ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.02, 13), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
-                                      : Text('........', style: TextStyle(fontSize: h * 0.02, color: gold.withValues(alpha: 0.6), letterSpacing: 5)),
+                                      ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.028, 17), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
+                                      : Text('........', style: TextStyle(fontSize: h * 0.024, color: gold.withValues(alpha: 0.6), letterSpacing: 5)),
                                   ]),
                               ),
                             )),
@@ -455,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     SizedBox(height: h * 0.01),
                                     FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
                                     SizedBox(height: h * 0.006),
-                                    Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.02, 13), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                                    Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.028, 17), fontWeight: FontWeight.w400, color: gold), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
                                   ]),
                               ),
                             )),
