@@ -311,7 +311,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             onPanEnd: _onKnobPanEnd,
                             child: Container(
                               color: Colors.transparent,
-                              child: Center(child: SizedBox(
+                              child: Center(child: AnimatedBuilder(
+                                animation: _rockCtrl,
+                                builder: (context, child) {
+                                  final t = _rockCtrl.value;
+                                  final rockAngle = (_isDragging || _showFailed || _showSuccess || progress > 0.01) ? 0.0 : (t < 0.33 ? sin(t / 0.33 * 2 * pi) * 0.08 : 0.0);
+                                  return Transform.rotate(angle: rockAngle, child: child);
+                                },
+                                child: SizedBox(
                                 width: knobSize, height: knobSize,
                                 child: Stack(alignment: Alignment.center, children: [
                                   Container(
@@ -347,39 +354,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   SizedBox(
-                                    width: faceSize * 0.3, height: faceSize * 0.3,
-                                    child: AnimatedBuilder(
-                                      animation: _rockCtrl,
-                                      builder: (context, child) {
-                                        final t = _rockCtrl.value;
-                                        final rockAngle = (_isDragging || _showFailed || _showSuccess || progress > 0.01) ? 0.0 : (t < 0.33 ? sin(t / 0.33 * 2 * pi) * 0.08 : 0.0);
-                                        return Transform.rotate(angle: rockAngle, child: child);
+                                    width: faceSize * 0.42, height: faceSize * 0.42,
+                                    child: ShaderMask(
+                                      shaderCallback: (bounds) {
+                                        if (_showSuccess) {
+                                          return LinearGradient(colors: [green, green]).createShader(bounds);
+                                        }
+                                        if (_showFailed) {
+                                          return LinearGradient(colors: [Colors.white.withValues(alpha: 0.7), Colors.white.withValues(alpha: 0.7)]).createShader(bounds);
+                                        }
+                                        if (progress < 0.01) {
+                                          return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
+                                        }
+                                        final fillStop = 1.0 - progress;
+                                        return LinearGradient(
+                                          begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                                          colors: [const Color(0xFFA0A0A0), const Color(0xFFA0A0A0), green, green],
+                                          stops: [0.0, fillStop, fillStop, 1.0],
+                                        ).createShader(bounds);
                                       },
-                                      child: ShaderMask(
-                                        shaderCallback: (bounds) {
-                                          if (_showSuccess) {
-                                            return LinearGradient(colors: [green, green]).createShader(bounds);
-                                          }
-                                          if (_showFailed) {
-                                            return LinearGradient(colors: [Colors.white.withValues(alpha: 0.7), Colors.white.withValues(alpha: 0.7)]).createShader(bounds);
-                                          }
-                                          if (progress < 0.01) {
-                                            return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
-                                          }
-                                          final fillStop = 1.0 - progress;
-                                          return LinearGradient(
-                                            begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                                            colors: [const Color(0xFFA0A0A0), const Color(0xFFA0A0A0), green, green],
-                                            stops: [0.0, fillStop, fillStop, 1.0],
-                                          ).createShader(bounds);
-                                        },
-                                        blendMode: BlendMode.srcIn,
-                                        child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain),
-                                      ),
+                                      blendMode: BlendMode.srcIn,
+                                      child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain),
                                     ),
                                   ),
                                 ]),
-                              )),
+                              ))),
                             ),
                           );
                         }),
