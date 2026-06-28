@@ -255,12 +255,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 ],
                               ),
                             )),
-                            // Logo — SVG with white letters, header only
+                            // Logo — white letters PNG, header only
                             Expanded(child: Padding(
                               padding: const EdgeInsets.all(4),
                               child: GestureDetector(
                                 onTap: _showCodePopup,
-                                child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', fit: BoxFit.contain),
+                                child: Image.asset('assets/images/lifeknob_logo_white.png', fit: BoxFit.contain),
                               ),
                             )),
                           ]),
