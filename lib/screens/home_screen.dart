@@ -255,10 +255,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 ],
                               ),
                             )),
-                            // Logo — responsive, scales with available space
-                            Expanded(child: GestureDetector(
-                              onTap: _showCodePopup,
-                              child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain),
+                            // Logo — SVG with white letters, header only
+                            Expanded(child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: GestureDetector(
+                                onTap: _showCodePopup,
+                                child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', fit: BoxFit.contain),
+                              ),
                             )),
                           ]),
                         ),
@@ -484,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Expanded(child: GestureDetector(
       onTap: () => widget.onTabChange?.call(index),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        SizedBox(width: h * 0.045, height: h * 0.045, child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain)),
+        Icon(Icons.eco, color: gold, size: h * 0.04),
         const SizedBox(height: 4),
         Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: gold), textAlign: TextAlign.center),
       ]),
