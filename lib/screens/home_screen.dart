@@ -269,29 +269,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         gradient: LinearGradient(colors: [gold.withValues(alpha: 0.05), gold, gold, gold.withValues(alpha: 0.05)]),
                       )),
 
-                      // ═══ TURN THE KNOB + QR — own section ═══
+                      // ═══ TURN THE KNOB + QR code ═══
                       SizedBox(
-                        height: h * 0.055,
+                        height: max(h * 0.065, 48),
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 6, right: 4),
+                          padding: const EdgeInsets.only(left: 6, right: 6),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Expanded(child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: h * 0.032, fontWeight: FontWeight.w500, color: gold))),
+                              Expanded(child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold))),
                               GestureDetector(
                                 onTap: _showCodePopup,
                                 child: Container(
-                                  width: h * 0.06, height: h * 0.06,
+                                  width: max(h * 0.065, 44), height: max(h * 0.065, 44),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: gold, width: 2.5),
+                                    border: Border.all(color: gold.withValues(alpha: 0.6), width: 2),
                                     color: navyMid,
                                   ),
                                   child: ClipOval(child: Padding(
                                     padding: const EdgeInsets.all(4),
                                     child: _userCode != null
-                                      ? QrImageView(data: _userCode!, size: h * 0.048, backgroundColor: Colors.transparent, eyeStyle: const QrEyeStyle(color: gold, eyeShape: QrEyeShape.circle), dataModuleStyle: const QrDataModuleStyle(color: gold, dataModuleShape: QrDataModuleShape.circle))
-                                      : Icon(Icons.qr_code_2, color: gold, size: h * 0.035),
+                                      ? QrImageView(data: _userCode!, size: max(h * 0.055, 34), backgroundColor: Colors.transparent, eyeStyle: const QrEyeStyle(color: gold, eyeShape: QrEyeShape.circle), dataModuleStyle: const QrDataModuleStyle(color: gold, dataModuleShape: QrDataModuleShape.circle))
+                                      : Icon(Icons.qr_code_2, color: gold, size: max(h * 0.04, 28)),
                                   )),
                                 ),
                               ),
@@ -302,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // ═══ KNOB — own section ═══
                       SizedBox(
-                        height: h * 0.38,
+                        height: h * 0.36,
                         child: LayoutBuilder(builder: (context, kc) {
                           final areaW = kc.maxWidth;
                           final areaH = kc.maxHeight;
@@ -380,23 +380,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         }),
                       ),
 
-                      // ═══ EKG + OR CALL FOR HELP — own section ═══
+                      // ═══ EKG + OR CALL FOR HELP ═══
                       SizedBox(
-                        height: h * 0.05,
+                        height: max(h * 0.06, 42),
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 6, right: 4),
+                          padding: const EdgeInsets.only(left: 6, right: 6),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               SizedBox(
-                                width: w * 0.22, height: h * 0.035,
+                                width: w * 0.25, height: max(h * 0.04, 28),
                                 child: AnimatedBuilder(
                                   animation: _ekgCtrl,
                                   builder: (context, _) => CustomPaint(painter: _EkgPainter(progress: _ekgCtrl.value, color: gold)),
                                 ),
                               ),
                               const Spacer(),
-                              Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: h * 0.032, fontWeight: FontWeight.w500, color: gold)),
+                              Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold)),
                             ],
                           ),
                         ),
@@ -423,7 +423,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                                   Icon(Icons.phone, color: gold, size: h * 0.055),
                                   SizedBox(height: h * 0.012),
-                                  Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: h * 0.028, fontWeight: FontWeight.w700, color: cream)),
+                                  Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.028, 18), fontWeight: FontWeight.w700, color: cream)),
                                   SizedBox(height: h * 0.006),
                                   contactLabel.isNotEmpty
                                     ? Text(contactLabel, style: GoogleFonts.robotoSlab(fontSize: h * 0.024, fontWeight: FontWeight.w400, color: gold), maxLines: 1, overflow: TextOverflow.ellipsis)
@@ -446,7 +446,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                                   Icon(Icons.health_and_safety, color: gold, size: h * 0.055),
                                   SizedBox(height: h * 0.012),
-                                  Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: h * 0.028, fontWeight: FontWeight.w700, color: cream)),
+                                  Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.028, 18), fontWeight: FontWeight.w700, color: cream)),
                                   SizedBox(height: h * 0.006),
                                   Text('#FDFOD5', style: GoogleFonts.robotoSlab(fontSize: h * 0.024, fontWeight: FontWeight.w400, color: gold)),
                                 ]),
