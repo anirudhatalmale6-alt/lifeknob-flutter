@@ -366,8 +366,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ),
                                   SizedBox(
                                     width: faceSize * 0.65, height: faceSize * 0.65,
-                                    child: (_isDragging || progress > 0.01) && !_showSuccess && !_showFailed
-                                      ? Center(child: Text('${(progress * 100).round()}%', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.25, fontWeight: FontWeight.w700, color: Color.lerp(const Color(0xFFA0A0A0), green, progress)!)))
+                                    child: _showFailed
+                                      ? Center(child: Text('TRY AGAIN', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.15, fontWeight: FontWeight.w700, color: Colors.white), textAlign: TextAlign.center))
+                                      : (_isDragging || progress > 0.01) && !_showSuccess
+                                      ? Center(child: Text('${(progress * 100).round()}%', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.25, fontWeight: FontWeight.w700, color: progress >= 1.0 ? green : Color.lerp(red, gold, progress)!)))
                                       : ClipRect(child: ShaderMask(
                                       shaderCallback: (bounds) {
                                         if (_showSuccess) {
