@@ -382,7 +382,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       : ClipRect(child: ShaderMask(
                                       shaderCallback: (bounds) {
                                         if (_isRecentSuccess) {
-                                          return LinearGradient(colors: [green, green]).createShader(bounds);
+                                          return LinearGradient(colors: [Colors.white.withValues(alpha: 0.8), Colors.white.withValues(alpha: 0.8)]).createShader(bounds);
                                         }
                                         if (_isOverdue) {
                                           return LinearGradient(colors: [red, red]).createShader(bounds);
