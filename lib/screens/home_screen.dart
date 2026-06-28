@@ -365,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       gradient: RadialGradient(
-                                        colors: _showFailed ? [red, const Color(0xFFAA0E19)] : (_showSuccess || _isRecentSuccess) ? [green, const Color(0xFF2D5234)] : [faceGray, faceDarkGray],
+                                        colors: _showFailed ? [red, const Color(0xFFAA0E19)] : _showSuccess ? [green, const Color(0xFF2D5234)] : [faceGray, faceDarkGray],
                                         stops: const [0.7, 1.0],
                                       ),
                                       boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
@@ -382,7 +382,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       : ClipRect(child: ShaderMask(
                                       shaderCallback: (bounds) {
                                         if (_isRecentSuccess) {
-                                          return LinearGradient(colors: [Colors.white.withValues(alpha: 0.8), Colors.white.withValues(alpha: 0.8)]).createShader(bounds);
+                                          return LinearGradient(colors: [green, green]).createShader(bounds);
                                         }
                                         if (_isOverdue) {
                                           return LinearGradient(colors: [red, red]).createShader(bounds);
