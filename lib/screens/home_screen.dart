@@ -332,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // ═══ KNOB — own section ═══
                       SizedBox(
-                        height: _isFreeUser ? h * 0.28 : h * 0.36,
+                        height: _isFreeUser ? h * 0.32 : h * 0.36,
                         child: LayoutBuilder(builder: (context, kc) {
                           final areaW = kc.maxWidth;
                           final areaH = kc.maxHeight;
@@ -462,59 +462,106 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
 
-                      // ═══ ZONE 5 + 6: Call buttons — edge to edge ═══
-                      SizedBox(
-                        height: h * 0.20,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 3, right: 3, bottom: 3),
-                          child: Row(children: [
-                            Expanded(child: GestureDetector(
-                              onTap: _callContact,
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF1A5276),
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
-                                    BoxShadow(color: const Color(0xFF1A5276).withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
-                                  ],
-                                ),
-                                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                    Icon(Icons.phone, color: gold, size: h * 0.05),
-                                    SizedBox(height: h * 0.01),
-                                    FittedBox(fit: BoxFit.scaleDown, child: Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
-                                    SizedBox(height: h * 0.006),
-                                    contactLabel.isNotEmpty
-                                      ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.026, 16), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
-                                      : Text('........', style: TextStyle(fontSize: h * 0.024, color: const Color(0xFFE8BE80).withValues(alpha: 0.5), letterSpacing: 5)),
+                      // ═══ Call buttons ═══
+                      _isFreeUser
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 3, right: 3, bottom: 3),
+                            child: Row(children: [
+                              Expanded(child: GestureDetector(
+                                onTap: _callContact,
+                                child: Container(
+                                  height: h * 0.07,
+                                  margin: const EdgeInsets.only(right: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF1A5276),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 2))],
+                                  ),
+                                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                    Icon(Icons.phone, color: gold, size: 20),
+                                    const SizedBox(width: 8),
+                                    Flexible(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                      Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
+                                      if (contactLabel.isNotEmpty)
+                                        Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: 12, color: const Color(0xFFE8BE80)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    ])),
                                   ]),
-                              ),
-                            )),
-                            Expanded(child: GestureDetector(
-                              onTap: _callAmbulance,
-                              child: Container(
-                                margin: const EdgeInsets.only(left: 2),
-                                decoration: BoxDecoration(
-                                  color: red,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
-                                    BoxShadow(color: red.withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
-                                  ],
                                 ),
-                                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                    Icon(Icons.health_and_safety, color: gold, size: h * 0.05),
-                                    SizedBox(height: h * 0.01),
-                                    FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
-                                    SizedBox(height: h * 0.006),
-                                    Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.026, 16), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                              )),
+                              Expanded(child: GestureDetector(
+                                onTap: _callAmbulance,
+                                child: Container(
+                                  height: h * 0.07,
+                                  margin: const EdgeInsets.only(left: 2),
+                                  decoration: BoxDecoration(
+                                    color: red,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 2))],
+                                  ),
+                                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                    Icon(Icons.health_and_safety, color: gold, size: 20),
+                                    const SizedBox(width: 8),
+                                    Flexible(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                      Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
+                                      Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: 12, color: const Color(0xFFE8BE80)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    ])),
                                   ]),
-                              ),
-                            )),
-                          ]),
-                        ),
-                      ),
+                                ),
+                              )),
+                            ]),
+                          )
+                        : SizedBox(
+                            height: h * 0.20,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 3, right: 3, bottom: 3),
+                              child: Row(children: [
+                                Expanded(child: GestureDetector(
+                                  onTap: _callContact,
+                                  child: Container(
+                                    margin: const EdgeInsets.only(right: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF1A5276),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                                        BoxShadow(color: const Color(0xFF1A5276).withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
+                                      ],
+                                    ),
+                                    child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                        Icon(Icons.phone, color: gold, size: h * 0.05),
+                                        SizedBox(height: h * 0.01),
+                                        FittedBox(fit: BoxFit.scaleDown, child: Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
+                                        SizedBox(height: h * 0.006),
+                                        contactLabel.isNotEmpty
+                                          ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.026, 16), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
+                                          : Text('........', style: TextStyle(fontSize: h * 0.024, color: const Color(0xFFE8BE80).withValues(alpha: 0.5), letterSpacing: 5)),
+                                      ]),
+                                  ),
+                                )),
+                                Expanded(child: GestureDetector(
+                                  onTap: _callAmbulance,
+                                  child: Container(
+                                    margin: const EdgeInsets.only(left: 2),
+                                    decoration: BoxDecoration(
+                                      color: red,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                                        BoxShadow(color: red.withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
+                                      ],
+                                    ),
+                                    child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                        Icon(Icons.health_and_safety, color: gold, size: h * 0.05),
+                                        SizedBox(height: h * 0.01),
+                                        FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
+                                        SizedBox(height: h * 0.006),
+                                        Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.026, 16), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                                      ]),
+                                  ),
+                                )),
+                              ]),
+                            ),
+                          ),
 
                       // Gold divider before nav
                       Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(
