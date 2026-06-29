@@ -31,7 +31,7 @@ class MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final screens = [
       HomeScreen(onTabChange: _onTabChanged),
-      HistoryScreen(key: _historyKey, onGoHome: goHome),
+      HistoryScreen(key: _historyKey, onGoHome: goHome, onTabChange: _onTabChanged),
       SettingsScreen(onGoHome: goHome),
     ];
 

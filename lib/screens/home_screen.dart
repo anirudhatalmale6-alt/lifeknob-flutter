@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import '../widgets/ad_widgets.dart';
 
 class HomeScreen extends StatefulWidget {
   final void Function(int)? onTabChange;
@@ -36,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   DateTime? _lastSuccessTime;
   bool _dataLoaded = false;
   int _lastHapticTick = 0;
+  bool _showBumperAd = false;
 
   late AnimationController _springCtrl;
   late AnimationController _hintCtrl;
@@ -162,7 +164,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() { _isDragging = false; _showSuccess = true; _showFailed = false; _lastSuccessTime = DateTime.now(); _rotation = _triggerAngle; });
     _doCheckIn();
     Future.delayed(const Duration(seconds: 5), () {
-      if (mounted) setState(() { _showSuccess = false; _rotation = 0; _lastHapticTick = 0; });
+      if (mounted) {
+        setState(() { _showSuccess = false; _rotation = 0; _lastHapticTick = 0; });
+        if (_isFreeUser) setState(() => _showBumperAd = true);
+      }
     });
   }
 
@@ -230,7 +235,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     return Scaffold(
       backgroundColor: navy,
-      body: Center(
+      body: Stack(children: [
+        Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500),
           child: Container(
@@ -402,33 +408,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         }),
                       ),
 
-                      // ═══ AD BANNER (free users) ═══
-                      if (_isFreeUser) ...[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Column(children: [
-                            Container(
-                              height: h * 0.08,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: gold.withValues(alpha: 0.3), width: 1),
-                                borderRadius: BorderRadius.circular(8),
-                                color: navy.withValues(alpha: 0.5),
-                              ),
-                              child: Center(child: Text('AD', style: GoogleFonts.barlowCondensed(fontSize: 14, color: gold.withValues(alpha: 0.3)))),
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 2, right: 4),
-                                child: GestureDetector(
-                                  onTap: () => widget.onTabChange?.call(2),
-                                  child: Text('Remove ads', style: GoogleFonts.robotoSlab(fontSize: 11, color: gold, fontStyle: FontStyle.italic)),
-                                ),
-                              ),
-                            ),
-                          ]),
+                      // ═══ AD BANNERS (free users) ═══
+                      if (_isFreeUser)
+                        AdBannerPair(
+                          singleHeight: h * 0.065,
+                          onRemoveAds: () => widget.onTabChange?.call(2),
                         ),
-                      ],
 
                       // ═══ OR CALL FOR HELP | EKG ═══
                       SizedBox(
@@ -534,6 +519,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ),
+      if (_showBumperAd)
+        BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false)),
+      ]),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import '../widgets/ad_widgets.dart';
 
 class SettingsScreen extends StatefulWidget {
   final VoidCallback? onGoHome;
@@ -23,6 +24,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String? _plan;
   bool _isSaving = false;
   String _language = 'English';
+  bool _isFreeUser = true;
+  bool _showBumperAd = false;
 
   @override
   void initState() {
@@ -42,6 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _userPhone = user.phone;
         _userCode = user.userCode;
         _plan = user.plan;
+        _isFreeUser = user.isFree;
       });
     }
     try {
@@ -56,6 +60,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _userPhone = freshUser.phone;
           _userCode = freshUser.userCode;
           _plan = freshUser.plan;
+          _isFreeUser = freshUser.isFree;
         });
       }
     } catch (_) {}
@@ -70,7 +75,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'ambulance_number': _ambulanceController.text.trim(),
       });
       await AuthService().refreshProfile();
-      if (mounted) _showBigMessage('Settings saved!', '', LKTheme.teal);
+      if (mounted) {
+        _showBigMessage('Settings saved!', '', LKTheme.teal);
+        if (_isFreeUser) Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) setState(() => _showBumperAd = true);
+        });
+      }
     } catch (e) {
       if (mounted) _showBigMessage('Could not save', '$e', LKTheme.red);
     } finally {
@@ -243,7 +253,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: LKTheme.bg,
-      body: SafeArea(
+      body: Stack(children: [SafeArea(
         child: Column(
           children: [
             Padding(
@@ -309,6 +319,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ]),
                     ),
+                    // Ad banners for free users
+                    if (_isFreeUser) ...[
+                      const SizedBox(height: 10),
+                      AdBannerPair(singleHeight: 50),
+                      const SizedBox(height: 4),
+                    ],
                     const SizedBox(height: 14),
 
                     // Ambulance card
@@ -417,6 +433,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+      if (_showBumperAd)
+        BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false)),
+      ]),
     );
   }
 

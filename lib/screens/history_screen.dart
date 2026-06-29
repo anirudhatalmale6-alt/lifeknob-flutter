@@ -3,11 +3,13 @@ import '../config/theme.dart';
 import '../models/connection_model.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/ad_widgets.dart';
 import 'subscription_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   final VoidCallback? onGoHome;
-  const HistoryScreen({super.key, this.onGoHome});
+  final void Function(int)? onTabChange;
+  const HistoryScreen({super.key, this.onGoHome, this.onTabChange});
 
   @override
   State<HistoryScreen> createState() => HistoryScreenState();
@@ -21,6 +23,9 @@ class HistoryScreenState extends State<HistoryScreen> {
   final _nameCtrl = TextEditingController();
   final _codeCtrl = TextEditingController();
   bool _isAdding = false;
+  bool _isFreeUser = true;
+  bool _showBumperAd = false;
+  DateTime? _pageOpenTime;
 
   int get _activeCount => _connections.where((c) => !c.isInactive).length;
 
@@ -30,7 +35,10 @@ class HistoryScreenState extends State<HistoryScreen> {
     _loadData();
   }
 
-  void ensureLoaded() { _loadData(); }
+  void ensureLoaded() {
+    _pageOpenTime = DateTime.now();
+    _loadData();
+  }
 
   @override
   void dispose() {
@@ -43,7 +51,10 @@ class HistoryScreenState extends State<HistoryScreen> {
     setState(() { _isLoading = true; _error = null; });
     try {
       final user = AuthService().currentUser ?? await AuthService().getSavedUser();
-      if (user != null) _maxConnections = user.maxConnections;
+      if (user != null) {
+        _maxConnections = user.maxConnections;
+        _isFreeUser = user.isFree;
+      }
 
       try {
         final siteResp = await ApiService().getSiteSettings();
@@ -208,11 +219,23 @@ class HistoryScreenState extends State<HistoryScreen> {
     ));
   }
 
+  void _checkBumperAdTime() {
+    if (!_isFreeUser || _showBumperAd || _pageOpenTime == null) return;
+    final elapsed = DateTime.now().difference(_pageOpenTime!).inSeconds;
+    if (elapsed >= 30) {
+      setState(() => _showBumperAd = true);
+      _pageOpenTime = null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isFreeUser && _pageOpenTime != null && !_showBumperAd) {
+      Future.delayed(const Duration(seconds: 1), () { if (mounted) _checkBumperAdTime(); });
+    }
     return Scaffold(
       backgroundColor: LKTheme.bg,
-      body: SafeArea(
+      body: Stack(children: [SafeArea(
         child: _isLoading
           ? const Center(child: CircularProgressIndicator(color: LKTheme.gold))
           : _error != null
@@ -290,6 +313,15 @@ class HistoryScreenState extends State<HistoryScreen> {
                     _buildAddSection(),
                   ],
 
+                  // Ad banners for free users
+                  if (_isFreeUser) ...[
+                    const SizedBox(height: 12),
+                    AdBannerPair(
+                      singleHeight: 50,
+                      onRemoveAds: () => widget.onTabChange?.call(2),
+                    ),
+                  ],
+
                   // Empty state
                   if (_connections.isEmpty)
                     Padding(padding: const EdgeInsets.only(top: 48),
@@ -310,6 +342,9 @@ class HistoryScreenState extends State<HistoryScreen> {
                     ),
                 ])))),
       ),
+      if (_showBumperAd)
+        BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false)),
+      ]),
     );
   }
 
