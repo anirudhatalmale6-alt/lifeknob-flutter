@@ -262,11 +262,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             if (_page > 0) ...[
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-                child: Center(child: SizedBox(height: 28, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn)))),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: Center(child: SizedBox(height: 44, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn)))),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                padding: const EdgeInsets.fromLTRB(40, 8, 40, 6),
                 child: Container(height: 3, decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [LKTheme.gold.withValues(alpha: 0.0), LKTheme.gold, LKTheme.gold, LKTheme.gold.withValues(alpha: 0.0)]),
                   borderRadius: BorderRadius.circular(2),
@@ -422,27 +422,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildEmergency() {
     return SingleChildScrollView(key: const ValueKey('emergency'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(children: [
-        const SizedBox(height: 24),
-        const Icon(Icons.health_and_safety_rounded, size: 48, color: LKTheme.red),
-        const SizedBox(height: 12),
-        const Text('Emergency Contact', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 24),
-        _label('Name'), const SizedBox(height: 6),
+        const SizedBox(height: 16),
+        const Text('Emergency Contacts', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        const SizedBox(height: 8),
+        Container(
+          width: 64, height: 64,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.15)),
+          child: const Icon(Icons.add_rounded, size: 36, color: LKTheme.red),
+        ),
+        const SizedBox(height: 8),
+        Text('Whom you want to call in case of emergency', style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7)), textAlign: TextAlign.center),
+        const SizedBox(height: 20),
+        _label('*Name'), const SizedBox(height: 6),
         TextField(controller: _sosNameController, maxLength: 50, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('sosName')) setState(() => _errorFields.remove('sosName')); },
-          decoration: _inputDeco('Contact name', Icons.person_rounded, LKTheme.blue, 'sosName')),
+          decoration: _inputDeco('My son ...', Icons.person_rounded, LKTheme.gold, 'sosName')),
         const SizedBox(height: 14),
         _label('Phone Number'), const SizedBox(height: 6),
         TextField(controller: _sosPhoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('sosPhone')) setState(() => _errorFields.remove('sosPhone')); },
-          decoration: _inputDeco('+61400000000', Icons.phone_rounded, LKTheme.blue, 'sosPhone')),
-        const SizedBox(height: 24), const Divider(color: LKTheme.border), const SizedBox(height: 16),
-        const Text('Ambulance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.red)),
+          decoration: _inputDeco('01 2345 6789 ...', Icons.phone_rounded, LKTheme.gold, 'sosPhone')),
+        const SizedBox(height: 24),
+        const Text('Ambulance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.gold)),
         const SizedBox(height: 12),
         _label('Phone Number'), const SizedBox(height: 6),
         TextField(controller: _ambulanceController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('ambulance')) setState(() => _errorFields.remove('ambulance')); },
-          decoration: _inputDeco('e.g. 000, 911, 112', Icons.local_hospital_rounded, LKTheme.red, 'ambulance')),
+          decoration: _inputDeco('112, 000, ...', Icons.local_hospital_rounded, LKTheme.red, 'ambulance')),
         const SizedBox(height: 20),
       ]));
   }
