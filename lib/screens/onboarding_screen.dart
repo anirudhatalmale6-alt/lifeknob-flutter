@@ -260,18 +260,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            if (_page > 0)
+            if (_page > 0) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                child: Center(child: SizedBox(height: 28, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn)))),
+              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-                child: Row(children: [
-                  Expanded(child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(value: (_page + 1) / _totalPages, backgroundColor: LKTheme.border, valueColor: const AlwaysStoppedAnimation(LKTheme.gold), minHeight: 4),
-                  )),
-                  const SizedBox(width: 12),
-                  Text('${_page + 1} / $_totalPages', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted)),
-                ]),
+                child: Container(height: 3, decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [LKTheme.gold.withValues(alpha: 0.0), LKTheme.gold, LKTheme.gold, LKTheme.gold.withValues(alpha: 0.0)]),
+                  borderRadius: BorderRadius.circular(2),
+                )),
               ),
+            ],
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
@@ -312,12 +313,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildLanguage() {
     final languages = ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais', 'Italiano', 'Portugues'];
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.12),
-        SizedBox(width: 200, height: 180, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.10),
+        SizedBox(width: 160, height: 150, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain, alignment: Alignment.centerLeft)),
         const SizedBox(height: 40),
-        const Text('Select Language', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
-        const SizedBox(height: 16),
+        const Text('Select Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+        const SizedBox(height: 12),
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.gold, width: 1.5)),
           child: DropdownButton<String>(value: _language, isExpanded: true, dropdownColor: LKTheme.bgCard, underline: const SizedBox(),
@@ -363,32 +364,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(children: [
         const SizedBox(height: 16),
         const Text('Your Details', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 20),
-        Container(width: 80, height: 80,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: LKTheme.bgCardLight,
-            border: Border.all(color: LKTheme.gold, width: 2),
-          ),
-          child: const Icon(Icons.qr_code_2_rounded, size: 40, color: LKTheme.gold),
-        ),
         const SizedBox(height: 6),
-        const Text('Your QR code will be generated', style: TextStyle(fontSize: 12, color: LKTheme.textMuted)),
+        Text('No authentication required', style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7))),
+        const SizedBox(height: 20),
+        const Icon(Icons.qr_code_2_rounded, size: 72, color: LKTheme.textMuted),
+        const SizedBox(height: 4),
         const SizedBox(height: 20),
         _label('Your Name'), const SizedBox(height: 6),
         TextField(controller: _nameController, maxLength: 30, style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
           onChanged: (_) { if (_errorFields.contains('name')) setState(() => _errorFields.remove('name')); },
-          decoration: _inputDeco('Your name', Icons.person_rounded, LKTheme.gold, 'name')),
+          decoration: _inputDeco('Peter, Lisa, ...', Icons.person_rounded, LKTheme.gold, 'name')),
         const SizedBox(height: 14),
-        _label('Your Email (no registration required)'), const SizedBox(height: 6),
+        _label('Your Email'), const SizedBox(height: 6),
         TextField(controller: _emailController, maxLength: 100, keyboardType: TextInputType.emailAddress, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('email')) setState(() => _errorFields.remove('email')); },
           decoration: _inputDeco('your@email.com', Icons.email_rounded, LKTheme.gold, 'email')),
         const SizedBox(height: 14),
-        _label('Your Phone Number (no registration required)'), const SizedBox(height: 6),
+        _label('Your Phone Number'), const SizedBox(height: 6),
         TextField(controller: _phoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('phone')) setState(() => _errorFields.remove('phone')); },
-          decoration: _inputDeco('+61400000000', Icons.phone_rounded, LKTheme.gold, 'phone')),
+          decoration: _inputDeco('01 2345 6789 ...', Icons.phone_rounded, LKTheme.gold, 'phone')),
         const SizedBox(height: 20),
       ]));
   }
