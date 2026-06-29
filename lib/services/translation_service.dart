@@ -15,8 +15,17 @@ class TranslationService {
   String _currentLang = 'en';
   List<Map<String, String>> _availableLanguages = [];
 
+  Map<String, String> _logos = {};
+
   String get currentLang => _currentLang;
   List<Map<String, String>> get availableLanguages => _availableLanguages;
+  Map<String, String> get logos => _logos;
+
+  String? logoUrl(String key) {
+    final path = _logos[key];
+    if (path == null || path.isEmpty) return null;
+    return 'https://lifeknob.com$path';
+  }
 
   String t(String key) => _strings[key] ?? key;
 
@@ -47,6 +56,8 @@ class TranslationService {
     } else {
       _fetchLanguages();
     }
+
+    await _fetchLogos();
   }
 
   Future<void> setLanguage(String langCode) async {
@@ -75,6 +86,19 @@ class TranslationService {
               .toList();
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('available_languages', jsonEncode(_availableLanguages));
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _fetchLogos() async {
+    try {
+      final resp = await http.get(Uri.parse('$_baseUrl/logos'))
+          .timeout(const Duration(seconds: 10));
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        if (data['status'] == 'success') {
+          _logos = Map<String, String>.from(data['data']);
         }
       }
     } catch (_) {}

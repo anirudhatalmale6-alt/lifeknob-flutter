@@ -42,6 +42,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   String _t(String key) => _ts.t(key);
 
+  Widget _logoWidget({double? width, double? height, String logoKey = 'registration'}) {
+    final url = _ts.logoUrl(logoKey);
+    if (url != null) {
+      return Image.network(url, width: width, height: height, fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => SvgPicture.asset('assets/images/lifeknoblogo.svg',
+          width: width, height: height, colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain));
+    }
+    return SvgPicture.asset('assets/images/lifeknoblogo.svg',
+      width: width, height: height, colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -291,7 +302,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             if (_page > 0) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: Center(child: SizedBox(height: 44, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn)))),
+                child: Center(child: SizedBox(height: 44, child: _logoWidget(height: 44, logoKey: 'header'))),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(40, 8, 40, 6),
@@ -347,7 +358,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildLanguage() {
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        SizedBox(width: 180, height: 170, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain)),
+        SizedBox(width: 180, height: 170, child: _logoWidget(width: 180, height: 170, logoKey: 'registration')),
         const SizedBox(height: 40),
         Text(_t('select_language'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
         const SizedBox(height: 12),
