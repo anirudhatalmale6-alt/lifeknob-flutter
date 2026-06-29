@@ -279,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       // ═══ HEADER — avatar + name | logo ═══
                       SizedBox(
-                        height: h * 0.13,
+                        height: _isFreeUser ? h * 0.10 : h * 0.13,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 6, right: 2),
                           child: Row(children: [
@@ -323,9 +323,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         gradient: LinearGradient(colors: [_accent.withValues(alpha: 0.05), _accent, _accent, _accent.withValues(alpha: 0.05)]),
                       )),
 
-                      // ═══ TURN THE KNOB + QR code ═══
+                      // ═══ TURN THE KNOB ═══
                       SizedBox(
-                        height: max(h * 0.065, 48),
+                        height: _isFreeUser ? max(h * 0.045, 34) : max(h * 0.065, 48),
                         child: Padding(
                           padding: const EdgeInsets.only(left: 6, right: 6),
                           child: Center(
@@ -336,7 +336,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // ═══ KNOB — own section ═══
                       SizedBox(
-                        height: _isFreeUser ? h * 0.25 : h * 0.36,
+                        height: _isFreeUser ? h * 0.28 : h * 0.36,
                         child: LayoutBuilder(builder: (context, kc) {
                           final areaW = kc.maxWidth;
                           final areaH = kc.maxHeight;
@@ -444,7 +444,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // ═══ OR CALL FOR HELP | EKG ═══
                       SizedBox(
-                        height: max(h * 0.06, 42),
+                        height: _isFreeUser ? max(h * 0.04, 32) : max(h * 0.06, 42),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
@@ -474,7 +474,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               Expanded(child: GestureDetector(
                                 onTap: _callContact,
                                 child: Container(
-                                  height: h * 0.07,
+                                  height: h * 0.06,
                                   margin: const EdgeInsets.only(right: 2),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF1A5276),
@@ -482,12 +482,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 2))],
                                   ),
                                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                    Icon(Icons.phone, color: _accent, size: 20),
+                                    Icon(Icons.phone, color: _accent, size: 22),
                                     const SizedBox(width: 8),
                                     Flexible(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                      Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
+                                      Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
                                       if (contactLabel.isNotEmpty)
-                                        Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: 12, color: _accentSub), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                        Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: 13, color: _accentSub), maxLines: 1, overflow: TextOverflow.ellipsis),
                                     ])),
                                   ]),
                                 ),
@@ -495,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               Expanded(child: GestureDetector(
                                 onTap: _callAmbulance,
                                 child: Container(
-                                  height: h * 0.07,
+                                  height: h * 0.06,
                                   margin: const EdgeInsets.only(left: 2),
                                   decoration: BoxDecoration(
                                     color: red,
@@ -503,11 +503,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 2))],
                                   ),
                                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                    Icon(Icons.health_and_safety, color: _accent, size: 20),
+                                    Icon(Icons.health_and_safety, color: _accent, size: 22),
                                     const SizedBox(width: 8),
                                     Flexible(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                      Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
-                                      Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: 12, color: _accentSub), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                      Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
+                                      Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: 13, color: _accentSub), maxLines: 1, overflow: TextOverflow.ellipsis),
                                     ])),
                                   ]),
                                 ),
@@ -571,9 +571,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         gradient: LinearGradient(colors: [_accent.withValues(alpha: 0.05), _accent.withValues(alpha: 0.5), _accent.withValues(alpha: 0.5), _accent.withValues(alpha: 0.05)]),
                       )),
 
-                      // ═══ ZONE 7 + 8 + 9: Nav ═══
+                      // ═══ Nav ═══
                       SizedBox(
-                        height: h * 0.10,
+                        height: _isFreeUser ? h * 0.08 : h * 0.10,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 3, right: 3),
                           child: Row(children: [
