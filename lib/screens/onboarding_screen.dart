@@ -260,17 +260,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-              child: Row(children: [
-                Expanded(child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(value: (_page + 1) / _totalPages, backgroundColor: LKTheme.border, valueColor: const AlwaysStoppedAnimation(LKTheme.gold), minHeight: 4),
-                )),
-                const SizedBox(width: 12),
-                Text('${_page + 1} / $_totalPages', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted)),
-              ]),
-            ),
+            if (_page > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                child: Row(children: [
+                  Expanded(child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(value: (_page + 1) / _totalPages, backgroundColor: LKTheme.border, valueColor: const AlwaysStoppedAnimation(LKTheme.gold), minHeight: 4),
+                  )),
+                  const SizedBox(width: 12),
+                  Text('${_page + 1} / $_totalPages', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted)),
+                ]),
+              ),
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
@@ -311,9 +312,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildLanguage() {
     final languages = ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais', 'Italiano', 'Portugues'];
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        SizedBox(width: 200, height: 180, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', fit: BoxFit.contain)),
-        const SizedBox(height: 32),
+      child: Column(children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.12),
+        SizedBox(width: 200, height: 180, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain)),
+        const SizedBox(height: 40),
         const Text('Select Language', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
         const SizedBox(height: 16),
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16),
