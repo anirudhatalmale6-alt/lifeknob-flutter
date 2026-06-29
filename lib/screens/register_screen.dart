@@ -57,9 +57,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LKTheme.bg,
+      backgroundColor: const Color(0xFF003049),
       appBar: AppBar(
-        backgroundColor: LKTheme.bg,
+        backgroundColor: const Color(0xFF003049),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: LKTheme.textPrimary, size: 28),

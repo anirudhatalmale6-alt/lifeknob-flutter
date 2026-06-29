@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
@@ -92,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LKTheme.bg,
+      backgroundColor: const Color(0xFF003049),
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnim,
@@ -105,34 +106,22 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   animation: _glowAnim,
                   builder: (context, child) {
                     return Container(
-                      width: 130,
-                      height: 130,
+                      width: 160,
+                      height: 160,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LKTheme.goldGradient,
                         boxShadow: [
                           BoxShadow(
-                            color: LKTheme.gold.withValues(alpha: _glowAnim.value),
-                            blurRadius: 40,
-                            spreadRadius: 5,
+                            color: LKTheme.gold.withValues(alpha: _glowAnim.value * 0.4),
+                            blurRadius: 50,
+                            spreadRadius: 10,
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.favorite, color: Color(0xFF5A3D10), size: 60),
+                      child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain),
                     );
                   },
                 ),
-                const SizedBox(height: 28),
-                const Text(
-                  'LifeKnob',
-                  style: TextStyle(
-                    fontSize: 38,
-                    fontWeight: FontWeight.w800,
-                    color: LKTheme.gold,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 Text(
                   'Silence is the alarm',
                   style: TextStyle(
