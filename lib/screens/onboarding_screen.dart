@@ -261,17 +261,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              child: Row(children: [
-                SizedBox(width: 24, height: 24, child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn))),
-                const SizedBox(width: 8),
-                const Text('REGISTRATION', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 2)),
-                const Spacer(),
-                Text('${_page + 1} / $_totalPages', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted)),
-              ]),
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(height: 32, child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn))),
+                  Positioned(right: 0, child: Text('${_page + 1} / $_totalPages', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted))),
+                ],
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 4, bottom: 2),
+              child: Text('REGISTRATION', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 3)),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(value: (_page + 1) / _totalPages, backgroundColor: LKTheme.border, valueColor: const AlwaysStoppedAnimation(LKTheme.gold), minHeight: 4),
@@ -292,7 +296,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: const Text('BACK', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ))),
                 if (_page > 0) const SizedBox(width: 12),
-                Expanded(flex: 2, child: SizedBox(height: 52, child: Container(
+                Expanded(flex: _page > 0 ? 1 : 1, child: SizedBox(height: 52, child: Container(
                   decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14), boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))]),
                   child: ElevatedButton(
                     onPressed: _isSaving ? null : (_page == 6 ? _finishConnect : _next),
@@ -356,14 +360,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _welcomeItem(IconData icon, String title, String desc) {
-    return Padding(padding: const EdgeInsets.only(bottom: 18), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(width: 40, height: 40, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
-        child: Icon(icon, size: 22, color: LKTheme.gold)),
+    return Padding(padding: const EdgeInsets.only(bottom: 20), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
+        child: Icon(icon, size: 24, color: LKTheme.gold)),
       const SizedBox(width: 14),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
-        const SizedBox(height: 4),
-        Text(desc, style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.4)),
+        Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        const SizedBox(height: 6),
+        Text(desc, style: const TextStyle(fontSize: 17, color: LKTheme.textPrimary, height: 1.5, fontWeight: FontWeight.w400)),
       ])),
     ]));
   }
@@ -375,28 +379,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 16),
         const Text('Your Details', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
         const SizedBox(height: 20),
-        GestureDetector(onTap: _pickAvatar, child: Stack(children: [
-          Container(width: 80, height: 80,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.bgCardLight, border: Border.all(color: LKTheme.gold, width: 2),
-              image: _avatarUrl != null ? DecorationImage(image: NetworkImage('https://lifeknob.com$_avatarUrl'), fit: BoxFit.cover) : null),
-            child: _avatarUrl == null ? const Icon(Icons.person_rounded, size: 40, color: LKTheme.gold) : null),
-          Positioned(bottom: 0, right: 0, child: Container(width: 24, height: 24,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold, border: Border.all(color: LKTheme.bg, width: 2)),
-            child: const Icon(Icons.camera_alt, size: 12, color: Color(0xFF5A3D10)))),
-        ])),
-        const SizedBox(height: 6), const Text('Upload your photo', style: TextStyle(fontSize: 12, color: LKTheme.textMuted)),
+        Container(width: 80, height: 80,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: LKTheme.bgCardLight,
+            border: Border.all(color: LKTheme.gold, width: 2),
+          ),
+          child: const Icon(Icons.qr_code_2_rounded, size: 40, color: LKTheme.gold),
+        ),
+        const SizedBox(height: 6),
+        const Text('Your QR code will be generated', style: TextStyle(fontSize: 12, color: LKTheme.textMuted)),
         const SizedBox(height: 20),
         _label('Your Name'), const SizedBox(height: 6),
-        TextField(controller: _nameController, maxLength: 50, style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
+        TextField(controller: _nameController, maxLength: 30, style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
           onChanged: (_) { if (_errorFields.contains('name')) setState(() => _errorFields.remove('name')); },
           decoration: _inputDeco('Your name', Icons.person_rounded, LKTheme.gold, 'name')),
         const SizedBox(height: 14),
-        _label('Your Email Address'), const SizedBox(height: 6),
+        _label('Your Email (no registration required)'), const SizedBox(height: 6),
         TextField(controller: _emailController, maxLength: 100, keyboardType: TextInputType.emailAddress, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('email')) setState(() => _errorFields.remove('email')); },
           decoration: _inputDeco('your@email.com', Icons.email_rounded, LKTheme.gold, 'email')),
         const SizedBox(height: 14),
-        _label('Your Phone Number'), const SizedBox(height: 6),
+        _label('Your Phone Number (no registration required)'), const SizedBox(height: 6),
         TextField(controller: _phoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('phone')) setState(() => _errorFields.remove('phone')); },
           decoration: _inputDeco('+61400000000', Icons.phone_rounded, LKTheme.gold, 'phone')),
