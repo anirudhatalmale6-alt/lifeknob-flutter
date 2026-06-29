@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import '../services/translation_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -19,6 +20,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const int _totalPages = 7;
 
   String _language = 'English';
+  String _langCode = 'en';
   String? _userCode;
   String _selectedPlan = 'free';
   int _maxSlots = 1;
@@ -36,10 +38,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _isSaving = false;
   String? _avatarUrl;
   final Set<String> _errorFields = {};
+  final TranslationService _ts = TranslationService();
+
+  String _t(String key) => _ts.t(key);
 
   @override
   void initState() {
     super.initState();
+    _loadLanguages();
     final user = AuthService().currentUser;
     if (user != null) {
       _userCode = user.userCode;
@@ -51,6 +57,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (user.ambulanceNumber != null && user.ambulanceNumber!.isNotEmpty) _ambulanceController.text = user.ambulanceNumber!;
       _avatarUrl = user.avatar;
     }
+  }
+
+  Future<void> _loadLanguages() async {
+    await _ts.init();
+    if (mounted) {
+      setState(() {
+        _langCode = _ts.currentLang;
+        final langs = _ts.availableLanguages;
+        final match = langs.where((l) => l['code'] == _langCode);
+        if (match.isNotEmpty) _language = match.first['name']!;
+      });
+    }
+  }
+
+  Future<void> _changeLanguage(String langName) async {
+    final langs = _ts.availableLanguages;
+    final match = langs.where((l) => l['name'] == langName);
+    if (match.isEmpty) return;
+    final code = match.first['code']!;
+    setState(() { _language = langName; _langCode = code; });
+    await _ts.setLanguage(code);
+    if (mounted) setState(() {});
   }
 
   void _next() {
@@ -285,7 +313,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 if (_page > 0) Expanded(flex: 1, child: SizedBox(height: 52, child: OutlinedButton(
                   onPressed: _back,
                   style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  child: const Text('BACK', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: Text(_t('back'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ))),
                 if (_page > 0) const SizedBox(width: 12),
                 Expanded(flex: _page > 0 ? 1 : 1, child: SizedBox(height: 52, child: Container(
@@ -296,7 +324,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: _isSaving
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
                         : Text(
-                            _page == _totalPages - 1 ? 'FINISH' : 'NEXT',
+                            _page == _totalPages - 1 ? _t('finish') : _t('next'),
                             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10), letterSpacing: 1),
                           ),
                   ),
@@ -309,33 +337,37 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  List<String> get _languageNames {
+    final langs = _ts.availableLanguages;
+    if (langs.isEmpty) return ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais', 'Italiano', 'Portugues'];
+    return langs.map((l) => l['name']!).toList();
+  }
+
   // Page 0: Language
   Widget _buildLanguage() {
-    final languages = ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais', 'Italiano', 'Portugues'];
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         SizedBox(width: 180, height: 170, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain)),
         const SizedBox(height: 40),
-        const Text('Select Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+        Text(_t('select_language'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
         const SizedBox(height: 12),
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.gold, width: 1.5)),
           child: DropdownButton<String>(value: _language, isExpanded: true, dropdownColor: LKTheme.bgCard, underline: const SizedBox(),
             icon: const Icon(Icons.keyboard_arrow_down_rounded, color: LKTheme.gold, size: 28),
             style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
-            items: languages.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-            onChanged: (v) { if (v != null) setState(() => _language = v); })),
+            items: _languageNames.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
+            onChanged: (v) { if (v != null) _changeLanguage(v); })),
       ]));
   }
 
   // Page 1: Welcome
   Widget _buildWelcome() {
-    final languages = ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais', 'Italiano', 'Portugues'];
     return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const SizedBox(height: 6),
         Center(child: Column(children: [
-          const Text('Select Language', style: TextStyle(fontSize: 13, color: LKTheme.textSecondary, fontWeight: FontWeight.w500)),
+          Text(_t('select_language'), style: const TextStyle(fontSize: 13, color: LKTheme.textSecondary, fontWeight: FontWeight.w500)),
           const SizedBox(height: 4),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -343,18 +375,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: DropdownButton<String>(value: _language, isExpanded: false, dropdownColor: LKTheme.bgCard, underline: const SizedBox(), isDense: true,
               icon: const Icon(Icons.keyboard_arrow_down_rounded, color: LKTheme.gold, size: 22),
               style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
-              items: languages.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-              onChanged: (v) { if (v != null) setState(() => _language = v); }),
+              items: _languageNames.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
+              onChanged: (v) { if (v != null) _changeLanguage(v); }),
           ),
         ])),
         const SizedBox(height: 10),
-        const Center(child: Text('Welcome to LifeKnob', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.gold))),
+        Center(child: Text(_t('welcome_title'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.gold))),
         const SizedBox(height: 12),
-        _welcomeItem(Icons.favorite_rounded, 'What is LifeKnob?', 'A simple app to let your family know you are fine. Press "I AM OKAY" every day.'),
-        _welcomeItem(Icons.warning_rounded, 'How it works', 'If you stop pressing, your family will know something might be wrong. Silence is the alarm.'),
-        _welcomeItem(Icons.people_rounded, 'Connections', 'Connect with family members using your unique code. They can see when you last pressed OK.'),
-        _welcomeItem(Icons.star_rounded, 'Membership', 'Free: 1 connection with ads. Premium plans: more connections, no ads.'),
-        _welcomeItem(Icons.shield_rounded, 'Your Privacy', 'Your data is only shared with people YOU connect with.'),
+        _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc')),
+        _welcomeItem(Icons.warning_rounded, _t('how_works_title'), _t('how_works_desc')),
+        _welcomeItem(Icons.people_rounded, _t('connections_title'), _t('connections_desc')),
+        _welcomeItem(Icons.star_rounded, _t('membership_title'), _t('membership_desc')),
+        _welcomeItem(Icons.shield_rounded, _t('privacy_title'), _t('privacy_desc')),
         const SizedBox(height: 8),
       ]));
   }
@@ -377,26 +409,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return SingleChildScrollView(key: const ValueKey('profile'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(children: [
         const SizedBox(height: 12),
-        const Text('Your Details', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        Text(_t('your_details'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
         const SizedBox(height: 6),
-        Text('No authentication required', style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7))),
+        Text(_t('no_auth_required'), style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7))),
         const SizedBox(height: 16),
         const Icon(Icons.qr_code_2_rounded, size: 64, color: LKTheme.textMuted),
         const SizedBox(height: 16),
-        _label('Your Name'), const SizedBox(height: 6),
+        _label(_t('your_name')), const SizedBox(height: 6),
         TextField(controller: _nameController, maxLength: 30, style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
           onChanged: (_) { if (_errorFields.contains('name')) setState(() => _errorFields.remove('name')); },
-          decoration: _inputDeco('Peter, Lisa, ...', Icons.person_rounded, LKTheme.gold, 'name')),
+          decoration: _inputDeco(_t('name_placeholder'), Icons.person_rounded, LKTheme.gold, 'name')),
         const SizedBox(height: 14),
-        _label('Your Email'), const SizedBox(height: 6),
+        _label(_t('your_email')), const SizedBox(height: 6),
         TextField(controller: _emailController, maxLength: 100, keyboardType: TextInputType.emailAddress, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('email')) setState(() => _errorFields.remove('email')); },
-          decoration: _inputDeco('your@email.com', Icons.email_rounded, LKTheme.gold, 'email')),
+          decoration: _inputDeco(_t('email_placeholder'), Icons.email_rounded, LKTheme.gold, 'email')),
         const SizedBox(height: 14),
-        _label('Your Phone Number'), const SizedBox(height: 6),
+        _label(_t('your_phone')), const SizedBox(height: 6),
         TextField(controller: _phoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('phone')) setState(() => _errorFields.remove('phone')); },
-          decoration: _inputDeco('01 2345 6789 ...', Icons.phone_rounded, LKTheme.gold, 'phone')),
+          decoration: _inputDeco(_t('phone_placeholder'), Icons.phone_rounded, LKTheme.gold, 'phone')),
         const SizedBox(height: 20),
       ]));
   }
@@ -407,23 +439,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         const Icon(Icons.save_rounded, size: 48, color: LKTheme.gold),
         const SizedBox(height: 16),
-        const Text('Your Personal Code', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        Text(_t('your_code'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
         const SizedBox(height: 24),
         Text(_userCode ?? '........', style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 8)),
         const SizedBox(height: 24),
-        const Text('Please save it or\nwrite it down on a paper.', textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w700, height: 1.4)),
+        Text(_t('save_code_msg'), textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w700, height: 1.4)),
         const SizedBox(height: 12),
-        const Text('Share this code with your family\nso they can connect to you.', textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.5)),
+        Text(_t('share_code_msg'), textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.5)),
         const SizedBox(height: 24),
         GestureDetector(
-          onTap: () { if (_userCode != null) { Clipboard.setData(ClipboardData(text: _userCode!)); _showMessage('Code copied!'); } },
+          onTap: () { if (_userCode != null) { Clipboard.setData(ClipboardData(text: _userCode!)); _showMessage(_t('code_copied')); } },
           child: Container(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold)),
-            child: const Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.copy_rounded, size: 20, color: LKTheme.gold), SizedBox(width: 8),
-              Text('Copy Code', style: TextStyle(fontSize: 17, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.copy_rounded, size: 20, color: LKTheme.gold), const SizedBox(width: 8),
+              Text(_t('copy_code'), style: const TextStyle(fontSize: 17, color: LKTheme.gold, fontWeight: FontWeight.w600)),
             ]))),
       ]));
   }
@@ -433,7 +465,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return SingleChildScrollView(key: const ValueKey('emergency'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(children: [
         const SizedBox(height: 12),
-        const Text('Emergency Contacts', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        Text(_t('emergency_contacts'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
         const SizedBox(height: 10),
         Container(
           width: 60, height: 60,
@@ -441,24 +473,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           child: const Icon(Icons.local_hospital_rounded, size: 32, color: LKTheme.red),
         ),
         const SizedBox(height: 8),
-        Text('Whom you want to call in case of emergency', style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7)), textAlign: TextAlign.center),
+        Text(_t('emergency_subtitle'), style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7)), textAlign: TextAlign.center),
         const SizedBox(height: 20),
-        _label('*Name'), const SizedBox(height: 6),
+        _label(_t('sos_name')), const SizedBox(height: 6),
         TextField(controller: _sosNameController, maxLength: 50, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('sosName')) setState(() => _errorFields.remove('sosName')); },
-          decoration: _inputDeco('My son ...', Icons.person_rounded, LKTheme.gold, 'sosName')),
+          decoration: _inputDeco(_t('sos_name_placeholder'), Icons.person_rounded, LKTheme.gold, 'sosName')),
         const SizedBox(height: 14),
-        _label('Phone Number'), const SizedBox(height: 6),
+        _label(_t('phone_number')), const SizedBox(height: 6),
         TextField(controller: _sosPhoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('sosPhone')) setState(() => _errorFields.remove('sosPhone')); },
-          decoration: _inputDeco('01 2345 6789 ...', Icons.phone_rounded, LKTheme.gold, 'sosPhone')),
+          decoration: _inputDeco(_t('sos_phone_placeholder'), Icons.phone_rounded, LKTheme.gold, 'sosPhone')),
         const SizedBox(height: 24),
-        const Text('Ambulance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.gold)),
+        Text(_t('ambulance'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.gold)),
         const SizedBox(height: 12),
-        _label('Phone Number'), const SizedBox(height: 6),
+        _label(_t('phone_number')), const SizedBox(height: 6),
         TextField(controller: _ambulanceController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('ambulance')) setState(() => _errorFields.remove('ambulance')); },
-          decoration: _inputDeco('112, 000, ...', Icons.local_hospital_rounded, LKTheme.red, 'ambulance')),
+          decoration: _inputDeco(_t('ambulance_placeholder'), Icons.local_hospital_rounded, LKTheme.red, 'ambulance')),
         const SizedBox(height: 20),
       ]));
   }
@@ -470,12 +502,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 16),
         const Icon(Icons.star_rounded, size: 48, color: LKTheme.gold),
         const SizedBox(height: 10),
-        const Text('Select Your Plan', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        Text(_t('select_plan'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
         const SizedBox(height: 8),
-        const Text(
-          'Choose how many people you want to watch over.\nMore connections means more family members can see when you press OK.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, color: LKTheme.textSecondary, height: 1.4)),
+        Text(_t('plan_desc'), textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary, height: 1.4)),
         const SizedBox(height: 20),
         _planCard('free', 'Free', [
           'Watch over 1 person',
@@ -499,7 +529,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           'Cancel anytime',
         ], '\$8', '\$80/year'),
         const SizedBox(height: 10),
-        const Text('You can change your plan anytime in Set Up.', style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
+        Text(_t('change_plan_hint'), style: const TextStyle(fontSize: 13, color: LKTheme.textMuted)),
         const SizedBox(height: 16),
       ]));
   }
@@ -552,7 +582,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(children: [
         const SizedBox(height: 16),
-        const Text('Connect to People', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        Text(_t('connect_title'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
         const SizedBox(height: 20),
 
         ..._connectedPeople.map((p) => Container(
@@ -573,20 +603,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         )),
 
         if (_connectedPeople.length >= _maxSlots && _connectedPeople.isNotEmpty)
-          const Padding(padding: EdgeInsets.symmetric(vertical: 10),
-            child: Text("Upgrade plan for more connections", style: TextStyle(fontSize: 14, color: LKTheme.gold, fontWeight: FontWeight.w500))),
+          Padding(padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Text(_t('upgrade_plan'), style: const TextStyle(fontSize: 14, color: LKTheme.gold, fontWeight: FontWeight.w500))),
 
         if (remaining > 0) ...[
           const SizedBox(height: 8),
           TextField(controller: _connectNameController, maxLength: 50,
             style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
             onChanged: (_) { if (_errorFields.contains('connectName')) setState(() => _errorFields.remove('connectName')); },
-            decoration: _inputDeco('Patrik, My brother, ...', Icons.person_rounded, LKTheme.gold, 'connectName')),
+            decoration: _inputDeco(_t('connect_name_placeholder'), Icons.person_rounded, LKTheme.gold, 'connectName')),
           const SizedBox(height: 12),
           TextField(controller: _connectCodeController, maxLength: 8, textCapitalization: TextCapitalization.characters,
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
             onChanged: (_) { if (_errorFields.contains('connectCode')) setState(() => _errorFields.remove('connectCode')); },
-            decoration: _inputDeco('Their code', Icons.link_rounded, LKTheme.gold, 'connectCode')),
+            decoration: _inputDeco(_t('connect_code_placeholder'), Icons.link_rounded, LKTheme.gold, 'connectCode')),
           const SizedBox(height: 16),
           SizedBox(width: double.infinity, height: 50, child: Container(
             decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
@@ -595,7 +625,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
               child: _isSaving
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
-                : const Text('+ CONNECT PEOPLE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10))),
+                : Text(_t('connect_button'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10))),
             ),
           )),
         ],

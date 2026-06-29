@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
+import '../services/translation_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -60,6 +61,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   Future<void> _initApp() async {
     await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
+    await TranslationService().init();
     // DEBUG: skip auth check to preview zones layout
     final uri = Uri.base;
     if (uri.queryParameters.containsKey('debug')) {
