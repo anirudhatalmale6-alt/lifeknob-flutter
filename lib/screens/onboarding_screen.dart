@@ -387,29 +387,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ]));
   }
 
-  // Page 3: Code
+  // Page 5: Your Personal Code
   Widget _buildCode() {
     return Padding(key: const ValueKey('code'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const Icon(Icons.badge_rounded, size: 52, color: LKTheme.gold),
+        const Icon(Icons.save_rounded, size: 48, color: LKTheme.gold),
         const SizedBox(height: 16),
         const Text('Your Personal Code', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 28),
-        Container(padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 22),
-          decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(20), border: Border.all(color: LKTheme.gold, width: 2),
-            boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.15), blurRadius: 20)]),
-          child: Text(_userCode ?? '........', style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 8))),
-        const SizedBox(height: 28),
+        const SizedBox(height: 24),
+        Text(_userCode ?? '........', style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 8)),
+        const SizedBox(height: 24),
         const Text('Please save it or\nwrite it down on a paper.', textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 20, color: LKTheme.red, fontWeight: FontWeight.w700, height: 1.4)),
-        const SizedBox(height: 16),
+          style: TextStyle(fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w700, height: 1.4)),
+        const SizedBox(height: 12),
         const Text('Share this code with your family\nso they can connect to you.', textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.5)),
-        const SizedBox(height: 20),
+          style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.5)),
+        const SizedBox(height: 24),
         GestureDetector(
           onTap: () { if (_userCode != null) { Clipboard.setData(ClipboardData(text: _userCode!)); _showMessage('Code copied!'); } },
-          child: Container(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.5))),
+          child: Container(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold)),
             child: const Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(Icons.copy_rounded, size: 20, color: LKTheme.gold), SizedBox(width: 8),
               Text('Copy Code', style: TextStyle(fontSize: 17, color: LKTheme.gold, fontWeight: FontWeight.w600)),
@@ -503,9 +500,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Container(
         width: double.infinity, padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selected ? LKTheme.gold.withValues(alpha: 0.1) : LKTheme.bgCard,
+          color: selected ? LKTheme.gold.withValues(alpha: 0.1) : const Color(0xFF002035),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: selected ? LKTheme.gold : LKTheme.border, width: selected ? 2 : 1),
+          border: Border.all(color: selected ? LKTheme.gold : LKTheme.gold.withValues(alpha: 0.2), width: selected ? 2 : 1),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
@@ -535,80 +532,61 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  // Page 6: Connect People (matches People page layout)
+  // Page 6: Connect to People
   Widget _buildConnect() {
     final remaining = _maxSlots - _connectedPeople.length;
-    return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 500),
-        child: Column(children: [
-          const SizedBox(height: 16),
-          Row(children: [
-            const Icon(Icons.people_rounded, color: LKTheme.gold, size: 28),
-            const SizedBox(width: 10),
-            const Expanded(child: Text('Connect to People', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
-            Text('${_connectedPeople.length} / $_maxSlots', style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
+    return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(children: [
+        const SizedBox(height: 16),
+        const Text('Connect to People', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        const SizedBox(height: 20),
+
+        ..._connectedPeople.map((p) => Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
+          child: Row(children: [
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(p['name']!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
+              const SizedBox(height: 2),
+              Text(p['code']!, style: const TextStyle(fontSize: 13, letterSpacing: 2, fontWeight: FontWeight.w700, color: LKTheme.gold)),
+            ])),
+            GestureDetector(
+              onTap: () => setState(() => _connectedPeople.remove(p)),
+              child: const Icon(Icons.cancel_rounded, size: 24, color: LKTheme.textMuted),
+            ),
           ]),
+        )),
+
+        if (_connectedPeople.length >= _maxSlots && _connectedPeople.isNotEmpty)
+          const Padding(padding: EdgeInsets.symmetric(vertical: 10),
+            child: Text("Upgrade plan for more connections", style: TextStyle(fontSize: 14, color: LKTheme.gold, fontWeight: FontWeight.w500))),
+
+        if (remaining > 0) ...[
+          const SizedBox(height: 8),
+          TextField(controller: _connectNameController, maxLength: 50,
+            style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+            onChanged: (_) { if (_errorFields.contains('connectName')) setState(() => _errorFields.remove('connectName')); },
+            decoration: _inputDeco('Patrik, My brother, ...', Icons.person_rounded, LKTheme.gold, 'connectName')),
           const SizedBox(height: 12),
-
-          // Connected people rows (same style as People page)
-          ..._connectedPeople.map((p) => Container(
-            margin: const EdgeInsets.only(bottom: 6),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(10), border: Border.all(color: LKTheme.border)),
-            child: Row(children: [
-              Expanded(flex: 4, child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                decoration: BoxDecoration(color: LKTheme.bgCardLight, borderRadius: BorderRadius.circular(6), border: Border.all(color: LKTheme.border)),
-                child: Text(p['name']!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
-              )),
-              const SizedBox(width: 6),
-              Expanded(flex: 2, child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                decoration: BoxDecoration(color: LKTheme.bgCardLight, borderRadius: BorderRadius.circular(6), border: Border.all(color: LKTheme.border)),
-                child: Text(p['code']!, style: const TextStyle(fontSize: 13, letterSpacing: 1, fontWeight: FontWeight.w700, color: LKTheme.gold)),
-              )),
-              const SizedBox(width: 6),
-              const Expanded(flex: 3, child: Text('Connection request\nset up. Waiting\nfor response.', style: TextStyle(fontSize: 11, color: LKTheme.textMuted, height: 1.3))),
-              GestureDetector(
-                onTap: () => setState(() => _connectedPeople.remove(p)),
-                child: const Column(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.cancel_rounded, size: 26, color: LKTheme.textMuted),
-                  Text('delete', style: TextStyle(fontSize: 9, color: LKTheme.textMuted)),
-                ]),
-              ),
-            ]),
-          )),
-
-          // Limit message
-          if (_connectedPeople.length >= _maxSlots && _connectedPeople.isNotEmpty)
-            Padding(padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-              child: const Text("You can't connect more people, need membership plan",
-                style: TextStyle(fontSize: 14, color: LKTheme.red, fontWeight: FontWeight.w500))),
-
-          // Add connection fields
-          if (remaining > 0) ...[
-            const SizedBox(height: 8),
-            const Text("Enter the other person's details:", style: TextStyle(fontSize: 14, color: LKTheme.textMuted)),
-            const SizedBox(height: 8),
-            TextField(controller: _connectNameController, maxLength: 50,
-              style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-              onChanged: (_) { if (_errorFields.contains('connectName')) setState(() => _errorFields.remove('connectName')); },
-              decoration: _inputDeco('Their name (e.g. My Son)', Icons.person_rounded, LKTheme.gold, 'connectName')),
-            const SizedBox(height: 10),
-            TextField(controller: _connectCodeController, maxLength: 8, textCapitalization: TextCapitalization.characters,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
-              onChanged: (_) { if (_errorFields.contains('connectCode')) setState(() => _errorFields.remove('connectCode')); },
-              decoration: _inputDeco('Their code', Icons.link_rounded, LKTheme.gold, 'connectCode')),
-            const SizedBox(height: 12),
-            SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
+          TextField(controller: _connectCodeController, maxLength: 8, textCapitalization: TextCapitalization.characters,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
+            onChanged: (_) { if (_errorFields.contains('connectCode')) setState(() => _errorFields.remove('connectCode')); },
+            decoration: _inputDeco('Their code', Icons.link_rounded, LKTheme.gold, 'connectCode')),
+          const SizedBox(height: 16),
+          SizedBox(width: double.infinity, height: 50, child: Container(
+            decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+            child: ElevatedButton(
               onPressed: _isSaving ? null : _addCode,
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
               child: _isSaving
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
-                : const Text('+ CONNECT PEOPLE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-            )),
-          ],
-          const SizedBox(height: 16),
-        ]))));
+                : const Text('+ CONNECT PEOPLE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10))),
+            ),
+          )),
+        ],
+        const SizedBox(height: 16),
+      ]));
   }
 
   Widget _label(String text) {
