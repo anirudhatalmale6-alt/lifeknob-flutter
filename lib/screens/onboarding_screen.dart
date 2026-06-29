@@ -330,29 +330,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // Page 1: Welcome
   Widget _buildWelcome() {
+    final languages = ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais', 'Italiano', 'Portugues'];
     return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(height: 24),
+        const SizedBox(height: 6),
+        Center(child: Column(children: [
+          const Text('Select Language', style: TextStyle(fontSize: 13, color: LKTheme.textSecondary, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(10), border: Border.all(color: LKTheme.gold, width: 1)),
+            child: DropdownButton<String>(value: _language, isExpanded: false, dropdownColor: LKTheme.bgCard, underline: const SizedBox(), isDense: true,
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: LKTheme.gold, size: 22),
+              style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
+              items: languages.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
+              onChanged: (v) { if (v != null) setState(() => _language = v); }),
+          ),
+        ])),
+        const SizedBox(height: 10),
         const Center(child: Text('Welcome to LifeKnob', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.gold))),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
         _welcomeItem(Icons.favorite_rounded, 'What is LifeKnob?', 'A simple app to let your family know you are fine. Press "I AM OKAY" every day.'),
         _welcomeItem(Icons.warning_rounded, 'How it works', 'If you stop pressing, your family will know something might be wrong. Silence is the alarm.'),
         _welcomeItem(Icons.people_rounded, 'Connections', 'Connect with family members using your unique code. They can see when you last pressed OK.'),
         _welcomeItem(Icons.star_rounded, 'Membership', 'Free: 1 connection with ads. Premium plans: more connections, no ads.'),
         _welcomeItem(Icons.shield_rounded, 'Your Privacy', 'Your data is only shared with people YOU connect with.'),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
       ]));
   }
 
   Widget _welcomeItem(IconData icon, String title, String desc) {
-    return Padding(padding: const EdgeInsets.only(bottom: 20), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
-        child: Icon(icon, size: 24, color: LKTheme.gold)),
-      const SizedBox(width: 14),
+    return Padding(padding: const EdgeInsets.only(bottom: 14), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(width: 40, height: 40, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
+        child: Icon(icon, size: 22, color: LKTheme.gold)),
+      const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 6),
-        Text(desc, style: const TextStyle(fontSize: 17, color: LKTheme.textPrimary, height: 1.5, fontWeight: FontWeight.w400)),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        const SizedBox(height: 3),
+        Text(desc, style: const TextStyle(fontSize: 15, color: LKTheme.textPrimary, height: 1.35, fontWeight: FontWeight.w400)),
       ])),
     ]));
   }
@@ -361,14 +376,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildProfile() {
     return SingleChildScrollView(key: const ValueKey('profile'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         const Text('Your Details', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
         const SizedBox(height: 6),
         Text('No authentication required', style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7))),
-        const SizedBox(height: 20),
-        const Icon(Icons.qr_code_2_rounded, size: 72, color: LKTheme.textMuted),
-        const SizedBox(height: 4),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+        const Icon(Icons.qr_code_2_rounded, size: 64, color: LKTheme.textMuted),
+        const SizedBox(height: 16),
         _label('Your Name'), const SizedBox(height: 6),
         TextField(controller: _nameController, maxLength: 30, style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
           onChanged: (_) { if (_errorFields.contains('name')) setState(() => _errorFields.remove('name')); },
@@ -414,17 +428,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ]));
   }
 
-  // Page 4: Emergency
+  // Page 3: Emergency
   Widget _buildEmergency() {
     return SingleChildScrollView(key: const ValueKey('emergency'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         const Text('Emergency Contacts', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Container(
-          width: 64, height: 64,
+          width: 60, height: 60,
           decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.15)),
-          child: const Icon(Icons.add_rounded, size: 36, color: LKTheme.red),
+          child: const Icon(Icons.local_hospital_rounded, size: 32, color: LKTheme.red),
         ),
         const SizedBox(height: 8),
         Text('Whom you want to call in case of emergency', style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7)), textAlign: TextAlign.center),
