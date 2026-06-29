@@ -10,6 +10,9 @@ class LKTheme {
   static const Color goldLight = Color(0xFFF0D97C);
   static const Color goldDark = Color(0xFFB08930);
   static const Color goldShadow = Color(0xFF6B4D1E);
+  static const Color silver = Color(0xFFADB5C0);
+  static const Color silverLight = Color(0xFFCCD2DA);
+  static const Color silverDark = Color(0xFF8690A0);
   static const Color teal = Color(0xFF4ECDC4);
   static const Color tealDark = Color(0xFF2B9E96);
   static const Color red = Color(0xFFE74C3C);
@@ -38,6 +41,12 @@ class LKTheme {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [Color(0xFFF0D97C), Color(0xFFD4A843), Color(0xFFB08930)],
+  );
+
+  static const LinearGradient silverGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFCCD2DA), Color(0xFFADB5C0), Color(0xFF8690A0)],
   );
 
   static const LinearGradient coinGradient = LinearGradient(

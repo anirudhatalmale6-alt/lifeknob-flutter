@@ -25,6 +25,10 @@ class HistoryScreenState extends State<HistoryScreen> {
   bool _isAdding = false;
   bool _isFreeUser = true;
   bool _showBumperAd = false;
+
+  Color get _accent => _isFreeUser ? LKTheme.silver : LKTheme.gold;
+  LinearGradient get _accentGradient => _isFreeUser ? LKTheme.silverGradient : LKTheme.goldGradient;
+  Color get _accentDark => _isFreeUser ? const Color(0xFF2D3340) : const Color(0xFF5A3D10);
   DateTime? _pageOpenTime;
   String? _bannerAdImage;
   String? _bannerAdUrl;
@@ -169,11 +173,14 @@ class HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _editConnection(Connection conn) async {
     final ctrl = TextEditingController(text: conn.name);
+    final accent = _accent;
+    final accentGrad = _accentGradient;
+    final accentDk = _accentDark;
     final newName = await showDialog<String>(context: context, builder: (ctx) => Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
         padding: const EdgeInsets.all(28),
-        decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.2)),
+        decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.2)),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           const Text('Edit name', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
           const SizedBox(height: 16),
@@ -190,9 +197,9 @@ class HistoryScreenState extends State<HistoryScreen> {
               child: const Text('Cancel', style: TextStyle(fontSize: 16)))),
             const SizedBox(width: 12),
             Expanded(child: Container(
-              decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(gradient: accentGrad, borderRadius: BorderRadius.circular(14)),
               child: ElevatedButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: accentDk, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
                 child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
             )),
           ]),
@@ -208,25 +215,28 @@ class HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _showMsg(String msg) {
+    final accent = _accent;
+    final accentGrad = _accentGradient;
+    final accentDk = _accentDark;
     showDialog(context: context, builder: (ctx) => Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
         padding: const EdgeInsets.all(28),
-        decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.2)),
+        decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.2)),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.1)),
-            child: const Icon(Icons.info_rounded, size: 36, color: LKTheme.gold),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: accent.withValues(alpha: 0.1)),
+            child: Icon(Icons.info_rounded, size: 36, color: accent),
           ),
           const SizedBox(height: 16),
           Text(msg, style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary, height: 1.4), textAlign: TextAlign.center),
           const SizedBox(height: 24),
           SizedBox(width: double.infinity, height: 48, child: Container(
-            decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(gradient: accentGrad, borderRadius: BorderRadius.circular(14)),
             child: ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: accentDk, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
               child: const Text('OK', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
           )),
         ]),
@@ -252,7 +262,7 @@ class HistoryScreenState extends State<HistoryScreen> {
       backgroundColor: LKTheme.bg,
       body: Stack(children: [SafeArea(
         child: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: LKTheme.gold))
+          ? Center(child: CircularProgressIndicator(color: _accent))
           : _error != null
             ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Container(
@@ -265,11 +275,11 @@ class HistoryScreenState extends State<HistoryScreen> {
                 const SizedBox(height: 16),
                 GestureDetector(onTap: _loadData, child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.5))),
-                  child: const Text('Try Again', style: TextStyle(color: LKTheme.gold, fontSize: 16, fontWeight: FontWeight.w600)),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: _accent.withValues(alpha: 0.5))),
+                  child: Text('Try Again', style: TextStyle(color: _accent, fontSize: 16, fontWeight: FontWeight.w600)),
                 )),
               ]))
-            : RefreshIndicator(color: LKTheme.gold, backgroundColor: LKTheme.bgCard, onRefresh: _loadData,
+            : RefreshIndicator(color: _accent, backgroundColor: LKTheme.bgCard, onRefresh: _loadData,
                 child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 500),
                 child: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 16), children: [
 
@@ -278,18 +288,18 @@ class HistoryScreenState extends State<HistoryScreen> {
                     padding: const EdgeInsets.only(bottom: 16, top: 4),
                     child: Row(
                       children: [
-                        const Icon(Icons.people_rounded, color: LKTheme.gold, size: 28),
+                        Icon(Icons.people_rounded, color: _accent, size: 28),
                         const SizedBox(width: 12),
                         const Expanded(child: Text('PEOPLE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 2))),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            gradient: LKTheme.goldGradient,
+                            gradient: _accentGradient,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             '$_activeCount / $_maxConnections',
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10)),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: _accentDark),
                           ),
                         ),
                       ],
@@ -346,9 +356,9 @@ class HistoryScreenState extends State<HistoryScreen> {
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: LKTheme.gold.withValues(alpha: 0.06),
+                            color: _accent.withValues(alpha: 0.06),
                           ),
-                          child: Icon(Icons.people_outline_rounded, size: 56, color: LKTheme.gold.withValues(alpha: 0.4)),
+                          child: Icon(Icons.people_outline_rounded, size: 56, color: _accent.withValues(alpha: 0.4)),
                         ),
                         const SizedBox(height: 20),
                         const Text('No connections yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: LKTheme.textSecondary)),
@@ -378,7 +388,7 @@ class HistoryScreenState extends State<HistoryScreen> {
       statusText = 'Disconnected';
       statusIcon = Icons.link_off_rounded;
     } else if (isPending) {
-      statusColor = LKTheme.gold;
+      statusColor = _accent;
       statusText = 'Waiting...';
       statusIcon = Icons.hourglass_top_rounded;
     } else if (isOverdue) {
@@ -430,7 +440,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                       color: isInactive ? LKTheme.textMuted : LKTheme.textPrimary)),
                     const SizedBox(height: 2),
                     Text(conn.userCode, style: TextStyle(fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.w600,
-                      color: isInactive ? LKTheme.textMuted.withValues(alpha: 0.6) : LKTheme.gold.withValues(alpha: 0.6))),
+                      color: isInactive ? LKTheme.textMuted.withValues(alpha: 0.6) : _accent.withValues(alpha: 0.6))),
                   ],
                 )),
                 // Status badge
@@ -488,13 +498,13 @@ class HistoryScreenState extends State<HistoryScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: LKTheme.gold.withValues(alpha: 0.06),
-                      border: Border.all(color: LKTheme.gold.withValues(alpha: 0.15)),
+                      color: _accent.withValues(alpha: 0.06),
+                      border: Border.all(color: _accent.withValues(alpha: 0.15)),
                     ),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(Icons.edit_rounded, size: 14, color: LKTheme.gold.withValues(alpha: 0.7)),
+                      Icon(Icons.edit_rounded, size: 14, color: _accent.withValues(alpha: 0.7)),
                       const SizedBox(width: 4),
-                      Text('edit', style: TextStyle(fontSize: 12, color: LKTheme.gold.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
+                      Text('edit', style: TextStyle(fontSize: 12, color: _accent.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
                     ]),
                   ),
                 ),
@@ -525,20 +535,20 @@ class HistoryScreenState extends State<HistoryScreen> {
 
   InputDecoration _fieldDeco(String hint, IconData icon) {
     return InputDecoration(hintText: hint, counterText: '',
-      prefixIcon: Icon(icon, color: LKTheme.gold),
+      prefixIcon: Icon(icon, color: _accent),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: LKTheme.border)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: LKTheme.gold, width: 2)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _accent, width: 2)),
       filled: true, fillColor: LKTheme.bgCardLight);
   }
 
   Widget _buildAddSection() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.1)),
+      decoration: LKTheme.glassCard(borderColor: _accent.withValues(alpha: 0.1)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(
           children: [
-            Icon(Icons.person_add_rounded, size: 20, color: LKTheme.gold.withValues(alpha: 0.7)),
+            Icon(Icons.person_add_rounded, size: 20, color: _accent.withValues(alpha: 0.7)),
             const SizedBox(width: 8),
             const Text("Add a connection", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
           ],
@@ -551,17 +561,17 @@ class HistoryScreenState extends State<HistoryScreen> {
           decoration: _fieldDeco('Their name (e.g. My Son)', Icons.person_rounded)),
         const SizedBox(height: 10),
         TextField(controller: _codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: _accent, letterSpacing: 4),
           decoration: _fieldDeco('Their code', Icons.link_rounded)),
         const SizedBox(height: 14),
         SizedBox(width: double.infinity, height: 50, child: Container(
-          decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+          decoration: BoxDecoration(gradient: _accentGradient, borderRadius: BorderRadius.circular(14)),
           child: ElevatedButton.icon(
             onPressed: _isAdding ? null : _connectPeople,
-            icon: _isAdding ? null : const Icon(Icons.add_rounded, size: 22, color: Color(0xFF5A3D10)),
+            icon: _isAdding ? null : Icon(Icons.add_rounded, size: 22, color: _accentDark),
             label: _isAdding
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
-              : const Text('CONNECT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10))),
+              ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: _accentDark, strokeWidth: 2))
+              : Text('CONNECT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _accentDark)),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
           ),
         )),

@@ -26,6 +26,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _language = 'English';
   bool _isFreeUser = true;
   bool _showBumperAd = false;
+
+  Color get _accent => _isFreeUser ? LKTheme.silver : LKTheme.gold;
+  LinearGradient get _accentGradient => _isFreeUser ? LKTheme.silverGradient : LKTheme.goldGradient;
+  Color get _accentDark => _isFreeUser ? const Color(0xFF2D3340) : const Color(0xFF5A3D10);
   String? _bannerAdImage;
   String? _bannerAdUrl;
   String? _bumperAdImage;
@@ -146,33 +150,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showCodePopup() {
     if (_userCode == null) return;
+    final accent = _accent;
+    final accentGrad = _accentGradient;
+    final accentDk = _accentDark;
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(32),
-          decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.3)),
+          decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.3)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text('YOUR CODE', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, fontWeight: FontWeight.w500, letterSpacing: 1)),
               const SizedBox(height: 16),
-              Text(_userCode!, style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 6)),
+              Text(_userCode!, style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: accent, letterSpacing: 6)),
               const SizedBox(height: 20),
               Row(children: [
                 Expanded(child: OutlinedButton.icon(
                   onPressed: () { Clipboard.setData(ClipboardData(text: _userCode!)); Navigator.pop(ctx); },
                   icon: const Icon(Icons.copy_rounded, size: 22),
                   label: const Text('Copy', style: TextStyle(fontSize: 18)),
-                  style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                  style: OutlinedButton.styleFrom(foregroundColor: accent, side: BorderSide(color: accent.withValues(alpha: 0.5)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
                 )),
                 const SizedBox(width: 12),
                 Expanded(child: Container(
-                  decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+                  decoration: BoxDecoration(gradient: accentGrad, borderRadius: BorderRadius.circular(14)),
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(ctx),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: accentDk, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), padding: const EdgeInsets.symmetric(vertical: 14)),
                     child: const Text('OK', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   ),
                 )),
@@ -186,20 +193,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showLanguageSelector() {
     final languages = ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais'];
+    final accent = _accent;
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(24),
-          decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.2)),
+          decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.2)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text('Select Language', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
               const SizedBox(height: 16),
               ...languages.map((lang) => ListTile(
-                leading: Icon(lang == _language ? Icons.radio_button_checked : Icons.radio_button_off, color: lang == _language ? LKTheme.gold : LKTheme.textMuted),
+                leading: Icon(lang == _language ? Icons.radio_button_checked : Icons.radio_button_off, color: lang == _language ? accent : LKTheme.textMuted),
                 title: Text(lang, style: TextStyle(fontSize: 18, color: LKTheme.textPrimary, fontWeight: lang == _language ? FontWeight.w700 : FontWeight.normal)),
                 onTap: () { setState(() => _language = lang); Navigator.pop(ctx); },
               )),
@@ -217,20 +225,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _startAgain() async {
+    final accent = _accent;
+    final accentGrad = _accentGradient;
+    final accentDk = _accentDark;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(32),
-          decoration: LKTheme.glassCard(borderColor: LKTheme.gold.withValues(alpha: 0.2)),
+          decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.2)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.1)),
-                child: const Icon(Icons.refresh_rounded, size: 48, color: LKTheme.gold),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: accent.withValues(alpha: 0.1)),
+                child: Icon(Icons.refresh_rounded, size: 48, color: accent),
               ),
               const SizedBox(height: 20),
               const Text('Start Again?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
@@ -238,10 +249,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const Text('Go through the setup steps\nagain to review or update\nyour details.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
               const SizedBox(height: 24),
               SizedBox(width: double.infinity, height: 52, child: Container(
-                decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(gradient: accentGrad, borderRadius: BorderRadius.circular(14)),
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(ctx, true),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: accentDk, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                   child: const Text('Start Again', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               )),
@@ -277,7 +288,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Row(children: [
-                const Icon(Icons.tune_rounded, color: LKTheme.gold, size: 28),
+                Icon(Icons.tune_rounded, color: _accent, size: 28),
                 const SizedBox(width: 12),
                 const Expanded(child: Text('SETUP', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 2))),
               ]),
@@ -298,12 +309,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Container(width: 56, height: 56,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: LKTheme.goldGradient,
-                              boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.2), blurRadius: 8)],
+                              gradient: _accentGradient,
+                              boxShadow: [BoxShadow(color: _accent.withValues(alpha: 0.2), blurRadius: 8)],
                             ),
                             child: Center(child: Text(
                               _userName != null && _userName!.isNotEmpty ? _userName![0].toUpperCase() : '?',
-                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF5A3D10)),
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _accentDark),
                             )),
                           ),
                           const SizedBox(width: 14),
@@ -315,11 +326,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                             decoration: BoxDecoration(
-                              color: _plan == 'paid' ? LKTheme.gold.withValues(alpha: 0.1) : Colors.transparent,
-                              border: Border.all(color: _plan == 'paid' ? LKTheme.gold.withValues(alpha: 0.4) : LKTheme.border),
+                              color: _plan == 'paid' ? LKTheme.gold.withValues(alpha: 0.1) : LKTheme.silver.withValues(alpha: 0.08),
+                              border: Border.all(color: _plan == 'paid' ? LKTheme.gold.withValues(alpha: 0.4) : LKTheme.silver.withValues(alpha: 0.3)),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(_plan == 'paid' ? 'Premium' : 'Free', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _plan == 'paid' ? LKTheme.gold : LKTheme.textMuted)),
+                            child: Text(_plan == 'paid' ? 'Premium' : 'Free', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _plan == 'paid' ? LKTheme.gold : LKTheme.silver)),
                           ),
                         ]),
                         const SizedBox(height: 16),
@@ -399,10 +410,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                             child: Row(children: [
-                              Icon(Icons.language_rounded, color: LKTheme.gold.withValues(alpha: 0.7), size: 22),
+                              Icon(Icons.language_rounded, color: _accent.withValues(alpha: 0.7), size: 22),
                               const SizedBox(width: 14),
                               const Expanded(child: Text('Language', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary))),
-                              Text(_language, style: TextStyle(fontSize: 15, color: LKTheme.gold.withValues(alpha: 0.7), fontWeight: FontWeight.w600)),
+                              Text(_language, style: TextStyle(fontSize: 15, color: _accent.withValues(alpha: 0.7), fontWeight: FontWeight.w600)),
                               const SizedBox(width: 4),
                               const Icon(Icons.chevron_right_rounded, color: LKTheme.textMuted, size: 22),
                             ]),
@@ -416,18 +427,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Save button
                     SizedBox(height: 56, child: Container(
                       decoration: BoxDecoration(
-                        gradient: LKTheme.goldGradient,
+                        gradient: _accentGradient,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.25), blurRadius: 16, offset: const Offset(0, 4))],
+                        boxShadow: [BoxShadow(color: _accent.withValues(alpha: 0.25), blurRadius: 16, offset: const Offset(0, 4))],
                       ),
                       child: ElevatedButton(
                         onPressed: _isSaving ? null : _saveSettings,
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: const Color(0xFF5A3D10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, foregroundColor: _accentDark, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                         child: _isSaving
-                            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
+                            ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: _accentDark, strokeWidth: 3))
                             : const Text('Save Settings'),
                       ),
                     )),
@@ -459,11 +469,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _infoRow(IconData icon, String label, String value, {bool isCode = false}) {
     return Row(children: [
-      Icon(icon, size: 18, color: isCode ? LKTheme.gold : LKTheme.textMuted),
+      Icon(icon, size: 18, color: isCode ? _accent : LKTheme.textMuted),
       const SizedBox(width: 10),
       Text(label, style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
       const Spacer(),
-      Text(value, style: TextStyle(fontSize: 14, fontWeight: isCode ? FontWeight.w800 : FontWeight.w500, color: isCode ? LKTheme.gold : LKTheme.textPrimary, letterSpacing: isCode ? 2 : 0)),
+      Text(value, style: TextStyle(fontSize: 14, fontWeight: isCode ? FontWeight.w800 : FontWeight.w500, color: isCode ? _accent : LKTheme.textPrimary, letterSpacing: isCode ? 2 : 0)),
       if (isCode) ...[const SizedBox(width: 4), Icon(Icons.zoom_in_rounded, size: 14, color: LKTheme.textMuted.withValues(alpha: 0.6))],
     ]);
   }

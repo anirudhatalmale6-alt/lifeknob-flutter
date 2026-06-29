@@ -53,12 +53,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   static const Color navy = Color(0xFF003049);
   static const Color navyMid = Color(0xFF08394F);
   static const Color gold = Color(0xFFDDA15E);
+  static const Color silver = Color(0xFFADB5C0);
   static const Color cream = Color(0xFFFDF0D5);
   static const Color green = Color(0xFF386641);
   static const Color red = Color(0xFFC1121F);
   static const Color textGray = Color(0xFF8A9AAA);
   static const Color faceGray = Color(0xFFDCDCDC);
   static const Color faceDarkGray = Color(0xFFC4C4C4);
+
+  Color get _accent => _isFreeUser ? silver : gold;
+  Color get _accentSub => _isFreeUser ? const Color(0xFFCCD2DA) : const Color(0xFFE8BE80);
 
   @override
   void initState() {
@@ -204,13 +208,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _showCodePopup() {
     if (_userCode == null) return;
+    final accent = _accent;
     showDialog(context: context, builder: (ctx) => Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
         padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(color: navy, borderRadius: BorderRadius.circular(20), border: Border.all(color: gold, width: 2)),
+        decoration: BoxDecoration(color: navy, borderRadius: BorderRadius.circular(20), border: Border.all(color: accent, width: 2)),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text('YOUR CODE', style: GoogleFonts.barlowCondensed(fontSize: 14, color: gold, fontWeight: FontWeight.w600, letterSpacing: 3)),
+          Text('YOUR CODE', style: GoogleFonts.barlowCondensed(fontSize: 14, color: accent, fontWeight: FontWeight.w600, letterSpacing: 3)),
           const SizedBox(height: 16),
           Text(_userCode!, style: GoogleFonts.barlowCondensed(fontSize: 48, fontWeight: FontWeight.w900, color: cream, letterSpacing: 6)),
           const SizedBox(height: 12),
@@ -219,13 +224,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Row(children: [
             Expanded(child: OutlinedButton(
               onPressed: () { Clipboard.setData(ClipboardData(text: _userCode!)); Navigator.pop(ctx); },
-              style: OutlinedButton.styleFrom(foregroundColor: gold, side: const BorderSide(color: gold), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+              style: OutlinedButton.styleFrom(foregroundColor: accent, side: BorderSide(color: accent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
               child: Text('COPY', style: GoogleFonts.barlowCondensed(fontSize: 14, fontWeight: FontWeight.w700)),
             )),
             const SizedBox(width: 12),
             Expanded(child: ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(backgroundColor: gold, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+              style: ElevatedButton.styleFrom(backgroundColor: accent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
               child: Text('OK', style: GoogleFonts.barlowCondensed(fontSize: 16, fontWeight: FontWeight.w800, color: navy)),
             )),
           ]),
@@ -284,8 +289,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 width: h * 0.085, height: h * 0.085,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: gold, width: 2.5),
-                                  color: gold.withValues(alpha: 0.1),
+                                  border: Border.all(color: _accent, width: 2.5),
+                                  color: _accent.withValues(alpha: 0.1),
                                 ),
                                 child: Icon(Icons.qr_code_2, color: Colors.white, size: h * 0.05),
                               ),
@@ -299,7 +304,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 children: [
                                   Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.032, 20), fontWeight: FontWeight.w600, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: min(h * 0.016, 12.0), fontWeight: FontWeight.w300, color: Colors.white.withValues(alpha: 0.45)), maxLines: 1),
-                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: min(h * 0.02, 16.0), fontWeight: FontWeight.w600, color: gold), maxLines: 1),
+                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: min(h * 0.02, 16.0), fontWeight: FontWeight.w600, color: _accent), maxLines: 1),
                                 ],
                               ),
                             )),
@@ -307,16 +312,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               padding: const EdgeInsets.all(4),
                               child: GestureDetector(
                                 onTap: _showCodePopup,
-                                child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', fit: BoxFit.contain),
+                                child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain),
                               ),
                             )),
                           ]),
                         ),
                       ),
 
-                      // Gold divider
                       Container(height: 1.5, margin: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [gold.withValues(alpha: 0.05), gold, gold, gold.withValues(alpha: 0.05)]),
+                        gradient: LinearGradient(colors: [_accent.withValues(alpha: 0.05), _accent, _accent, _accent.withValues(alpha: 0.05)]),
                       )),
 
                       // ═══ TURN THE KNOB + QR code ═══
@@ -325,14 +329,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 6, right: 6),
                           child: Center(
-                            child: FittedBox(fit: BoxFit.scaleDown, child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold))),
+                            child: FittedBox(fit: BoxFit.scaleDown, child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: _accent))),
                           ),
                         ),
                       ),
 
                       // ═══ KNOB — own section ═══
                       SizedBox(
-                        height: _isFreeUser ? h * 0.32 : h * 0.36,
+                        height: _isFreeUser ? h * 0.25 : h * 0.36,
                         child: LayoutBuilder(builder: (context, kc) {
                           final areaW = kc.maxWidth;
                           final areaH = kc.maxHeight;
@@ -375,10 +379,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       shape: BoxShape.circle,
                                       gradient: LinearGradient(
                                         begin: Alignment.topLeft, end: Alignment.bottomRight,
-                                        colors: [gold.withValues(alpha: 0.9), gold, gold, gold.withValues(alpha: 0.85)],
+                                        colors: [_accent.withValues(alpha: 0.9), _accent, _accent, _accent.withValues(alpha: 0.85)],
                                       ),
                                       boxShadow: [
-                                        BoxShadow(color: gold.withValues(alpha: 0.3), blurRadius: 25, spreadRadius: 3),
+                                        BoxShadow(color: _accent.withValues(alpha: 0.3), blurRadius: 25, spreadRadius: 3),
                                         BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 12, offset: const Offset(0, 4)),
                                       ],
                                     ),
@@ -387,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     angle: _rotation,
                                     child: CustomPaint(
                                       size: Size(dialSize, dialSize),
-                                      painter: _DialPainter(navy: navy, tickColor: cream.withValues(alpha: 0.8), progress: progress),
+                                      painter: _DialPainter(navy: navy, tickColor: cream.withValues(alpha: 0.8), progress: progress, trackColor: _accent.withValues(alpha: 0.25)),
                                     ),
                                   ),
                                   Container(
@@ -408,7 +412,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       : _showSuccess
                                       ? Center(child: Text('THANK\nYOU', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.14, fontWeight: FontWeight.w700, color: cream), textAlign: TextAlign.center))
                                       : (_isDragging || progress > 0.01)
-                                      ? Center(child: Text('${(progress * 100).round()}%', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.25, fontWeight: FontWeight.w700, color: progress >= 1.0 ? green : Color.lerp(red, gold, progress)!)))
+                                      ? Center(child: Text('${(progress * 100).round()}%', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.25, fontWeight: FontWeight.w700, color: progress >= 1.0 ? green : Color.lerp(red, _accent, progress)!)))
                                       : ClipRect(child: ShaderMask(
                                       shaderCallback: (bounds) {
                                         if (_isRecentSuccess) {
@@ -446,14 +450,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              FittedBox(fit: BoxFit.scaleDown, child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: gold))),
+                              FittedBox(fit: BoxFit.scaleDown, child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: _accent))),
                               Expanded(child: Padding(
                                 padding: const EdgeInsets.only(left: 12, right: 4),
                                 child: SizedBox(
                                   height: max(h * 0.04, 28),
                                   child: AnimatedBuilder(
                                     animation: _ekgCtrl,
-                                    builder: (context, _) => CustomPaint(painter: _EkgPainter(progress: _ekgCtrl.value, color: gold)),
+                                    builder: (context, _) => CustomPaint(painter: _EkgPainter(progress: _ekgCtrl.value, color: _accent)),
                                   ),
                                 ),
                               )),
@@ -478,12 +482,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 2))],
                                   ),
                                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                    Icon(Icons.phone, color: gold, size: 20),
+                                    Icon(Icons.phone, color: _accent, size: 20),
                                     const SizedBox(width: 8),
                                     Flexible(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
                                       Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
                                       if (contactLabel.isNotEmpty)
-                                        Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: 12, color: const Color(0xFFE8BE80)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                        Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: 12, color: _accentSub), maxLines: 1, overflow: TextOverflow.ellipsis),
                                     ])),
                                   ]),
                                 ),
@@ -499,11 +503,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 2))],
                                   ),
                                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                    Icon(Icons.health_and_safety, color: gold, size: 20),
+                                    Icon(Icons.health_and_safety, color: _accent, size: 20),
                                     const SizedBox(width: 8),
                                     Flexible(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
                                       Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
-                                      Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: 12, color: const Color(0xFFE8BE80)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                      Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: 12, color: _accentSub), maxLines: 1, overflow: TextOverflow.ellipsis),
                                     ])),
                                   ]),
                                 ),
@@ -563,9 +567,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                           ),
 
-                      // Gold divider before nav
                       Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [gold.withValues(alpha: 0.05), gold.withValues(alpha: 0.5), gold.withValues(alpha: 0.5), gold.withValues(alpha: 0.05)]),
+                        gradient: LinearGradient(colors: [_accent.withValues(alpha: 0.05), _accent.withValues(alpha: 0.5), _accent.withValues(alpha: 0.5), _accent.withValues(alpha: 0.05)]),
                       )),
 
                       // ═══ ZONE 7 + 8 + 9: Nav ═══
@@ -601,7 +604,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         SizedBox(
           width: h * 0.04, height: h * 0.04,
-          child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: const ColorFilter.mode(gold, BlendMode.srcIn), fit: BoxFit.contain),
+          child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain),
         ),
         const SizedBox(height: 4),
         Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.7)), textAlign: TextAlign.center),
@@ -613,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Expanded(child: GestureDetector(
       onTap: () => widget.onTabChange?.call(index),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(icon, color: gold, size: h * 0.045),
+        Icon(icon, color: _accent, size: h * 0.045),
         const SizedBox(height: 4),
         Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.7)), textAlign: TextAlign.center),
       ]),
