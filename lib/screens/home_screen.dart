@@ -27,6 +27,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String? _sosName;
   String? _ambulanceNumber;
   bool _isFreeUser = true;
+  String? _bannerAdImage;
+  String? _bannerAdUrl;
+  String? _bumperAdImage;
+  String? _bumperAdUrl;
 
   static const double _triggerAngle = pi;
   double _rotation = 0.0;
@@ -81,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
     _loadUserData();
     _loadLastCheckIn();
+    _loadAdConfig();
   }
 
   @override
@@ -121,6 +126,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
       }
     } catch (_) { if (mounted) setState(() => _dataLoaded = true); }
+  }
+
+  Future<void> _loadAdConfig() async {
+    try {
+      final resp = await ApiService().getSiteSettings();
+      final data = resp['data'] ?? {};
+      if (mounted) {
+        setState(() {
+          final img = data['banner_ad_image'] ?? '';
+          _bannerAdImage = img.isNotEmpty ? 'https://lifeknob.com$img' : null;
+          _bannerAdUrl = data['banner_ad_url'];
+          final bImg = data['bumper_ad_image'] ?? '';
+          _bumperAdImage = bImg.isNotEmpty ? 'https://lifeknob.com$bImg' : null;
+          _bumperAdUrl = data['bumper_ad_url'];
+        });
+      }
+    } catch (_) {}
   }
 
   bool get _isRecentSuccess => _lastSuccessTime != null && DateTime.now().difference(_lastSuccessTime!).inMinutes < 60;
@@ -411,8 +433,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       // ═══ AD BANNERS (free users) ═══
                       if (_isFreeUser)
                         AdBannerPair(
-                          singleHeight: h * 0.065,
                           onRemoveAds: () => widget.onTabChange?.call(2),
+                          bannerImageUrl: _bannerAdImage,
+                          bannerClickUrl: _bannerAdUrl,
                         ),
 
                       // ═══ OR CALL FOR HELP | EKG ═══
@@ -520,7 +543,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       ),
       if (_showBumperAd)
-        BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false)),
+        BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false), imageUrl: _bumperAdImage, clickUrl: _bumperAdUrl),
       ]),
     );
   }

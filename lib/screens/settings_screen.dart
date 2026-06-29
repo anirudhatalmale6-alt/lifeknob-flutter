@@ -26,6 +26,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _language = 'English';
   bool _isFreeUser = true;
   bool _showBumperAd = false;
+  String? _bannerAdImage;
+  String? _bannerAdUrl;
+  String? _bumperAdImage;
+  String? _bumperAdUrl;
 
   @override
   void initState() {
@@ -61,6 +65,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _userCode = freshUser.userCode;
           _plan = freshUser.plan;
           _isFreeUser = freshUser.isFree;
+        });
+      }
+    } catch (_) {}
+    try {
+      final siteResp = await ApiService().getSiteSettings();
+      final data = siteResp['data'] ?? {};
+      if (mounted) {
+        setState(() {
+          final img = '${data['banner_ad_image'] ?? ''}';
+          _bannerAdImage = img.isNotEmpty ? 'https://lifeknob.com$img' : null;
+          _bannerAdUrl = data['banner_ad_url'];
+          final bImg = '${data['bumper_ad_image'] ?? ''}';
+          _bumperAdImage = bImg.isNotEmpty ? 'https://lifeknob.com$bImg' : null;
+          _bumperAdUrl = data['bumper_ad_url'];
         });
       }
     } catch (_) {}
@@ -322,7 +340,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // Ad banners for free users
                     if (_isFreeUser) ...[
                       const SizedBox(height: 10),
-                      AdBannerPair(singleHeight: 50),
+                      AdBannerPair(bannerImageUrl: _bannerAdImage, bannerClickUrl: _bannerAdUrl),
                       const SizedBox(height: 4),
                     ],
                     const SizedBox(height: 14),
@@ -434,7 +452,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
       if (_showBumperAd)
-        BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false)),
+        BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false), imageUrl: _bumperAdImage, clickUrl: _bumperAdUrl),
       ]),
     );
   }

@@ -1,66 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class AdBannerWidget extends StatelessWidget {
-  final double height;
+class AdBannerPair extends StatelessWidget {
   final VoidCallback? onRemoveAds;
+  final String? bannerImageUrl;
+  final String? bannerClickUrl;
 
   static const Color navy = Color(0xFF003049);
   static const Color gold = Color(0xFFDDA15E);
+  static const Color red = Color(0xFFC1121F);
 
-  const AdBannerWidget({super.key, this.height = 50, this.onRemoveAds});
+  const AdBannerPair({super.key, this.onRemoveAds, this.bannerImageUrl, this.bannerClickUrl});
+
+  void _onAdTap() async {
+    if (bannerClickUrl != null && bannerClickUrl!.isNotEmpty) {
+      final uri = Uri.tryParse(bannerClickUrl!);
+      if (uri != null && await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Widget _buildBanner({bool hasImage = false}) {
+    return AspectRatio(
+      aspectRatio: 3.2,
+      child: GestureDetector(
+        onTap: hasImage ? _onAdTap : null,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: red.withValues(alpha: 0.5), width: 1),
+            color: navy.withValues(alpha: 0.3),
+          ),
+          child: hasImage && bannerImageUrl != null
+            ? Image.network(bannerImageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder())
+            : _placeholder(),
+        ),
+      ),
+    );
+  }
+
+  Widget _placeholder() {
+    return CustomPaint(
+      painter: _AdPlaceholderPainter(lineColor: red.withValues(alpha: 0.25)),
+      child: Center(child: Text('AD', style: GoogleFonts.barlowCondensed(fontSize: 16, color: red.withValues(alpha: 0.35)))),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final hasImage = bannerImageUrl != null && bannerImageUrl!.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Column(children: [
-        Container(
-          height: height,
-          decoration: BoxDecoration(
-            border: Border.all(color: gold.withValues(alpha: 0.3), width: 1),
-            borderRadius: BorderRadius.circular(8),
-            color: navy.withValues(alpha: 0.5),
-          ),
-          child: Center(child: Text('AD', style: GoogleFonts.barlowCondensed(fontSize: 14, color: gold.withValues(alpha: 0.3)))),
-        ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
         if (onRemoveAds != null)
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 2, right: 4),
-              child: GestureDetector(
-                onTap: onRemoveAds,
-                child: Text('Remove ads', style: GoogleFonts.robotoSlab(fontSize: 11, color: gold, fontStyle: FontStyle.italic)),
-              ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 3, right: 2),
+            child: GestureDetector(
+              onTap: onRemoveAds,
+              child: Text('Remove ads', style: GoogleFonts.robotoSlab(fontSize: 11, color: gold, fontStyle: FontStyle.italic)),
             ),
           ),
+        _buildBanner(hasImage: hasImage),
+        const SizedBox(height: 5),
+        _buildBanner(hasImage: hasImage),
       ]),
     );
   }
 }
 
-class AdBannerPair extends StatelessWidget {
-  final double singleHeight;
-  final VoidCallback? onRemoveAds;
-
-  const AdBannerPair({super.key, this.singleHeight = 50, this.onRemoveAds});
+class _AdPlaceholderPainter extends CustomPainter {
+  final Color lineColor;
+  _AdPlaceholderPainter({required this.lineColor});
 
   @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      AdBannerWidget(height: singleHeight),
-      const SizedBox(height: 6),
-      AdBannerWidget(height: singleHeight, onRemoveAds: onRemoveAds),
-    ]);
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = lineColor..strokeWidth = 1.0;
+    canvas.drawLine(Offset.zero, Offset(size.width, size.height), paint);
+    canvas.drawLine(Offset(size.width, 0), Offset(0, size.height), paint);
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter old) => false;
 }
 
 class BumperAdOverlay extends StatefulWidget {
   final int durationSeconds;
   final VoidCallback onDismiss;
+  final String? imageUrl;
+  final String? clickUrl;
 
-  const BumperAdOverlay({super.key, this.durationSeconds = 6, required this.onDismiss});
+  const BumperAdOverlay({super.key, this.durationSeconds = 6, required this.onDismiss, this.imageUrl, this.clickUrl});
 
   @override
   State<BumperAdOverlay> createState() => _BumperAdOverlayState();
@@ -72,6 +100,7 @@ class _BumperAdOverlayState extends State<BumperAdOverlay> with SingleTickerProv
 
   static const Color navy = Color(0xFF003049);
   static const Color gold = Color(0xFFDDA15E);
+  static const Color red = Color(0xFFC1121F);
 
   @override
   void initState() {
@@ -96,8 +125,16 @@ class _BumperAdOverlayState extends State<BumperAdOverlay> with SingleTickerProv
     super.dispose();
   }
 
+  void _onAdTap() async {
+    if (widget.clickUrl != null && widget.clickUrl!.isNotEmpty) {
+      final uri = Uri.tryParse(widget.clickUrl!);
+      if (uri != null && await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasImage = widget.imageUrl != null && widget.imageUrl!.isNotEmpty;
     return Material(
       color: Colors.black.withValues(alpha: 0.85),
       child: Center(
@@ -108,15 +145,23 @@ class _BumperAdOverlayState extends State<BumperAdOverlay> with SingleTickerProv
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: double.infinity,
-                  height: 250,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: gold.withValues(alpha: 0.3), width: 1),
-                    borderRadius: BorderRadius.circular(16),
-                    color: navy.withValues(alpha: 0.8),
+                GestureDetector(
+                  onTap: hasImage ? _onAdTap : null,
+                  child: Container(
+                    width: double.infinity,
+                    height: 250,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: red.withValues(alpha: 0.4), width: 1),
+                      borderRadius: BorderRadius.circular(16),
+                      color: navy.withValues(alpha: 0.8),
+                    ),
+                    child: hasImage
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.network(widget.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _bumperPlaceholder()),
+                        )
+                      : _bumperPlaceholder(),
                   ),
-                  child: Center(child: Text('AD', style: GoogleFonts.barlowCondensed(fontSize: 32, color: gold.withValues(alpha: 0.4)))),
                 ),
                 const SizedBox(height: 24),
                 if (_remaining > 0)
@@ -126,10 +171,7 @@ class _BumperAdOverlayState extends State<BumperAdOverlay> with SingleTickerProv
                     onTap: widget.onDismiss,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: gold,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      decoration: BoxDecoration(color: gold, borderRadius: BorderRadius.circular(12)),
                       child: Text('CONTINUE', style: GoogleFonts.barlowCondensed(fontSize: 18, fontWeight: FontWeight.w700, color: navy)),
                     ),
                   ),
@@ -138,6 +180,13 @@ class _BumperAdOverlayState extends State<BumperAdOverlay> with SingleTickerProv
           ),
         ),
       ),
+    );
+  }
+
+  Widget _bumperPlaceholder() {
+    return CustomPaint(
+      painter: _AdPlaceholderPainter(lineColor: red.withValues(alpha: 0.2)),
+      child: Center(child: Text('AD', style: GoogleFonts.barlowCondensed(fontSize: 32, color: red.withValues(alpha: 0.3)))),
     );
   }
 }

@@ -26,6 +26,11 @@ class HistoryScreenState extends State<HistoryScreen> {
   bool _isFreeUser = true;
   bool _showBumperAd = false;
   DateTime? _pageOpenTime;
+  String? _bannerAdImage;
+  String? _bannerAdUrl;
+  String? _bumperAdImage;
+  String? _bumperAdUrl;
+  int _bumperDelaySeconds = 30;
 
   int get _activeCount => _connections.where((c) => !c.isInactive).length;
 
@@ -58,8 +63,18 @@ class HistoryScreenState extends State<HistoryScreen> {
 
       try {
         final siteResp = await ApiService().getSiteSettings();
-        final days = int.tryParse('${siteResp['data']?['alert_threshold_days'] ?? '2'}') ?? 2;
+        final data = siteResp['data'] ?? {};
+        final days = int.tryParse('${data['alert_threshold_days'] ?? '2'}') ?? 2;
         Connection.alertThresholdDays = days;
+        if (mounted) {
+          final img = '${data['banner_ad_image'] ?? ''}';
+          _bannerAdImage = img.isNotEmpty ? 'https://lifeknob.com$img' : null;
+          _bannerAdUrl = data['banner_ad_url'];
+          final bImg = '${data['bumper_ad_image'] ?? ''}';
+          _bumperAdImage = bImg.isNotEmpty ? 'https://lifeknob.com$bImg' : null;
+          _bumperAdUrl = data['bumper_ad_url'];
+          _bumperDelaySeconds = int.tryParse('${data['bumper_delay_seconds'] ?? '30'}') ?? 30;
+        }
       } catch (_) {}
 
       final connResp = await ApiService().getConnections();
@@ -222,7 +237,7 @@ class HistoryScreenState extends State<HistoryScreen> {
   void _checkBumperAdTime() {
     if (!_isFreeUser || _showBumperAd || _pageOpenTime == null) return;
     final elapsed = DateTime.now().difference(_pageOpenTime!).inSeconds;
-    if (elapsed >= 30) {
+    if (elapsed >= _bumperDelaySeconds) {
       setState(() => _showBumperAd = true);
       _pageOpenTime = null;
     }
@@ -317,8 +332,9 @@ class HistoryScreenState extends State<HistoryScreen> {
                   if (_isFreeUser) ...[
                     const SizedBox(height: 12),
                     AdBannerPair(
-                      singleHeight: 50,
                       onRemoveAds: () => widget.onTabChange?.call(2),
+                      bannerImageUrl: _bannerAdImage,
+                      bannerClickUrl: _bannerAdUrl,
                     ),
                   ],
 
@@ -343,7 +359,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                 ])))),
       ),
       if (_showBumperAd)
-        BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false)),
+        BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false), imageUrl: _bumperAdImage, clickUrl: _bumperAdUrl),
       ]),
     );
   }
