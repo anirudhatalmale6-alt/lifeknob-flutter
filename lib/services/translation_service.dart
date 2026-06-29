@@ -93,7 +93,8 @@ class TranslationService {
 
   Future<void> _fetchLogos() async {
     try {
-      final resp = await http.get(Uri.parse('$_baseUrl/logos'))
+      final cacheBust = DateTime.now().millisecondsSinceEpoch;
+      final resp = await http.get(Uri.parse('$_baseUrl/logos?v=$cacheBust'))
           .timeout(const Duration(seconds: 10));
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);

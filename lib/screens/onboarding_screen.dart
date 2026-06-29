@@ -45,12 +45,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _logoWidget({double? width, double? height, String logoKey = 'registration'}) {
     final url = _ts.logoUrl(logoKey);
     if (url != null) {
-      return Image.network(url, width: width, height: height, fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => SvgPicture.asset('assets/images/lifeknoblogo.svg',
-          width: width, height: height, colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain));
+      final cacheBust = DateTime.now().millisecondsSinceEpoch ~/ 60000;
+      return Image.network('$url?v=$cacheBust', width: width, height: height, fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => SizedBox(width: width, height: height));
     }
-    return SvgPicture.asset('assets/images/lifeknoblogo.svg',
-      width: width, height: height, colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain);
+    return SizedBox(width: width, height: height);
   }
 
   @override

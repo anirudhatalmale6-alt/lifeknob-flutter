@@ -62,10 +62,16 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
     await TranslationService().init();
-    // DEBUG: skip auth check to preview zones layout
     final uri = Uri.base;
     if (uri.queryParameters.containsKey('debug')) {
       Navigator.pushReplacementNamed(context, '/home');
+      return;
+    }
+    if (uri.queryParameters.containsKey('reset')) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/onboarding');
       return;
     }
 
