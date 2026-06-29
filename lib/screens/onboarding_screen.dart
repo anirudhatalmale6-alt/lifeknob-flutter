@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
@@ -262,7 +263,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: Row(children: [
-                const Text('LIFEKNOB', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 2)),
+                SizedBox(width: 24, height: 24, child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn))),
+                const SizedBox(width: 8),
+                const Text('REGISTRATION', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 2)),
                 const Spacer(),
                 Text('${_page + 1} / $_totalPages', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted)),
               ]),
@@ -315,9 +318,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final languages = ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais', 'Italiano', 'Portugues'];
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Container(width: 80, height: 80, decoration: BoxDecoration(shape: BoxShape.circle, gradient: LKTheme.goldGradient, boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.25), blurRadius: 20)]),
-          child: const Icon(Icons.favorite, color: Color(0xFF5A3D10), size: 40)),
-        const SizedBox(height: 20),
+        Container(
+          width: 100, height: 100,
+          decoration: BoxDecoration(shape: BoxShape.circle, gradient: LKTheme.goldGradient, boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.25), blurRadius: 20)]),
+          padding: const EdgeInsets.all(18),
+          child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: const ColorFilter.mode(Color(0xFF5A3D10), BlendMode.srcIn)),
+        ),
+        const SizedBox(height: 16),
         const Text('LifeKnob', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 1)),
         const SizedBox(height: 32),
         const Text('Select Language', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
