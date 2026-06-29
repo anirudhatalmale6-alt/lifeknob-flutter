@@ -261,25 +261,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(height: 32, child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn))),
-                  Positioned(right: 0, child: Text('${_page + 1} / $_totalPages', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted))),
-                ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 4, bottom: 2),
-              child: Text('REGISTRATION', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 3)),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(value: (_page + 1) / _totalPages, backgroundColor: LKTheme.border, valueColor: const AlwaysStoppedAnimation(LKTheme.gold), minHeight: 4),
-              ),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+              child: Row(children: [
+                Expanded(child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(value: (_page + 1) / _totalPages, backgroundColor: LKTheme.border, valueColor: const AlwaysStoppedAnimation(LKTheme.gold), minHeight: 4),
+                )),
+                const SizedBox(width: 12),
+                Text('${_page + 1} / $_totalPages', style: const TextStyle(fontSize: 13, color: LKTheme.textMuted)),
+              ]),
             ),
             Expanded(
               child: AnimatedSwitcher(
@@ -322,14 +312,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final languages = ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais', 'Italiano', 'Portugues'];
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Container(
-          width: 100, height: 100,
-          decoration: BoxDecoration(shape: BoxShape.circle, gradient: LKTheme.goldGradient, boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.25), blurRadius: 20)]),
-          padding: const EdgeInsets.all(18),
-          child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: const ColorFilter.mode(Color(0xFF5A3D10), BlendMode.srcIn)),
-        ),
-        const SizedBox(height: 16),
-        const Text('LifeKnob', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 1)),
+        SizedBox(width: 200, height: 180, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', fit: BoxFit.contain)),
         const SizedBox(height: 32),
         const Text('Select Language', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
         const SizedBox(height: 16),

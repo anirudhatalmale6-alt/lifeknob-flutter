@@ -79,6 +79,7 @@ flutter:
     - assets/images/lifeknob_logo.png
     - assets/images/lifeknob_logo_header.svg
     - assets/images/lifeknob_logo_white.png
+    - assets/images/lifeknoblogo.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
