@@ -256,7 +256,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LKTheme.bg,
+      backgroundColor: const Color(0xFF003049),
       body: SafeArea(
         child: Column(
           children: [
@@ -313,9 +313,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildLanguage() {
     final languages = ['English', 'Magyar', 'Deutsch', 'Espanol', 'Francais', 'Italiano', 'Portugues'];
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.10),
-        SizedBox(width: 160, height: 150, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain, alignment: Alignment.centerLeft)),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(width: 180, height: 170, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain)),
         const SizedBox(height: 40),
         const Text('Select Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
         const SizedBox(height: 12),
