@@ -59,9 +59,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   Future<void> _initApp() async {
-    await Future.delayed(const Duration(seconds: 1));
+    final initFuture = TranslationService().init();
+    await Future.delayed(const Duration(milliseconds: 2500));
+    await initFuture;
     if (!mounted) return;
-    await TranslationService().init();
     final uri = Uri.base;
     if (uri.queryParameters.containsKey('debug')) {
       Navigator.pushReplacementNamed(context, '/home');
