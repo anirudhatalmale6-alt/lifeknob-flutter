@@ -300,8 +300,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             if (_page > 0) ...[
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: Center(child: SizedBox(height: 44, child: _logoWidget(height: 44, logoKey: 'header'))),
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 32, width: 32, child: _logoWidget(height: 32, width: 32, logoKey: 'header')),
+                    const SizedBox(width: 10),
+                    Text('Life Knob', style: LKTheme.heading(size: 16, color: LKTheme.gold)),
+                  ],
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(40, 8, 40, 6),
@@ -358,7 +365,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         SizedBox(width: 180, height: 170, child: _logoWidget(width: 180, height: 170, logoKey: 'registration')),
-        const SizedBox(height: 40),
+        const SizedBox(height: 16),
+        Text('Life Knob', style: LKTheme.heading(size: 24, color: LKTheme.gold)),
+        const SizedBox(height: 24),
         Text(_t('select_language'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
         const SizedBox(height: 12),
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -375,7 +384,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildWelcome() {
     return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const SizedBox(height: 8),
+        Center(child: SizedBox(width: 80, height: 80, child: _logoWidget(width: 80, height: 80, logoKey: 'registration'))),
         const SizedBox(height: 6),
+        Center(child: Text('Life Knob', style: LKTheme.heading(size: 16, color: LKTheme.gold))),
+        const SizedBox(height: 10),
         Center(child: Column(children: [
           Text(_t('select_language'), style: const TextStyle(fontSize: 13, color: LKTheme.textSecondary, fontWeight: FontWeight.w500)),
           const SizedBox(height: 4),
