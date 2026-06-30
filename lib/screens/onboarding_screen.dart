@@ -375,11 +375,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // Page 0: Language
   Widget _buildLanguage() {
-    return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
+    return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(children: [
-        const Spacer(flex: 1),
-        SizedBox(width: 200, height: 200, child: _logoWidget(width: 200, height: 200, logoKey: 'registration')),
-        const Spacer(flex: 1),
+        const Spacer(flex: 2),
+        SizedBox(width: 220, height: 220, child: _logoWidget(width: 220, height: 220, logoKey: 'registration')),
+        const SizedBox(height: 28),
         Text(_t('select_language'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
         const SizedBox(height: 14),
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -389,7 +389,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
             items: _languageNames.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
             onChanged: (v) { if (v != null) _changeLanguage(v); })),
-        const Spacer(flex: 4),
+        const Spacer(flex: 5),
       ]));
   }
 
