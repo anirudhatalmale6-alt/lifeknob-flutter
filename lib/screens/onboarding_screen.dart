@@ -374,11 +374,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // Page 0: Language
   Widget _buildLanguage() {
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        SizedBox(width: 160, height: 160, child: _logoWidget(width: 160, height: 160, logoKey: 'registration')),
-        const SizedBox(height: 32),
-        Text(_t('select_language'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
-        const SizedBox(height: 12),
+      child: Column(children: [
+        const Spacer(flex: 1),
+        SizedBox(width: 200, height: 200, child: _logoWidget(width: 200, height: 200, logoKey: 'registration')),
+        const Spacer(flex: 1),
+        Text(_t('select_language'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+        const SizedBox(height: 14),
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.gold, width: 1.5)),
           child: DropdownButton<String>(value: _language, isExpanded: true, dropdownColor: LKTheme.bgCard, underline: const SizedBox(),
@@ -386,6 +387,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
             items: _languageNames.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
             onChanged: (v) { if (v != null) _changeLanguage(v); })),
+        const Spacer(flex: 4),
       ]));
   }
 
