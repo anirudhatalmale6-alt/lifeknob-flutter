@@ -300,13 +300,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             if (_page > 0) ...[
               SizedBox(
-                height: 80,
+                height: 84,
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 8, top: 6),
+                  padding: const EdgeInsets.only(left: 6, right: 2),
                   child: Row(children: [
-                    Text('Life Knob', style: LKTheme.heading(size: 22, color: LKTheme.gold)),
                     const Spacer(),
-                    SizedBox(width: 68, height: 68, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain)),
+                    Expanded(child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain),
+                    )),
                   ]),
                 ),
               ),
