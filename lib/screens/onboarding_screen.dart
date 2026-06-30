@@ -110,9 +110,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final match = langs.where((l) => l['name'] == langName);
     if (match.isEmpty) return;
     final code = match.first['code']!;
-    setState(() { _language = langName; _langCode = code; });
     await _ts.setLanguage(code);
-    if (mounted) setState(() {});
+    if (mounted) setState(() { _language = langName; _langCode = code; });
   }
 
   void _next() {
