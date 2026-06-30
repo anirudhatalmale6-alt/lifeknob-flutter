@@ -299,23 +299,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: [
             if (_page > 0) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 32, width: 32, child: _logoWidget(height: 32, width: 32, logoKey: 'header')),
-                    const SizedBox(width: 10),
-                    Text('Life Knob', style: LKTheme.heading(size: 16, color: LKTheme.gold)),
-                  ],
+              SizedBox(
+                height: 48,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain),
                 ),
               ),
+              Container(height: 1.5, margin: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [LKTheme.gold.withValues(alpha: 0.05), LKTheme.gold, LKTheme.gold, LKTheme.gold.withValues(alpha: 0.05)]),
+              )),
               Padding(
-                padding: const EdgeInsets.fromLTRB(40, 8, 40, 6),
-                child: Container(height: 3, decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [LKTheme.gold.withValues(alpha: 0.0), LKTheme.gold, LKTheme.gold, LKTheme.gold.withValues(alpha: 0.0)]),
-                  borderRadius: BorderRadius.circular(2),
-                )),
+                padding: const EdgeInsets.fromLTRB(32, 6, 32, 4),
+                child: Row(
+                  children: List.generate(_totalPages - 1, (i) => Expanded(
+                    child: Container(
+                      height: 3,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        color: i < _page ? LKTheme.gold : LKTheme.gold.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  )),
+                ),
               ),
             ],
             Expanded(
@@ -329,7 +336,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Row(children: [
                 if (_page > 0) Expanded(flex: 1, child: SizedBox(height: 52, child: OutlinedButton(
                   onPressed: _back,
-                  style: OutlinedButton.styleFrom(foregroundColor: LKTheme.textSecondary, side: const BorderSide(color: LKTheme.border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                  style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5), width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                   child: Text(_t('back'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ))),
                 if (_page > 0) const SizedBox(width: 12),
@@ -384,25 +391,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildWelcome() {
     return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(height: 8),
-        Center(child: SizedBox(width: 80, height: 80, child: _logoWidget(width: 80, height: 80, logoKey: 'registration'))),
-        const SizedBox(height: 6),
-        Center(child: Text('Life Knob', style: LKTheme.heading(size: 16, color: LKTheme.gold))),
-        const SizedBox(height: 10),
-        Center(child: Column(children: [
-          Text(_t('select_language'), style: const TextStyle(fontSize: 13, color: LKTheme.textSecondary, fontWeight: FontWeight.w500)),
-          const SizedBox(height: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(10), border: Border.all(color: LKTheme.gold, width: 1)),
-            child: DropdownButton<String>(value: _language, isExpanded: false, dropdownColor: LKTheme.bgCard, underline: const SizedBox(), isDense: true,
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: LKTheme.gold, size: 22),
-              style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
-              items: _languageNames.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-              onChanged: (v) { if (v != null) _changeLanguage(v); }),
-          ),
-        ])),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Center(child: Text(_t('welcome_title'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.gold))),
         const SizedBox(height: 12),
         _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc')),
