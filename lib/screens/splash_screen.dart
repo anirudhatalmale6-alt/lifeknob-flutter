@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
@@ -60,8 +61,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   Future<void> _initApp() async {
     final initFuture = TranslationService().init();
-    await Future.delayed(const Duration(milliseconds: 2500));
-    await initFuture;
+    await Future.wait([
+      initFuture,
+      GoogleFonts.pendingFonts([GoogleFonts.cinzel(), GoogleFonts.cormorantGaramond()]),
+      Future.delayed(const Duration(milliseconds: 3000)),
+    ]);
     if (!mounted) return;
     final uri = Uri.base;
     if (uri.queryParameters.containsKey('debug')) {
