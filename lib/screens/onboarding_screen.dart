@@ -300,10 +300,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             if (_page > 0) ...[
               SizedBox(
-                height: 48,
+                height: 80,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain),
+                  padding: const EdgeInsets.only(left: 16, right: 8, top: 6),
+                  child: Row(children: [
+                    Text('Life Knob', style: LKTheme.heading(size: 22, color: LKTheme.gold)),
+                    const Spacer(),
+                    SizedBox(width: 68, height: 68, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain)),
+                  ]),
                 ),
               ),
               Container(height: 1.5, margin: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(
@@ -371,10 +375,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildLanguage() {
     return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        SizedBox(width: 180, height: 170, child: _logoWidget(width: 180, height: 170, logoKey: 'registration')),
-        const SizedBox(height: 16),
-        Text('Life Knob', style: LKTheme.heading(size: 24, color: LKTheme.gold)),
-        const SizedBox(height: 24),
+        SizedBox(width: 160, height: 160, child: _logoWidget(width: 160, height: 160, logoKey: 'registration')),
+        const SizedBox(height: 32),
         Text(_t('select_language'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
         const SizedBox(height: 12),
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -389,10 +391,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // Page 1: Welcome
   Widget _buildWelcome() {
-    return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 32),
+    return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(height: 12),
-        Center(child: Text(_t('welcome_title'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.gold))),
+        const SizedBox(height: 10),
+        Center(child: Text(_t('welcome_title'), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: LKTheme.gold))),
         const SizedBox(height: 12),
         _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc')),
         _welcomeItem(Icons.warning_rounded, _t('how_works_title'), _t('how_works_desc')),
@@ -404,14 +406,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _welcomeItem(IconData icon, String title, String desc) {
-    return Padding(padding: const EdgeInsets.only(bottom: 14), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(width: 40, height: 40, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
-        child: Icon(icon, size: 22, color: LKTheme.gold)),
-      const SizedBox(width: 12),
+    return Padding(padding: const EdgeInsets.only(bottom: 16), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
+        child: Icon(icon, size: 24, color: LKTheme.gold)),
+      const SizedBox(width: 14),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 3),
-        Text(desc, style: const TextStyle(fontSize: 15, color: LKTheme.textPrimary, height: 1.35, fontWeight: FontWeight.w400)),
+        Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        const SizedBox(height: 4),
+        Text(desc, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary, height: 1.4, fontWeight: FontWeight.w400)),
       ])),
     ]));
   }
