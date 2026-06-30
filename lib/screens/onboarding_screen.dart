@@ -40,7 +40,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final Set<String> _errorFields = {};
   final TranslationService _ts = TranslationService();
 
-  String _t(String key) => _ts.t(key);
+  static const _fallbacks = {
+    'select_language': 'Select Language', 'next': 'Next', 'back': 'Back', 'finish': 'Finish',
+    'welcome_title': 'Welcome to LifeKnob', 'what_is_title': 'What is LifeKnob?',
+    'what_is_desc': 'A simple app to let your family know you are fine. Press "I AM OKAY" every day.',
+    'how_works_title': 'How it works', 'how_works_desc': 'If you stop pressing, your family will know something might be wrong. Silence is the alarm.',
+    'connections_title': 'Connections', 'connections_desc': 'Connect with family members using your unique code. They can see when you last pressed OK.',
+    'membership_title': 'Membership', 'membership_desc': 'Free: 1 connection with ads. Premium plans: more connections, no ads.',
+    'privacy_title': 'Your Privacy', 'privacy_desc': 'Your data is only shared with people you connect with.',
+    'your_details': 'Your Details', 'no_auth_required': 'No authentication required',
+    'your_name': 'Your Name', 'your_email': 'Your Email', 'your_phone': 'Your Phone Number',
+    'emergency_contacts': 'Emergency Contacts', 'emergency_subtitle': 'Whom you want to call in case of emergency',
+    'sos_name': '*Name', 'phone_number': 'Phone Number', 'ambulance': 'Ambulance',
+    'select_plan': 'Select Your Plan', 'your_code': 'Your Personal Code',
+    'save_code_msg': 'Please save it or write it down on a paper.',
+    'share_code_msg': 'Share this code with your family so they can connect to you.',
+    'copy_code': 'Copy Code', 'code_copied': 'Code copied!',
+    'connect_title': 'Connect to People', 'connect_button': 'Connect People',
+    'plan_desc': 'Choose how many people you want to watch over. More connections means more family members can see when you press OK.',
+    'change_plan_hint': 'You can change your plan anytime in Settings.',
+    'upgrade_plan': 'Upgrade your plan for more connection slots.',
+  };
+  String _t(String key) {
+    final val = _ts.t(key);
+    return val == key ? (_fallbacks[key] ?? key) : val;
+  }
 
   Widget _logoWidget({double? width, double? height, String logoKey = 'registration'}) {
     final url = _ts.logoUrl(logoKey);
@@ -379,7 +403,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(children: [
         const Spacer(flex: 2),
         SizedBox(width: 220, height: 220, child: _logoWidget(width: 220, height: 220, logoKey: 'registration')),
-        const SizedBox(height: 28),
+        const Spacer(flex: 1),
         Text(_t('select_language'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
         const SizedBox(height: 14),
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16),
