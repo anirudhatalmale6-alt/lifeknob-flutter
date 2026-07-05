@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
@@ -60,19 +59,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   Future<void> _initApp() async {
-    final initFuture = TranslationService().init();
-    await Future.wait([
-      initFuture,
-      GoogleFonts.pendingFonts([GoogleFonts.cinzel(), GoogleFonts.cormorantGaramond()]),
-      Future.delayed(const Duration(milliseconds: 3000)),
-    ]);
     if (!mounted) return;
     final uri = Uri.base;
     if (uri.queryParameters.containsKey('debug')) {
       Navigator.pushReplacementNamed(context, '/home');
       return;
     }
-    if (uri.queryParameters.containsKey('reset')) {
+    if (uri.queryParameters.containsKey('reset') || uri.queryParameters.containsKey('preview')) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
       if (!mounted) return;
@@ -105,59 +98,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF003049),
-      body: Center(
-        child: FadeTransition(
-          opacity: _fadeAnim,
-          child: ScaleTransition(
-            scale: _scaleAnim,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                AnimatedBuilder(
-                  animation: _glowAnim,
-                  builder: (context, child) {
-                    return Container(
-                      width: 160,
-                      height: 160,
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: LKTheme.gold.withValues(alpha: _glowAnim.value * 0.4),
-                            blurRadius: 50,
-                            spreadRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Silence is the alarm',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: LKTheme.textSecondary.withValues(alpha: 0.7),
-                    letterSpacing: 1,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(height: 48),
-                SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: CircularProgressIndicator(
-                    color: LKTheme.gold.withValues(alpha: 0.6),
-                    strokeWidth: 2.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return const Scaffold(
+      backgroundColor: Color(0xFF003049),
+      body: SizedBox.shrink(),
     );
   }
 }

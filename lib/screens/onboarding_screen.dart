@@ -15,7 +15,7 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends State<OnboardingScreen> with TickerProviderStateMixin {
   int _page = 0;
   static const int _totalPages = 7;
 
@@ -36,18 +36,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _connectCodeController = TextEditingController();
 
   bool _isSaving = false;
+  bool _isLoadingLang = true;
+  bool _langPickerOpen = false;
+  late AnimationController _langAnimCtrl;
+  late Animation<double> _langScaleAnim;
+  late AnimationController _logoFadeCtrl;
+  late Animation<double> _logoFadeAnim;
+  late Animation<double> _logoScaleAnim;
+  late AnimationController _logoMoveCtrl;
+  bool _isTransitioning = false;
   String? _avatarUrl;
   final Set<String> _errorFields = {};
   final TranslationService _ts = TranslationService();
 
   static const _fallbacks = {
-    'select_language': 'Select Language', 'next': 'Next', 'back': 'Back', 'finish': 'Finish',
+    'select_language': 'Select Language', 'next': 'NEXT', 'back': 'BACK', 'finish': 'FINISH',
     'welcome_title': 'Welcome to LifeKnob', 'what_is_title': 'What is LifeKnob?',
     'what_is_desc': 'A simple app to let your family know you are fine. Press "I AM OKAY" every day.',
     'how_works_title': 'How it works', 'how_works_desc': 'If you stop pressing, your family will know something might be wrong. Silence is the alarm.',
     'connections_title': 'Connections', 'connections_desc': 'Connect with family members using your unique code. They can see when you last pressed OK.',
     'membership_title': 'Membership', 'membership_desc': 'Free: 1 connection with ads. Premium plans: more connections, no ads.',
-    'privacy_title': 'Your Privacy', 'privacy_desc': 'Your data is only shared with people you connect with.',
+    'privacy_title': 'Your Privacy', 'privacy_desc': 'Your data is only shared with people YOU connect with.',
     'your_details': 'Your Details', 'no_auth_required': 'No authentication required',
     'your_name': 'Your Name', 'your_email': 'Your Email', 'your_phone': 'Your Phone Number',
     'emergency_contacts': 'Emergency Contacts', 'emergency_subtitle': 'Whom you want to call in case of emergency',
@@ -56,10 +65,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     'save_code_msg': 'Please save it or write it down on a paper.',
     'share_code_msg': 'Share this code with your family so they can connect to you.',
     'copy_code': 'Copy Code', 'code_copied': 'Code copied!',
-    'connect_title': 'Connect to People', 'connect_button': 'Connect People',
+    'connect_title': 'Connect to People', 'connect_button': 'CONNECT PEOPLE',
     'plan_desc': 'Choose how many people you want to watch over. More connections means more family members can see when you press OK.',
-    'change_plan_hint': 'You can change your plan anytime in Settings.',
-    'upgrade_plan': 'Upgrade your plan for more connection slots.',
+    'change_plan_hint': 'You can change your plan anytime in Set Up.',
+    'upgrade_plan': 'Upgrade plan for more connections',
   };
   String _t(String key) {
     final val = _ts.t(key);
@@ -79,6 +88,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
+    _logoFadeCtrl = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
+    _logoFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _logoFadeCtrl, curve: Curves.easeIn),
+    );
+    _logoScaleAnim = Tween<double>(begin: 0.7, end: 1.0).animate(
+      CurvedAnimation(parent: _logoFadeCtrl, curve: Curves.easeOutBack),
+    );
+    _logoMoveCtrl = AnimationController(duration: const Duration(milliseconds: 600), vsync: this);
+    _langAnimCtrl = AnimationController(duration: const Duration(milliseconds: 1200), vsync: this);
+    _langScaleAnim = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.6, end: 1.1).chain(CurveTween(curve: Curves.easeOut)), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 1.1, end: 1.0).chain(CurveTween(curve: Curves.easeInOut)), weight: 60),
+    ]).animate(_langAnimCtrl);
     _loadLanguages();
     final user = AuthService().currentUser;
     if (user != null) {
@@ -94,15 +116,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _loadLanguages() async {
-    await _ts.init();
+    _logoFadeCtrl.forward();
+    await Future.wait([
+      _ts.init(),
+      _logoFadeCtrl.forward().orCancel.catchError((_) {}),
+    ]);
     if (mounted) {
-      setState(() {
-        _langCode = _ts.currentLang;
-        final langs = _ts.availableLanguages;
-        final match = langs.where((l) => l['code'] == _langCode);
-        if (match.isNotEmpty) _language = match.first['name']!;
-      });
+      _langCode = _ts.currentLang;
+      final langs = _ts.availableLanguages;
+      final match = langs.where((l) => l['code'] == _langCode);
+      if (match.isNotEmpty) _language = match.first['name']!;
+      setState(() => _isLoadingLang = false);
     }
+    _ts.preloadAll();
   }
 
   Future<void> _changeLanguage(String langName) async {
@@ -110,11 +136,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final match = langs.where((l) => l['name'] == langName);
     if (match.isEmpty) return;
     final code = match.first['code']!;
+    setState(() => _isLoadingLang = true);
     await _ts.setLanguage(code);
-    if (mounted) setState(() { _language = langName; _langCode = code; });
+    if (mounted) setState(() { _language = langName; _langCode = code; _isLoadingLang = false; });
   }
 
   void _next() {
+    final uri = Uri.base;
+    final isPreview = uri.queryParameters.containsKey('preview');
+    if (isPreview) { if (_page < _totalPages - 1) setState(() => _page++); return; }
     if (_page == 2) { _validateProfile(); return; }
     if (_page == 3) { _validateEmergency(); return; }
     if (_page == 4) { _savePlanAndRegister(); return; }
@@ -284,7 +314,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
         const Icon(Icons.info_rounded, size: 56, color: LKTheme.gold),
         const SizedBox(height: 16),
-        Text(msg, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary), textAlign: TextAlign.center),
+        Text(msg, style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, color: LKTheme.textPrimary), textAlign: TextAlign.center),
         const SizedBox(height: 24),
         SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
           onPressed: () => Navigator.pop(ctx),
@@ -308,6 +338,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   void dispose() {
+    _langAnimCtrl.dispose();
+    _logoFadeCtrl.dispose();
+    _logoMoveCtrl.dispose();
     _nameController.dispose(); _emailController.dispose(); _phoneController.dispose();
     _sosNameController.dispose(); _sosPhoneController.dispose(); _ambulanceController.dispose();
     _connectNameController.dispose(); _connectCodeController.dispose();
@@ -335,9 +368,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ]),
                 ),
               ),
-              Container(height: 1.5, margin: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [LKTheme.gold.withValues(alpha: 0.05), LKTheme.gold, LKTheme.gold, LKTheme.gold.withValues(alpha: 0.05)]),
-              )),
+              const SizedBox(height: 0.5),
               Padding(
                 padding: const EdgeInsets.fromLTRB(32, 6, 32, 4),
                 child: Row(
@@ -355,18 +386,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ],
             Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: [_buildLanguage, _buildWelcome, _buildProfile, _buildEmergency, _buildMembership, _buildCode, _buildConnect][_page](),
-              ),
+              child: [_buildLanguage, _buildWelcome, _buildProfile, _buildEmergency, _buildMembership, _buildCode, _buildConnect][_page](),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+            AnimatedOpacity(
+              opacity: (_page == 0 && _isLoadingLang) ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeIn,
+              child: Padding(
+              padding: const EdgeInsets.fromLTRB(28, 8, 28, 21),
               child: Row(children: [
                 if (_page > 0) Expanded(flex: 1, child: SizedBox(height: 52, child: OutlinedButton(
                   onPressed: _back,
                   style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5), width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  child: Text(_t('back'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: Text(_t('back'), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 1)),
                 ))),
                 if (_page > 0) const SizedBox(width: 12),
                 Expanded(flex: _page > 0 ? 1 : 1, child: SizedBox(height: 52, child: Container(
@@ -378,17 +410,64 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
                         : Text(
                             _page == _totalPages - 1 ? _t('finish') : _t('next'),
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10), letterSpacing: 1),
+                            style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF5A3D10), letterSpacing: 1),
                           ),
                   ),
                 ))),
               ]),
-            ),
+            )),
           ],
         ),
       ),
     );
   }
+
+  void _showLanguagePicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF0A1628),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border(top: BorderSide(color: LKTheme.gold, width: 1.5)),
+        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 12),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: LKTheme.gold.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 16),
+          Text(_t('select_language'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 1)),
+          const SizedBox(height: 8),
+          ..._languageNames.map((lang) => Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () { Navigator.pop(ctx); if (lang != _language) _changeLanguage(lang); },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                decoration: BoxDecoration(
+                  color: lang == _language ? LKTheme.gold.withValues(alpha: 0.12) : Colors.transparent,
+                  border: Border(bottom: BorderSide(color: LKTheme.gold.withValues(alpha: 0.08))),
+                ),
+                child: Row(children: [
+                  Expanded(child: Text(lang, style: TextStyle(fontSize: 18, fontWeight: lang == _language ? FontWeight.w700 : FontWeight.w500, color: lang == _language ? LKTheme.gold : LKTheme.textPrimary))),
+                  if (lang == _language) const Icon(Icons.check_rounded, color: LKTheme.gold, size: 22),
+                ]),
+              ),
+            ),
+          )),
+          SizedBox(height: MediaQuery.of(ctx).padding.bottom + 16),
+        ]),
+      ),
+    );
+  }
+
+  static const _langFlags = {
+    'English': '🇬🇧', 'Magyar': '🇭🇺', 'Deutsch': '🇩🇪', 'German': '🇩🇪',
+    'Espanol': '🇪🇸', 'Francais': '🇫🇷', 'Italiano': '🇮🇹', 'Portugues': '🇵🇹',
+    'Hottentotta': '🇿🇦', 'Nederlands': '🇳🇱', 'Polski': '🇵🇱', 'Romana': '🇷🇴',
+    'Svenska': '🇸🇪', 'Norsk': '🇳🇴', 'Suomi': '🇫🇮', 'Dansk': '🇩🇰',
+  };
 
   List<String> get _languageNames {
     final langs = _ts.availableLanguages;
@@ -398,169 +477,254 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // Page 0: Language
   Widget _buildLanguage() {
-    return Padding(key: const ValueKey('lang'), padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(children: [
-        const Spacer(flex: 2),
-        SizedBox(width: 220, height: 220, child: _logoWidget(width: 220, height: 220, logoKey: 'registration')),
-        const Spacer(flex: 1),
-        Text(_t('select_language'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
-        const SizedBox(height: 14),
-        Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(color: LKTheme.bgCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: LKTheme.gold, width: 1.5)),
-          child: DropdownButton<String>(value: _language, isExpanded: true, dropdownColor: LKTheme.bgCard, underline: const SizedBox(),
-            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: LKTheme.gold, size: 28),
-            style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
-            items: _languageNames.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-            onChanged: (v) { if (v != null) _changeLanguage(v); })),
-        const Spacer(flex: 5),
-      ]));
+    return LayoutBuilder(key: const ValueKey('lang'), builder: (context, constraints) {
+      final h = constraints.maxHeight;
+      final logoTop = h * 5 / 13 - 90;
+      final selectorTop = logoTop + 180 + 37;
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () { if (_langPickerOpen) setState(() => _langPickerOpen = false); },
+        child: Stack(children: [
+          Positioned(left: 28, right: 28, top: logoTop, child: FadeTransition(
+            opacity: _logoFadeAnim,
+            child: ScaleTransition(
+              scale: _logoScaleAnim,
+              child: SizedBox(height: 180, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain)),
+            ),
+          )),
+          Positioned(left: 28, right: 28, top: selectorTop, child: AnimatedOpacity(
+            opacity: _isLoadingLang ? 0.0 : 1.0,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeIn,
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(_t('select_language'), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 18, fontWeight: FontWeight.w500, color: LKTheme.textPrimary, letterSpacing: 1)),
+              const SizedBox(height: 23),
+              Container(
+                decoration: BoxDecoration(
+                  color: LKTheme.bgCard,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: LKTheme.gold.withValues(alpha: 0.6), width: 1.5),
+                  boxShadow: _langPickerOpen ? [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))] : [],
+                ),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  GestureDetector(
+                    onTap: () => setState(() => _langPickerOpen = !_langPickerOpen),
+                    child: Container(
+                      width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      child: Row(children: [
+                        Text(_langFlags[_language] ?? '🌐', style: const TextStyle(fontSize: 22)),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text(_language, style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600))),
+                        Icon(_langPickerOpen ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, color: LKTheme.gold, size: 28),
+                      ]),
+                    ),
+                  ),
+                  if (_langPickerOpen) ...[
+                    Container(height: 1, color: LKTheme.gold.withValues(alpha: 0.3)),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 250),
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: _languageNames.length,
+                        itemBuilder: (ctx, i) {
+                          final lang = _languageNames[i];
+                          final selected = lang == _language;
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() => _langPickerOpen = false);
+                              if (!selected) _changeLanguage(lang);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                              decoration: BoxDecoration(
+                                color: selected ? LKTheme.gold.withValues(alpha: 0.1) : Colors.transparent,
+                                border: i < _languageNames.length - 1 ? Border(bottom: BorderSide(color: LKTheme.gold.withValues(alpha: 0.08))) : null,
+                              ),
+                              child: Row(children: [
+                                Text(_langFlags[lang] ?? '🌐', style: const TextStyle(fontSize: 20)),
+                                const SizedBox(width: 12),
+                                Expanded(child: Text(lang, style: TextStyle(fontSize: 18, fontWeight: selected ? FontWeight.w700 : FontWeight.w500, color: selected ? LKTheme.gold : LKTheme.textPrimary))),
+                                if (selected) const Icon(Icons.check_rounded, color: LKTheme.gold, size: 20),
+                              ]),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ]),
+              ),
+            ]),
+          )),
+        ]),
+      );
+    });
   }
 
   // Page 1: Welcome
   Widget _buildWelcome() {
-    return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 24),
+    return Padding(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(height: 10),
-        Center(child: Text(_t('welcome_title'), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: LKTheme.gold))),
-        const SizedBox(height: 12),
-        _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc')),
-        _welcomeItem(Icons.warning_rounded, _t('how_works_title'), _t('how_works_desc')),
-        _welcomeItem(Icons.people_rounded, _t('connections_title'), _t('connections_desc')),
-        _welcomeItem(Icons.star_rounded, _t('membership_title'), _t('membership_desc')),
-        _welcomeItem(Icons.shield_rounded, _t('privacy_title'), _t('privacy_desc')),
-        const SizedBox(height: 8),
+        const SizedBox(height: 21),
+        Center(child: Text(_t('welcome_title').toUpperCase(), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 28, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 2))),
+        const Spacer(flex: 1),
+        _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc'), false),
+        _welcomeItem(Icons.warning_rounded, _t('how_works_title'), _t('how_works_desc'), false),
+        _welcomeItem(Icons.people_rounded, _t('connections_title'), _t('connections_desc'), false),
+        _welcomeItem(Icons.star_rounded, _t('membership_title'), _t('membership_desc'), false),
+        _welcomeItem(Icons.shield_rounded, _t('privacy_title'), _t('privacy_desc'), true),
+        const Spacer(flex: 1),
       ]));
   }
 
-  Widget _welcomeItem(IconData icon, String title, String desc) {
-    return Padding(padding: const EdgeInsets.only(bottom: 16), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
-        child: Icon(icon, size: 24, color: LKTheme.gold)),
-      const SizedBox(width: 14),
+  Widget _welcomeItem(IconData icon, String title, String desc, bool isTcsLink) {
+    return Padding(padding: const EdgeInsets.only(bottom: 13), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(width: 40, height: 40, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
+        child: Icon(icon, size: 22, color: LKTheme.gold)),
+      const SizedBox(width: 13),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        Text(title, style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 18, fontWeight: FontWeight.w500, color: LKTheme.textPrimary, letterSpacing: 1)),
         const SizedBox(height: 4),
-        Text(desc, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary, height: 1.4, fontWeight: FontWeight.w400)),
+        Text(desc, style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, color: LKTheme.textPrimary, height: 1.4, fontWeight: FontWeight.w400)),
+        if (isTcsLink) ...[
+          const SizedBox(height: 6),
+          GestureDetector(onTap: () {}, child: const Text('Read Terms and Conditions', style: TextStyle(fontFamily: 'CormorantGaramond', fontSize: 16, color: LKTheme.gold, decoration: TextDecoration.underline, decorationColor: LKTheme.gold))),
+        ],
       ])),
     ]));
   }
 
   // Page 2: Profile
   Widget _buildProfile() {
-    return SingleChildScrollView(key: const ValueKey('profile'), padding: const EdgeInsets.symmetric(horizontal: 32),
+    return SingleChildScrollView(key: const ValueKey('profile'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
-        const SizedBox(height: 12),
-        Text(_t('your_details'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 6),
-        Text(_t('no_auth_required'), style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7))),
-        const SizedBox(height: 16),
-        const Icon(Icons.qr_code_2_rounded, size: 64, color: LKTheme.textMuted),
-        const SizedBox(height: 16),
-        _label(_t('your_name')), const SizedBox(height: 6),
-        TextField(controller: _nameController, maxLength: 30, style: const TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
+        const SizedBox(height: 21),
+        Text(_t('your_details').toUpperCase(), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 28, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 2)),
+        const SizedBox(height: 8),
+        Text(_t('no_auth_required'), style: TextStyle(fontFamily: 'CormorantGaramond', fontSize: 16, color: LKTheme.gold.withValues(alpha: 0.7))),
+        const SizedBox(height: 21),
+        Container(
+          width: 55, height: 55,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.12)),
+          child: const Icon(Icons.person_outline_rounded, size: 30, color: LKTheme.gold),
+        ),
+        const SizedBox(height: 21),
+        _label(_t('your_name')), const SizedBox(height: 8),
+        TextField(controller: _nameController, maxLength: 30, style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 18, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
           onChanged: (_) { if (_errorFields.contains('name')) setState(() => _errorFields.remove('name')); },
           decoration: _inputDeco(_t('name_placeholder'), Icons.person_rounded, LKTheme.gold, 'name')),
-        const SizedBox(height: 14),
-        _label(_t('your_email')), const SizedBox(height: 6),
-        TextField(controller: _emailController, maxLength: 100, keyboardType: TextInputType.emailAddress, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+        const SizedBox(height: 21),
+        _label(_t('your_email')), const SizedBox(height: 8),
+        TextField(controller: _emailController, maxLength: 100, keyboardType: TextInputType.emailAddress, style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('email')) setState(() => _errorFields.remove('email')); },
           decoration: _inputDeco(_t('email_placeholder'), Icons.email_rounded, LKTheme.gold, 'email')),
-        const SizedBox(height: 14),
-        _label(_t('your_phone')), const SizedBox(height: 6),
-        TextField(controller: _phoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+        const SizedBox(height: 21),
+        _label(_t('your_phone')), const SizedBox(height: 8),
+        TextField(controller: _phoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('phone')) setState(() => _errorFields.remove('phone')); },
           decoration: _inputDeco(_t('phone_placeholder'), Icons.phone_rounded, LKTheme.gold, 'phone')),
-        const SizedBox(height: 20),
+        const SizedBox(height: 21),
       ]));
   }
 
   // Page 5: Your Personal Code
   Widget _buildCode() {
-    return Padding(key: const ValueKey('code'), padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const Icon(Icons.save_rounded, size: 48, color: LKTheme.gold),
-        const SizedBox(height: 16),
-        Text(_t('your_code'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 24),
-        Text(_userCode ?? '........', style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: LKTheme.gold, letterSpacing: 8)),
-        const SizedBox(height: 24),
+    return Padding(key: const ValueKey('code'), padding: const EdgeInsets.symmetric(horizontal: 28),
+      child: Column(children: [
+        const Spacer(flex: 5),
+        Container(
+          width: 55, height: 55,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.12)),
+          child: const Icon(Icons.key_rounded, size: 28, color: LKTheme.gold),
+        ),
+        const SizedBox(height: 13),
+        Text(_t('your_code').toUpperCase(), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 28, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 2)),
+        const SizedBox(height: 34),
+        Text(_userCode ?? '........', style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 44, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 8)),
+        const SizedBox(height: 34),
         Text(_t('save_code_msg'), textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w700, height: 1.4)),
-        const SizedBox(height: 12),
+          style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w700, height: 1.4)),
+        const SizedBox(height: 8),
         Text(_t('share_code_msg'), textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.5)),
-        const SizedBox(height: 24),
+          style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 16, color: LKTheme.textSecondary, height: 1.5)),
+        const SizedBox(height: 21),
         GestureDetector(
           onTap: () { if (_userCode != null) { Clipboard.setData(ClipboardData(text: _userCode!)); _showMessage(_t('code_copied')); } },
-          child: Container(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          child: Container(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 13),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold)),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.copy_rounded, size: 20, color: LKTheme.gold), const SizedBox(width: 8),
-              Text(_t('copy_code'), style: const TextStyle(fontSize: 17, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+              Text(_t('copy_code'), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 17, color: LKTheme.gold, fontWeight: FontWeight.w500, letterSpacing: 1)),
             ]))),
+        const Spacer(flex: 8),
       ]));
   }
 
   // Page 3: Emergency
   Widget _buildEmergency() {
-    return SingleChildScrollView(key: const ValueKey('emergency'), padding: const EdgeInsets.symmetric(horizontal: 32),
+    return SingleChildScrollView(key: const ValueKey('emergency'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
-        const SizedBox(height: 12),
-        Text(_t('emergency_contacts'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 10),
+        const SizedBox(height: 21),
+        Text(_t('emergency_contacts').toUpperCase(), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 28, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 2)),
+        const SizedBox(height: 13),
         Container(
-          width: 60, height: 60,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.15)),
-          child: const Icon(Icons.local_hospital_rounded, size: 32, color: LKTheme.red),
+          width: 55, height: 55,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.12)),
+          child: const Icon(Icons.local_hospital_rounded, size: 28, color: LKTheme.red),
         ),
         const SizedBox(height: 8),
-        Text(_t('emergency_subtitle'), style: TextStyle(fontSize: 14, color: LKTheme.gold.withValues(alpha: 0.7)), textAlign: TextAlign.center),
-        const SizedBox(height: 20),
-        _label(_t('sos_name')), const SizedBox(height: 6),
-        TextField(controller: _sosNameController, maxLength: 50, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+        Text(_t('emergency_subtitle'), style: TextStyle(fontFamily: 'CormorantGaramond', fontSize: 16, color: LKTheme.gold.withValues(alpha: 0.7)), textAlign: TextAlign.center),
+        const SizedBox(height: 21),
+        _label(_t('sos_name')), const SizedBox(height: 8),
+        TextField(controller: _sosNameController, maxLength: 50, style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('sosName')) setState(() => _errorFields.remove('sosName')); },
           decoration: _inputDeco(_t('sos_name_placeholder'), Icons.person_rounded, LKTheme.gold, 'sosName')),
-        const SizedBox(height: 14),
-        _label(_t('phone_number')), const SizedBox(height: 6),
-        TextField(controller: _sosPhoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+        const SizedBox(height: 21),
+        _label(_t('phone_number')), const SizedBox(height: 8),
+        TextField(controller: _sosPhoneController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('sosPhone')) setState(() => _errorFields.remove('sosPhone')); },
           decoration: _inputDeco(_t('sos_phone_placeholder'), Icons.phone_rounded, LKTheme.gold, 'sosPhone')),
-        const SizedBox(height: 24),
-        Text(_t('ambulance'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.gold)),
-        const SizedBox(height: 12),
-        _label(_t('phone_number')), const SizedBox(height: 6),
-        TextField(controller: _ambulanceController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+        const SizedBox(height: 34),
+        Text(_t('ambulance').toUpperCase(), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 20, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 1)),
+        const SizedBox(height: 13),
+        _label(_t('phone_number')), const SizedBox(height: 8),
+        TextField(controller: _ambulanceController, maxLength: 20, keyboardType: TextInputType.phone, style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, color: LKTheme.textPrimary),
           onChanged: (_) { if (_errorFields.contains('ambulance')) setState(() => _errorFields.remove('ambulance')); },
           decoration: _inputDeco(_t('ambulance_placeholder'), Icons.local_hospital_rounded, LKTheme.red, 'ambulance')),
-        const SizedBox(height: 20),
+        const SizedBox(height: 21),
       ]));
   }
 
-  // Page 5: Membership Selection
+  // Page 4: Membership Selection
   Widget _buildMembership() {
-    return SingleChildScrollView(key: const ValueKey('membership'), padding: const EdgeInsets.symmetric(horizontal: 24),
+    return SingleChildScrollView(key: const ValueKey('membership'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
-        const SizedBox(height: 16),
-        const Icon(Icons.star_rounded, size: 48, color: LKTheme.gold),
-        const SizedBox(height: 10),
-        Text(_t('select_plan'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
+        const SizedBox(height: 21),
+        Container(
+          width: 55, height: 55,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.12)),
+          child: const Icon(Icons.star_rounded, size: 28, color: LKTheme.gold),
+        ),
+        const SizedBox(height: 13),
+        Text(_t('select_plan').toUpperCase(), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 28, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 2)),
         const SizedBox(height: 8),
         Text(_t('plan_desc'), textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary, height: 1.4)),
-        const SizedBox(height: 20),
+          style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
+        const SizedBox(height: 21),
         _planCard('free', 'Free', [
           'Watch over 1 person',
           'With advertising',
           '3-day cooldown when switching',
         ], null, null),
-        const SizedBox(height: 12),
+        const SizedBox(height: 13),
         _planCard('plan5', 'Premium', [
           'Watch over up to 3 people',
           'No advertisements',
           'Switch connections freely',
           'Cancel anytime',
         ], '\$5', '\$50/year'),
-        const SizedBox(height: 12),
+        const SizedBox(height: 13),
         _planCard('plan8', 'Premium Plus', [
           'Watch over up to 10 people',
           'No advertisements',
@@ -569,9 +733,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           'Best for large families',
           'Cancel anytime',
         ], '\$8', '\$80/year'),
-        const SizedBox(height: 10),
-        Text(_t('change_plan_hint'), style: const TextStyle(fontSize: 13, color: LKTheme.textMuted)),
-        const SizedBox(height: 16),
+        const SizedBox(height: 13),
+        Text(_t('change_plan_hint'), style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 14, color: LKTheme.textMuted)),
+        const SizedBox(height: 13),
       ]));
   }
 
@@ -583,33 +747,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         _maxSlots = planKey == 'free' ? 1 : planKey == 'plan5' ? 3 : 10;
       }),
       child: Container(
-        width: double.infinity, padding: const EdgeInsets.all(16),
+        width: double.infinity, padding: const EdgeInsets.all(13),
         decoration: BoxDecoration(
-          color: selected ? LKTheme.gold.withValues(alpha: 0.1) : const Color(0xFF002035),
-          borderRadius: BorderRadius.circular(16),
+          color: selected ? LKTheme.gold.withValues(alpha: 0.08) : const Color(0xFF002035),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: selected ? LKTheme.gold : LKTheme.gold.withValues(alpha: 0.2), width: selected ? 2 : 1),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off, color: selected ? LKTheme.gold : LKTheme.textMuted, size: 26),
-            const SizedBox(width: 12),
-            Expanded(child: Text(name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: selected ? LKTheme.gold : LKTheme.textPrimary))),
+            Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off, color: selected ? LKTheme.gold : LKTheme.textMuted, size: 24),
+            const SizedBox(width: 13),
+            Expanded(child: Text(name, style: TextStyle(fontFamily: 'BarlowCondensed', fontSize: 20, fontWeight: FontWeight.w500, color: selected ? LKTheme.gold : LKTheme.textPrimary, letterSpacing: 1))),
             if (monthly != null)
               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text(monthly, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: LKTheme.gold)),
-                const Text('/month', style: TextStyle(fontSize: 11, color: LKTheme.textMuted)),
-                if (yearly != null) Text('or $yearly', style: const TextStyle(fontSize: 12, color: LKTheme.teal, fontWeight: FontWeight.w600)),
+                Text(monthly, style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 22, fontWeight: FontWeight.w500, color: LKTheme.gold)),
+                Text('/month', style: TextStyle(fontFamily: 'CormorantGaramond', fontSize: 12, color: LKTheme.textMuted)),
+                if (yearly != null) Text('or $yearly', style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 13, color: LKTheme.teal, fontWeight: FontWeight.w600)),
               ])
             else
-              const Text('FREE', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LKTheme.textSecondary)),
+              const Text('FREE', style: TextStyle(fontFamily: 'BarlowCondensed', fontSize: 20, fontWeight: FontWeight.w500, color: LKTheme.textSecondary, letterSpacing: 2)),
           ]),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           ...features.map((f) => Padding(
-            padding: const EdgeInsets.only(left: 38, bottom: 4),
+            padding: const EdgeInsets.only(left: 37, bottom: 5),
             child: Row(children: [
               Icon(Icons.check_rounded, size: 16, color: selected ? LKTheme.gold : LKTheme.textMuted),
               const SizedBox(width: 8),
-              Text(f, style: TextStyle(fontSize: 14, color: selected ? LKTheme.textPrimary : LKTheme.textSecondary)),
+              Expanded(child: Text(f, style: TextStyle(fontFamily: 'CormorantGaramond', fontSize: 15, color: selected ? LKTheme.textPrimary : LKTheme.textSecondary))),
             ]),
           )),
         ]),
@@ -620,21 +784,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // Page 6: Connect to People
   Widget _buildConnect() {
     final remaining = _maxSlots - _connectedPeople.length;
-    return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 32),
+    return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
-        const SizedBox(height: 16),
-        Text(_t('connect_title'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: LKTheme.textPrimary)),
-        const SizedBox(height: 20),
+        const SizedBox(height: 21),
+        Container(
+          width: 55, height: 55,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.12)),
+          child: const Icon(Icons.people_rounded, size: 28, color: LKTheme.gold),
+        ),
+        const SizedBox(height: 13),
+        Text(_t('connect_title').toUpperCase(), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 28, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 2)),
+        const SizedBox(height: 21),
 
         ..._connectedPeople.map((p) => Container(
           margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(13),
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
           child: Row(children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(p['name']!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
+              Text(p['name']!, style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
               const SizedBox(height: 2),
-              Text(p['code']!, style: const TextStyle(fontSize: 13, letterSpacing: 2, fontWeight: FontWeight.w700, color: LKTheme.gold)),
+              Text(p['code']!, style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 14, letterSpacing: 2, fontWeight: FontWeight.w500, color: LKTheme.gold)),
             ])),
             GestureDetector(
               onTap: () => setState(() => _connectedPeople.remove(p)),
@@ -644,21 +814,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         )),
 
         if (_connectedPeople.length >= _maxSlots && _connectedPeople.isNotEmpty)
-          Padding(padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Text(_t('upgrade_plan'), style: const TextStyle(fontSize: 14, color: LKTheme.gold, fontWeight: FontWeight.w500))),
+          Padding(padding: const EdgeInsets.symmetric(vertical: 13),
+            child: Text(_t('upgrade_plan'), style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 15, color: LKTheme.gold, fontWeight: FontWeight.w500))),
 
         if (remaining > 0) ...[
           const SizedBox(height: 8),
           TextField(controller: _connectNameController, maxLength: 50,
-            style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+            style: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, color: LKTheme.textPrimary),
             onChanged: (_) { if (_errorFields.contains('connectName')) setState(() => _errorFields.remove('connectName')); },
             decoration: _inputDeco(_t('connect_name_placeholder'), Icons.person_rounded, LKTheme.gold, 'connectName')),
-          const SizedBox(height: 12),
+          const SizedBox(height: 13),
           TextField(controller: _connectCodeController, maxLength: 8, textCapitalization: TextCapitalization.characters,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: LKTheme.gold, letterSpacing: 4),
+            style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 22, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 4),
             onChanged: (_) { if (_errorFields.contains('connectCode')) setState(() => _errorFields.remove('connectCode')); },
             decoration: _inputDeco(_t('connect_code_placeholder'), Icons.link_rounded, LKTheme.gold, 'connectCode')),
-          const SizedBox(height: 16),
+          const SizedBox(height: 21),
           SizedBox(width: double.infinity, height: 50, child: Container(
             decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14)),
             child: ElevatedButton(
@@ -666,24 +836,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
               child: _isSaving
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
-                : Text(_t('connect_button'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF5A3D10))),
+                : Text(_t('connect_button'), style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF5A3D10), letterSpacing: 1)),
             ),
           )),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: 21),
       ]));
   }
 
   Widget _label(String text) {
     return Align(alignment: Alignment.centerLeft,
-      child: Text(text, style: const TextStyle(fontSize: 14, color: LKTheme.gold, fontWeight: FontWeight.w600)));
+      child: Text(text, style: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 16, color: LKTheme.gold, fontWeight: FontWeight.w500, letterSpacing: 1)));
   }
 
   InputDecoration _inputDeco(String hint, IconData icon, Color iconColor, String fieldKey) {
     final hasError = _errorFields.contains(fieldKey);
     return InputDecoration(hintText: hint, counterText: '',
+      hintStyle: TextStyle(fontFamily: 'CormorantGaramond', fontSize: 17, color: LKTheme.textSecondary.withValues(alpha: 0.7), fontWeight: FontWeight.w400),
       prefixIcon: Icon(icon, color: hasError ? LKTheme.red : iconColor),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: hasError ? LKTheme.red : LKTheme.border, width: hasError ? 2 : 1)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: hasError ? LKTheme.red : LKTheme.gold.withValues(alpha: 0.25), width: hasError ? 2 : 1)),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: hasError ? LKTheme.red : LKTheme.gold, width: 2)),
       filled: true, fillColor: LKTheme.bgCardLight);
   }

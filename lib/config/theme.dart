@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class LKTheme {
   static const Color bg = Color(0xFF080B14);
@@ -26,15 +25,15 @@ class LKTheme {
   static const Color borderGold = Color(0xFF2A2218);
 
   static TextStyle heading({double size = 20, FontWeight weight = FontWeight.w700, Color color = textPrimary}) {
-    return GoogleFonts.cinzel(fontSize: size, fontWeight: weight, color: color, letterSpacing: 3);
+    return TextStyle(fontFamily: 'Cinzel', fontSize: size, fontWeight: weight, color: color, letterSpacing: 3);
   }
 
   static TextStyle body({double size = 16, FontWeight weight = FontWeight.w500, Color color = textPrimary}) {
-    return GoogleFonts.cormorantGaramond(fontSize: size, fontWeight: weight, color: color);
+    return TextStyle(fontFamily: 'CormorantGaramond', fontSize: size, fontWeight: weight, color: color);
   }
 
   static TextStyle label({double size = 12, FontWeight weight = FontWeight.w600, Color color = gold}) {
-    return GoogleFonts.cinzel(fontSize: size, fontWeight: weight, color: color, letterSpacing: 2);
+    return TextStyle(fontFamily: 'Cinzel', fontSize: size, fontWeight: weight, color: color, letterSpacing: 2);
   }
 
   static const LinearGradient goldGradient = LinearGradient(

@@ -69,9 +69,27 @@ class TranslationService {
     final cached = prefs.getString('$_cacheKeyPrefix$langCode');
     if (cached != null) {
       _strings = Map<String, String>.from(jsonDecode(cached));
+      _fetchTranslations(langCode);
+    } else {
+      await _fetchTranslations(langCode);
     }
+  }
 
-    await _fetchTranslations(langCode);
+  Future<void> preloadAll() async {
+    final savedLang = _currentLang;
+    final savedStrings = Map<String, String>.from(_strings);
+    for (final lang in _availableLanguages) {
+      final code = lang['code']!;
+      if (code == savedLang) continue;
+      final prefs = await SharedPreferences.getInstance();
+      final cached = prefs.getString('$_cacheKeyPrefix$code');
+      if (cached == null) {
+        await Future.delayed(const Duration(milliseconds: 2000));
+        await _fetchTranslations(code);
+      }
+    }
+    _currentLang = savedLang;
+    _strings = savedStrings;
   }
 
   Future<void> _fetchLanguages() async {
