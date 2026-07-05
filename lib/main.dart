@@ -44,8 +44,8 @@ class LifeKnobApp extends StatelessWidget {
         textTheme: const TextTheme(
           headlineLarge: TextStyle(fontFamily: 'BarlowCondensed', fontSize: 32, fontWeight: FontWeight.w500, color: LKTheme.textPrimary),
           headlineMedium: TextStyle(fontFamily: 'BarlowCondensed', fontSize: 24, fontWeight: FontWeight.w500, color: LKTheme.textPrimary),
-          bodyLarge: TextStyle(fontFamily: 'CormorantGaramond', fontSize: 18, color: LKTheme.textPrimary),
-          bodyMedium: TextStyle(fontFamily: 'CormorantGaramond', fontSize: 16, color: LKTheme.textPrimary),
+          bodyLarge: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary),
+          bodyMedium: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textPrimary),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -63,8 +63,8 @@ class LifeKnobApp extends StatelessWidget {
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: LKTheme.gold.withValues(alpha: 0.15))),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: LKTheme.gold, width: 1.5)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          labelStyle: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 16, color: LKTheme.textSecondary),
-          hintStyle: const TextStyle(fontFamily: 'CormorantGaramond', fontSize: 16, color: LKTheme.textMuted),
+          labelStyle: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textSecondary),
+          hintStyle: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textMuted),
         ),
         useMaterial3: true,
       ),

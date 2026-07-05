@@ -111,6 +111,9 @@ flutter:
     - family: CormorantGaramond
       fonts:
         - asset: assets/fonts/CormorantGaramond.ttf
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans.ttf
     - family: BarlowCondensed
       fonts:
         - asset: assets/fonts/BarlowCondensed-Medium.ttf
