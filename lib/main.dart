@@ -42,8 +42,8 @@ class LifeKnobApp extends StatelessWidget {
           surface: LKTheme.bgCard,
         ),
         textTheme: const TextTheme(
-          headlineLarge: TextStyle(fontFamily: 'BarlowCondensed', fontSize: 32, fontWeight: FontWeight.w500, color: LKTheme.textPrimary),
-          headlineMedium: TextStyle(fontFamily: 'BarlowCondensed', fontSize: 24, fontWeight: FontWeight.w500, color: LKTheme.textPrimary),
+          headlineLarge: TextStyle(fontFamily: 'OpenSans', fontSize: 32, fontWeight: FontWeight.w500, color: LKTheme.textPrimary),
+          headlineMedium: TextStyle(fontFamily: 'OpenSans', fontSize: 24, fontWeight: FontWeight.w500, color: LKTheme.textPrimary),
           bodyLarge: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary),
           bodyMedium: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textPrimary),
         ),
@@ -51,7 +51,7 @@ class LifeKnobApp extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: LKTheme.gold,
             foregroundColor: const Color(0xFF5A3D10),
-            textStyle: const TextStyle(fontFamily: 'BarlowCondensed', fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 2),
+            textStyle: const TextStyle(fontFamily: 'OpenSans', fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             minimumSize: const Size(double.infinity, 52),
           ),
