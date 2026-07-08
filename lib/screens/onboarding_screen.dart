@@ -493,7 +493,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           const SizedBox(height: 12),
           Container(width: 40, height: 4, decoration: BoxDecoration(color: LKTheme.gold.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 16),
-          Text(_t('select_language'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 1)),
+          Text(_t('select_language'), style: const TextStyle(fontFamily: 'Dosis', fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 1.5)),
           const SizedBox(height: 8),
           ..._languageNames.map((lang) => Material(
             color: Colors.transparent,
@@ -554,7 +554,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
             duration: const Duration(milliseconds: 600),
             curve: Curves.easeIn,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(_t('select_language'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary, letterSpacing: 1)),
+              Text(_t('select_language'), style: const TextStyle(fontFamily: 'Dosis', fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.textPrimary, letterSpacing: 1.5)),
               const SizedBox(height: 23),
               Container(
                 decoration: BoxDecoration(

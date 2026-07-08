@@ -114,6 +114,9 @@ flutter:
     - family: OpenSans
       fonts:
         - asset: assets/fonts/OpenSans.ttf
+    - family: Dosis
+      fonts:
+        - asset: assets/fonts/Dosis.ttf
     - family: BarlowCondensed
       fonts:
         - asset: assets/fonts/BarlowCondensed-Medium.ttf
