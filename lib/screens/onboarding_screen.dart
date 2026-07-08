@@ -73,6 +73,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     'all_done_msg': 'Thank you for choosing our application! You are all set to use our daily check-in knob to let people know you are active and doing well.',
     'all_done_msg2': 'Open the app every day! It takes just seconds to stay connected and give others peace of mind.',
     'go_to_knob': 'GO TO TURN THE LIFE KNOB',
+    'read_terms': 'Read Terms and Conditions',
+    'connected_state': 'Connected', 'waiting_state': 'Waiting for them to add your code',
+    'terms_title': 'Terms and Conditions',
+    'terms_body': 'Welcome to LifeKnob.\n\nLifeKnob is a simple daily check-in service. By pressing the knob each day you let the people you connect with know that you are okay. LifeKnob is not a medical, emergency, or monitoring service and must not be relied upon as one. In a real emergency always call your local emergency number.\n\n1. The App. LifeKnob lets you register with a name, email and phone number, choose a membership plan, receive a personal code, and connect with other people using their codes. No password or login is required to use the daily check-in.\n\n2. Connections. You are connected to another person only when both of you have entered each other\'s codes. Once connected, that person can see the name you registered and when you last checked in. You can remove a connection at any time.\n\n3. Membership. The Free plan lets you watch over one person and shows advertising. Paid plans let you watch over more people and remove advertising. Prices are shown before you confirm. You can cancel a paid plan at any time; downgrading may reduce the number of people you can watch over.\n\n4. Your Data. Your details are only shared with people you choose to connect with. We do not sell your data. Your personal code is tied to your device and cannot be changed.\n\n5. Availability. We work hard to keep LifeKnob running, but we cannot guarantee uninterrupted service and are not liable for missed check-ins caused by device, network, or service issues.\n\n6. Changes. We may update these terms from time to time. Continued use of the app means you accept the current terms.\n\nBy using LifeKnob you agree to these terms.',
   };
   String _t(String key) {
     final val = _ts.t(key);
@@ -235,7 +239,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         _errorFields.clear();
         final connectedName = result['data']?['connected_to']?['name'] ?? name;
         final status = result['data']?['connection_status'] ?? 'pending';
-        _connectedPeople.add({'name': connectedName, 'code': code});
+        _connectedPeople.add({'name': connectedName, 'code': code, 'status': status});
         _connectNameController.clear();
         _connectCodeController.clear();
         setState(() => _isSaving = false);
@@ -333,6 +337,47 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           child: const Text('OK', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         )),
       ])),
+    ));
+  }
+
+  void _showTerms() {
+    Navigator.of(context).push(PageRouteBuilder(
+      opaque: true,
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (ctx, anim, __) => FadeTransition(
+        opacity: anim,
+        child: Scaffold(
+          backgroundColor: const Color(0xFF003049),
+          body: SafeArea(
+            child: Column(children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: Row(children: [
+                  Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
+                    child: const Icon(Icons.description_rounded, size: 24, color: LKTheme.gold)),
+                  const SizedBox(width: 13),
+                  Expanded(child: Text(_t('terms_title'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 24, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 1))),
+                ]),
+              ),
+              Divider(color: LKTheme.gold.withValues(alpha: 0.2), height: 1),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                  child: Text(_t('terms_body'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textPrimary, height: 1.6)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(28, 8, 28, 21),
+                child: SizedBox(width: double.infinity, height: 52, child: OutlinedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5), width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                  child: Text(_t('back'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                )),
+              ),
+            ]),
+          ),
+        ),
+      ),
     ));
   }
 
@@ -600,7 +645,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         Text(desc, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.textPrimary, height: 1.4, fontWeight: FontWeight.w400)),
         if (isTcsLink) ...[
           const SizedBox(height: 6),
-          GestureDetector(onTap: () {}, child: const Text('Read Terms and Conditions', style: TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.gold, decoration: TextDecoration.underline, decorationColor: LKTheme.gold))),
+          GestureDetector(onTap: _showTerms, child: Text(_t('read_terms'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.gold, decoration: TextDecoration.underline, decorationColor: LKTheme.gold))),
         ],
       ])),
     ]);
@@ -806,22 +851,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         Text(_t('connect_title').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
         const SizedBox(height: 21),
 
-        ..._connectedPeople.map((p) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(13),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: LKTheme.gold.withValues(alpha: 0.3))),
-          child: Row(children: [
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(p['name']!, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
-              const SizedBox(height: 2),
-              Text(p['code']!, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 14, letterSpacing: 2, fontWeight: FontWeight.w500, color: LKTheme.gold)),
-            ])),
-            GestureDetector(
-              onTap: () => setState(() => _connectedPeople.remove(p)),
-              child: const Icon(Icons.cancel_rounded, size: 24, color: LKTheme.textMuted),
-            ),
-          ]),
-        )),
+        ..._connectedPeople.map((p) {
+          final connected = p['status'] == 'accepted';
+          final stateColor = connected ? LKTheme.green : LKTheme.red;
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(13),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: stateColor.withValues(alpha: 0.55), width: 1.5)),
+            child: Row(children: [
+              Container(width: 12, height: 12, margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: stateColor,
+                  boxShadow: [BoxShadow(color: stateColor.withValues(alpha: 0.5), blurRadius: 6)])),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(p['name']!, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
+                const SizedBox(height: 2),
+                Text(connected ? _t('connected_state') : _t('waiting_state'),
+                  style: TextStyle(fontFamily: 'OpenSans', fontSize: 13, fontWeight: FontWeight.w600, color: stateColor)),
+              ])),
+              GestureDetector(
+                onTap: () => setState(() => _connectedPeople.remove(p)),
+                child: const Icon(Icons.cancel_rounded, size: 24, color: LKTheme.textMuted),
+              ),
+            ]),
+          );
+        }),
 
         if (_connectedPeople.length >= _maxSlots && _connectedPeople.isNotEmpty)
           Padding(padding: const EdgeInsets.symmetric(vertical: 13),
