@@ -76,20 +76,18 @@ class TranslationService {
   }
 
   Future<void> preloadAll() async {
-    final savedLang = _currentLang;
-    final savedStrings = Map<String, String>.from(_strings);
     for (final lang in _availableLanguages) {
       final code = lang['code']!;
-      if (code == savedLang) continue;
+      if (code == _currentLang) continue;
       final prefs = await SharedPreferences.getInstance();
       final cached = prefs.getString('$_cacheKeyPrefix$code');
       if (cached == null) {
         await Future.delayed(const Duration(milliseconds: 2000));
-        await _fetchTranslations(code);
+        // Preload into cache only — must NOT touch the active _strings map,
+        // otherwise the current language's text gets clobbered mid-render.
+        await _fetchTranslations(code, setActive: false);
       }
     }
-    _currentLang = savedLang;
-    _strings = savedStrings;
   }
 
   Future<void> _fetchLanguages() async {
@@ -123,16 +121,19 @@ class TranslationService {
     } catch (_) {}
   }
 
-  Future<void> _fetchTranslations(String langCode) async {
+  Future<void> _fetchTranslations(String langCode, {bool setActive = true}) async {
     try {
       final resp = await http.get(Uri.parse('$_baseUrl/translations/$langCode'))
           .timeout(const Duration(seconds: 10));
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
         if (data['status'] == 'success') {
-          _strings = Map<String, String>.from(data['data']);
+          final map = Map<String, String>.from(data['data']);
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('$_cacheKeyPrefix$langCode', jsonEncode(_strings));
+          await prefs.setString('$_cacheKeyPrefix$langCode', jsonEncode(map));
+          // Only swap the active language if this fetch is for it. Preloads
+          // (setActive:false) update the cache without disturbing the UI.
+          if (setActive) _strings = map;
         }
       }
     } catch (_) {}
