@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import '../services/translation_service.dart';
 import '../widgets/ad_widgets.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -312,7 +313,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               padding: const EdgeInsets.all(4),
                               child: GestureDetector(
                                 onTap: _showCodePopup,
-                                child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain),
+                                child: Builder(builder: (_) {
+                                  final url = TranslationService().logoUrl('header');
+                                  if (url != null) {
+                                    final cb = DateTime.now().millisecondsSinceEpoch ~/ 60000;
+                                    return Image.network('$url?v=$cb', fit: BoxFit.contain,
+                                      errorBuilder: (_, __, ___) => SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain));
+                                  }
+                                  return SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain);
+                                }),
                               ),
                             )),
                           ]),

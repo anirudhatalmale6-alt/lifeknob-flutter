@@ -609,7 +609,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
             opacity: _logoFadeAnim,
             child: ScaleTransition(
               scale: _logoScaleAnim,
-              child: SizedBox(height: 180, child: SvgPicture.asset('assets/images/lifeknoblogo_wordmark.svg', fit: BoxFit.contain)),
+              child: SizedBox(height: 180, child: Builder(builder: (_) {
+                final url = _ts.logoUrl('registration');
+                if (url != null) {
+                  final cb = DateTime.now().millisecondsSinceEpoch ~/ 60000;
+                  return Image.network('$url?v=$cb', fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => SvgPicture.asset('assets/images/lifeknoblogo_wordmark.svg', fit: BoxFit.contain));
+                }
+                return SvgPicture.asset('assets/images/lifeknoblogo_wordmark.svg', fit: BoxFit.contain);
+              })),
             ),
           )),
           Positioned(left: 28, right: 28, top: selectorTop, child: AnimatedOpacity(

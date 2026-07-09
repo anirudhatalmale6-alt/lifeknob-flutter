@@ -60,6 +60,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   Future<void> _initApp() async {
     if (!mounted) return;
+    // Load translations + admin logos app-wide before navigating, so /home
+    // (returning users, who skip onboarding) also gets the admin logos.
+    try { await TranslationService().init(); } catch (_) {}
+    if (!mounted) return;
     final uri = Uri.base;
     if (uri.queryParameters.containsKey('debug')) {
       Navigator.pushReplacementNamed(context, '/home');
