@@ -426,6 +426,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     }
   }
 
+  // Fixed H1 title widget. The welcome step (page 1) is two-tone to match the
+  // design — "WELCOME TO" in gold, the brand word "LIFEKNOB" in white. All
+  // other titles are single gold.
+  Widget _buildTitle() {
+    const base = TextStyle(fontFamily: 'Dosis', fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: 2);
+    final t = _pageTitle().toUpperCase();
+    if (_page == 1) {
+      final idx = t.lastIndexOf(' ');
+      if (idx > 0) {
+        return Text.rich(TextSpan(children: [
+          TextSpan(text: t.substring(0, idx + 1), style: base.copyWith(color: LKTheme.gold)),
+          TextSpan(text: t.substring(idx + 1), style: base.copyWith(color: Colors.white)),
+        ]));
+      }
+    }
+    return Text(t, style: base.copyWith(color: LKTheme.gold));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -442,7 +460,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                     const Spacer(),
                     Expanded(child: Padding(
                       padding: const EdgeInsets.all(4),
-                      child: SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain),
+                      child: Builder(builder: (_) {
+                        final logoUrl = _ts.logoUrl('header');
+                        if (logoUrl != null) {
+                          final cb = DateTime.now().millisecondsSinceEpoch ~/ 60000;
+                          return Image.network('$logoUrl?v=$cb', fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => SvgPicture.asset('assets/images/lifeknob_logo_header.svg', fit: BoxFit.contain));
+                        }
+                        return SvgPicture.asset('assets/images/lifeknob_logo_header.svg', fit: BoxFit.contain);
+                      }),
                     )),
                   ]),
                 ),
@@ -473,8 +499,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text(_pageTitle().toUpperCase(),
-                        style: const TextStyle(fontFamily: 'Dosis', fontSize: 28, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
+                      child: _buildTitle(),
                     ),
                   ),
                 ),
@@ -584,7 +609,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
             opacity: _logoFadeAnim,
             child: ScaleTransition(
               scale: _logoScaleAnim,
-              child: SizedBox(height: 180, child: SvgPicture.asset('assets/images/lifeknoblogo.svg', colorFilter: const ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain)),
+              child: SizedBox(height: 180, child: SvgPicture.asset('assets/images/lifeknoblogo_wordmark.svg', fit: BoxFit.contain)),
             ),
           )),
           Positioned(left: 28, right: 28, top: selectorTop, child: AnimatedOpacity(
@@ -592,7 +617,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
             duration: const Duration(milliseconds: 600),
             curve: Curves.easeIn,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(_t('select_language').toUpperCase(), style: const TextStyle(fontFamily: 'Dosis', fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.textPrimary, letterSpacing: 1.5)),
+              Text(_t('select_language').toUpperCase(), style: const TextStyle(fontFamily: 'Dosis', fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 1.5)),
               const SizedBox(height: 23),
               Container(
                 decoration: BoxDecoration(
@@ -676,9 +701,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         child: Icon(icon, size: 24, color: LKTheme.gold)),
       const SizedBox(width: 13),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+        Text(title, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
         const SizedBox(height: 6),
-        Text(desc, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.textPrimary, height: 1.4, fontWeight: FontWeight.w400)),
+        Text(desc, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.gold, height: 1.4, fontWeight: FontWeight.w400)),
         if (isTcsLink) ...[
           const SizedBox(height: 6),
           GestureDetector(onTap: _showTerms, child: Text(_t('read_terms'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.gold, decoration: TextDecoration.underline, decorationColor: LKTheme.gold))),
