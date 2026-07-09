@@ -410,6 +410,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     super.dispose();
   }
 
+  // H1 page title per step — rendered once at a FIXED position in the scaffold
+  // (below) so it never shifts when moving next/back. Page 0 (language) is the
+  // intro screen and keeps its own SELECT LANGUAGE label.
+  String _pageTitle() {
+    switch (_page) {
+      case 1: return _t('welcome_title');
+      case 2: return _t('your_details');
+      case 3: return _t('emergency_contacts');
+      case 4: return _t('membership_title');
+      case 5: return _t('your_code');
+      case 6: return _t('connect_title');
+      case 7: return _t('all_done_title');
+      default: return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -445,6 +461,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                       ),
                     ),
                   )),
+                ),
+              ),
+              // Fixed-position H1 (Dosis) — same Y + height on every step, so it
+              // does not jump up/down when navigating next/back. FittedBox keeps
+              // long titles on a single line so the height stays constant.
+              SizedBox(
+                height: 44,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(_pageTitle().toUpperCase(),
+                        style: const TextStyle(fontFamily: 'Dosis', fontSize: 28, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -629,9 +661,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   Widget _buildWelcome() {
     return Padding(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(height: 8),
-        Center(child: Text(_t('welcome_title').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2))),
-        const SizedBox(height: 13),
+        const SizedBox(height: 4),
         Expanded(child: _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc'), false)),
         Expanded(child: _welcomeItem(Icons.people_rounded, _t('welcome_connect_title'), _t('welcome_connect_desc'), false)),
         Expanded(child: _welcomeItem(Icons.adjust_rounded, _t('welcome_turn_title'), _t('welcome_turn_desc'), false)),
@@ -661,9 +691,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   Widget _buildProfile() {
     return SingleChildScrollView(key: const ValueKey('profile'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
-        const SizedBox(height: 21),
-        Text(_t('your_details').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Text(_t('no_auth_required'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.gold.withValues(alpha: 0.7))),
         const SizedBox(height: 21),
         Container(
@@ -694,14 +722,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   Widget _buildCode() {
     return Padding(key: const ValueKey('code'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
-        const Spacer(flex: 5),
+        const SizedBox(height: 24),
         Container(
           width: 55, height: 55,
           decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.12)),
           child: const Icon(Icons.key_rounded, size: 28, color: LKTheme.gold),
         ),
-        const SizedBox(height: 13),
-        Text(_t('your_code').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
         const SizedBox(height: 34),
         Text(_userCode ?? '........', style: const TextStyle(fontFamily: 'OpenSans', fontSize: 44, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 8)),
         const SizedBox(height: 34),
@@ -727,9 +753,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   Widget _buildEmergency() {
     return SingleChildScrollView(key: const ValueKey('emergency'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
-        const SizedBox(height: 21),
-        Text(_t('emergency_contacts').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
-        const SizedBox(height: 13),
+        const SizedBox(height: 10),
         Container(
           width: 55, height: 55,
           decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.12)),
@@ -762,15 +786,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   Widget _buildMembership() {
     return SingleChildScrollView(key: const ValueKey('membership'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
-        const SizedBox(height: 21),
+        const SizedBox(height: 10),
         Container(
           width: 55, height: 55,
           decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.12)),
           child: const Icon(Icons.star_rounded, size: 28, color: LKTheme.gold),
         ),
         const SizedBox(height: 13),
-        Text(_t('membership_title').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
-        const SizedBox(height: 8),
         Text(_t('plan_desc'), textAlign: TextAlign.center,
           style: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
         const SizedBox(height: 21),
@@ -849,14 +871,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     final remaining = _maxSlots - _connectedPeople.length;
     return SingleChildScrollView(key: const ValueKey('connect'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
-        const SizedBox(height: 21),
+        const SizedBox(height: 10),
         Container(
           width: 55, height: 55,
           decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.12)),
           child: const Icon(Icons.people_rounded, size: 28, color: LKTheme.gold),
         ),
-        const SizedBox(height: 13),
-        Text(_t('connect_title').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
         const SizedBox(height: 21),
 
         ..._connectedPeople.map((p) {
@@ -949,9 +969,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.12), border: Border.all(color: LKTheme.gold, width: 2)),
           child: const Icon(Icons.adjust_rounded, size: 52, color: LKTheme.gold),
         ),
-        const SizedBox(height: 21),
-        Text(_t('all_done_title').toUpperCase(), textAlign: TextAlign.center,
-          style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
         const SizedBox(height: 21),
         Text(_t('all_done_msg'), textAlign: TextAlign.center,
           style: const TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary, height: 1.5)),
