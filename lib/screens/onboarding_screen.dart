@@ -75,6 +75,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     'go_to_knob': 'GO TO TURN THE LIFE KNOB',
     'read_terms': 'Read Terms and Conditions',
     'connected_state': 'Connected', 'waiting_state': 'Waiting for them to add your code',
+    'welcome_connect_title': 'Connect to people', 'welcome_connect_desc': 'Connect with the people you care about using your personal code. They can see when you last checked in.',
+    'welcome_turn_title': 'Turn The Knob', 'welcome_turn_desc': 'Press the knob each day to let your family know you are okay. If you stop, they know something might be wrong.',
+    'last_verified': 'Last verified:', 'just_now': 'Just now', 'select_your_plan_label': 'Select Your Plan',
+    'name_placeholder': 'Steve, Margaret, ...', 'email_placeholder': 'your@email.com', 'phone_placeholder': '01 2345 5678 ...',
+    'sos_name_placeholder': 'My son, My husband, ...', 'sos_phone_placeholder': '01 2345 5678 ...', 'ambulance_placeholder': '112, 000, ...',
+    'connect_name_placeholder': 'Patrik, My brother, ...', 'connect_code_placeholder': 'Their code',
     'terms_title': 'Terms and Conditions',
     'terms_body': 'Welcome to LifeKnob.\n\nLifeKnob is a simple daily check-in service. By pressing the knob each day you let the people you connect with know that you are okay. LifeKnob is not a medical, emergency, or monitoring service and must not be relied upon as one. In a real emergency always call your local emergency number.\n\n1. The App. LifeKnob lets you register with a name, email and phone number, choose a membership plan, receive a personal code, and connect with other people using their codes. No password or login is required to use the daily check-in.\n\n2. Connections. You are connected to another person only when both of you have entered each other\'s codes. Once connected, that person can see the name you registered and when you last checked in. You can remove a connection at any time.\n\n3. Membership. The Free plan lets you watch over one person and shows advertising. Paid plans let you watch over more people and remove advertising. Prices are shown before you confirm. You can cancel a paid plan at any time; downgrading may reduce the number of people you can watch over.\n\n4. Your Data. Your details are only shared with people you choose to connect with. We do not sell your data. Your personal code is tied to your device and cannot be changed.\n\n5. Availability. We work hard to keep LifeKnob running, but we cannot guarantee uninterrupted service and are not liable for missed check-ins caused by device, network, or service issues.\n\n6. Changes. We may update these terms from time to time. Continued use of the app means you accept the current terms.\n\nBy using LifeKnob you agree to these terms.',
   };
@@ -554,7 +560,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
             duration: const Duration(milliseconds: 600),
             curve: Curves.easeIn,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(_t('select_language'), style: const TextStyle(fontFamily: 'Dosis', fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.textPrimary, letterSpacing: 1.5)),
+              Text(_t('select_language').toUpperCase(), style: const TextStyle(fontFamily: 'Dosis', fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.textPrimary, letterSpacing: 1.5)),
               const SizedBox(height: 23),
               Container(
                 decoration: BoxDecoration(
@@ -627,8 +633,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         Center(child: Text(_t('welcome_title').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2))),
         const SizedBox(height: 13),
         Expanded(child: _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc'), false)),
-        Expanded(child: _welcomeItem(Icons.warning_rounded, _t('how_works_title'), _t('how_works_desc'), false)),
-        Expanded(child: _welcomeItem(Icons.people_rounded, _t('connections_title'), _t('connections_desc'), false)),
+        Expanded(child: _welcomeItem(Icons.people_rounded, _t('welcome_connect_title'), _t('welcome_connect_desc'), false)),
+        Expanded(child: _welcomeItem(Icons.adjust_rounded, _t('welcome_turn_title'), _t('welcome_turn_desc'), false)),
         Expanded(child: _welcomeItem(Icons.star_rounded, _t('membership_title'), _t('membership_desc'), false)),
         Expanded(child: _welcomeItem(Icons.shield_rounded, _t('privacy_title'), _t('privacy_desc'), true)),
       ]));
@@ -763,11 +769,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           child: const Icon(Icons.star_rounded, size: 28, color: LKTheme.gold),
         ),
         const SizedBox(height: 13),
-        Text(_t('select_plan').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
+        Text(_t('membership_title').toUpperCase(), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2)),
         const SizedBox(height: 8),
         Text(_t('plan_desc'), textAlign: TextAlign.center,
           style: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
         const SizedBox(height: 21),
+        Align(alignment: Alignment.centerLeft, child: Text(_t('select_your_plan_label'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w600, letterSpacing: 1))),
+        const SizedBox(height: 13),
         _planCard('free', 'Free', [
           'Watch over 1 person',
           'No alert messages',
@@ -854,24 +862,48 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         ..._connectedPeople.map((p) {
           final connected = p['status'] == 'accepted';
           final stateColor = connected ? LKTheme.green : LKTheme.red;
+          const onBanner = Color(0xFF06263A);
           return Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(13),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: stateColor.withValues(alpha: 0.55), width: 1.5)),
-            child: Row(children: [
-              Container(width: 12, height: 12, margin: const EdgeInsets.only(right: 12),
-                decoration: BoxDecoration(shape: BoxShape.circle, color: stateColor,
-                  boxShadow: [BoxShadow(color: stateColor.withValues(alpha: 0.5), blurRadius: 6)])),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(p['name']!, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
-                const SizedBox(height: 2),
-                Text(connected ? _t('connected_state') : _t('waiting_state'),
-                  style: TextStyle(fontFamily: 'OpenSans', fontSize: 13, fontWeight: FontWeight.w600, color: stateColor)),
-              ])),
-              GestureDetector(
-                onTap: () => setState(() => _connectedPeople.remove(p)),
-                child: const Icon(Icons.cancel_rounded, size: 24, color: LKTheme.textMuted),
+            margin: const EdgeInsets.only(bottom: 10),
+            child: Column(children: [
+              // Solid colour code banner: green = connected, red = waiting
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                decoration: BoxDecoration(
+                  color: stateColor,
+                  borderRadius: connected
+                      ? const BorderRadius.vertical(top: Radius.circular(10))
+                      : BorderRadius.circular(10),
+                ),
+                child: Row(children: [
+                  Expanded(child: Text((p['code'] ?? '').toUpperCase(),
+                    style: const TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w700, color: onBanner, letterSpacing: 5))),
+                  GestureDetector(
+                    onTap: () => setState(() => _connectedPeople.remove(p)),
+                    child: Icon(Icons.close_rounded, size: 20, color: onBanner.withValues(alpha: 0.75)),
+                  ),
+                ]),
               ),
+              // Connected cards show the person's name + last-verified
+              if (connected)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                  decoration: BoxDecoration(
+                    color: LKTheme.bgCardLight,
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
+                    border: Border.all(color: stateColor.withValues(alpha: 0.4)),
+                  ),
+                  child: Row(children: [
+                    Expanded(child: Text(p['name'] ?? '',
+                      style: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary))),
+                    Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                      Text(_t('last_verified'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 11, fontWeight: FontWeight.w700, color: LKTheme.green)),
+                      Text(p['last'] ?? _t('just_now'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 12, color: LKTheme.textSecondary)),
+                    ]),
+                  ]),
+                ),
             ]),
           );
         }),
@@ -915,7 +947,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         Container(
           width: 92, height: 92,
           decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.12), border: Border.all(color: LKTheme.gold, width: 2)),
-          child: const Icon(Icons.check_rounded, size: 52, color: LKTheme.gold),
+          child: const Icon(Icons.adjust_rounded, size: 52, color: LKTheme.gold),
         ),
         const SizedBox(height: 21),
         Text(_t('all_done_title').toUpperCase(), textAlign: TextAlign.center,
