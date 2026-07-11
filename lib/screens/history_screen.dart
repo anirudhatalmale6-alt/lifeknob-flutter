@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../config/theme.dart';
 import '../models/connection_model.dart';
 import '../services/api_service.dart';
@@ -26,9 +27,10 @@ class HistoryScreenState extends State<HistoryScreen> {
   bool _isFreeUser = true;
   bool _showBumperAd = false;
 
-  Color get _accent => _isFreeUser ? LKTheme.silver : LKTheme.gold;
-  LinearGradient get _accentGradient => _isFreeUser ? LKTheme.silverGradient : LKTheme.goldGradient;
-  Color get _accentDark => _isFreeUser ? const Color(0xFF2D3340) : const Color(0xFF5A3D10);
+  // Gold accent on all plans per Tom's appfaces sheet (free/paid differ by the ad, not colour).
+  Color get _accent => LKTheme.gold;
+  LinearGradient get _accentGradient => LKTheme.goldGradient;
+  Color get _accentDark => const Color(0xFF5A3D10);
   DateTime? _pageOpenTime;
   String? _bannerAdImage;
   String? _bannerAdUrl;
@@ -290,7 +292,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                       children: [
                         Icon(Icons.people_rounded, color: _accent, size: 28),
                         const SizedBox(width: 12),
-                        const Expanded(child: Text('PEOPLE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 2))),
+                        Expanded(child: Text('PEOPLE', style: GoogleFonts.dosis(fontSize: 24, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2))),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
@@ -27,9 +28,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isFreeUser = true;
   bool _showBumperAd = false;
 
-  Color get _accent => _isFreeUser ? LKTheme.silver : LKTheme.gold;
-  LinearGradient get _accentGradient => _isFreeUser ? LKTheme.silverGradient : LKTheme.goldGradient;
-  Color get _accentDark => _isFreeUser ? const Color(0xFF2D3340) : const Color(0xFF5A3D10);
+  // Gold accent on all plans per Tom's appfaces sheet (free/paid differ by the ad, not colour).
+  Color get _accent => LKTheme.gold;
+  LinearGradient get _accentGradient => LKTheme.goldGradient;
+  Color get _accentDark => const Color(0xFF5A3D10);
   String? _bannerAdImage;
   String? _bannerAdUrl;
   String? _bumperAdImage;
@@ -290,7 +292,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Row(children: [
                 Icon(Icons.tune_rounded, color: _accent, size: 28),
                 const SizedBox(width: 12),
-                const Expanded(child: Text('SETUP', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: LKTheme.textPrimary, letterSpacing: 2))),
+                Expanded(child: Text('SETUP', style: GoogleFonts.dosis(fontSize: 24, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2))),
               ]),
             ),
 

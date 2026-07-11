@@ -60,8 +60,6 @@ class AdBannerPair extends StatelessWidget {
             ),
           ),
         _buildBanner(hasImage: hasImage),
-        const SizedBox(height: 5),
-        _buildBanner(hasImage: hasImage),
       ]),
     );
   }

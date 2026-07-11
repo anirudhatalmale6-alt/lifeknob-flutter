@@ -62,8 +62,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   static const Color faceGray = Color(0xFFDCDCDC);
   static const Color faceDarkGray = Color(0xFFC4C4C4);
 
-  Color get _accent => _isFreeUser ? silver : gold;
-  Color get _accentSub => _isFreeUser ? const Color(0xFFCCD2DA) : const Color(0xFFE8BE80);
+  // Per Tom's appfaces sheet: gold accent on all plans (free screen shows gold too);
+  // the free/paid difference is the ad area, not the colour.
+  Color get _accent => gold;
+  Color get _accentSub => const Color(0xFFE8BE80);
 
   @override
   void initState() {
@@ -338,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 6, right: 6),
                           child: Center(
-                            child: FittedBox(fit: BoxFit.scaleDown, child: Text('TURN THE KNOB', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: _accent))),
+                            child: FittedBox(fit: BoxFit.scaleDown, child: Text('TURN THE KNOB', style: GoogleFonts.dosis(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w700, color: _accent, letterSpacing: 1))),
                           ),
                         ),
                       ),
@@ -423,15 +425,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       : (_isDragging || progress > 0.01)
                                       ? Center(child: Text('${(progress * 100).round()}%', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.25, fontWeight: FontWeight.w700, color: progress >= 1.0 ? green : Color.lerp(red, _accent, progress)!)))
                                       : ClipRect(child: ShaderMask(
-                                      shaderCallback: (bounds) {
-                                        if (_isRecentSuccess) {
-                                          return LinearGradient(colors: [green, green]).createShader(bounds);
-                                        }
-                                        if (_isOverdue) {
-                                          return LinearGradient(colors: [red, red]).createShader(bounds);
-                                        }
-                                        return const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds);
-                                      },
+                                      // Resting knob face is a plain grey monochrome logo per the
+                                      // appfaces sheet (M1/M2 stay grey even when overdue). Green/red
+                                      // only appear transiently on a successful/failed turn (face above).
+                                      shaderCallback: (bounds) =>
+                                        const LinearGradient(colors: [Color(0xFFA0A0A0), Color(0xFFA0A0A0)]).createShader(bounds),
                                       blendMode: BlendMode.srcIn,
                                       child: Transform.translate(offset: const Offset(10, 0), child: SvgPicture.asset('assets/images/lifeknob_logo.svg', fit: BoxFit.contain)),
                                     )),
@@ -443,13 +441,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         }),
                       ),
 
-                      // ═══ AD BANNERS (free users) ═══
-                      if (_isFreeUser)
-                        AdBannerPair(
-                          onRemoveAds: () => widget.onTabChange?.call(2),
-                          bannerImageUrl: _bannerAdImage,
-                          bannerClickUrl: _bannerAdUrl,
-                        ),
+                      // Push the call/ad/nav block to the bottom (knob sits in the upper area,
+                      // per the sheet) so there's no empty gap under the nav on free plans.
+                      if (_isFreeUser) const Spacer(),
 
                       // ═══ OR CALL FOR HELP | EKG ═══
                       SizedBox(
@@ -576,6 +570,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                           ),
 
+                      // ═══ AD (free users) — single 3:1 banner below the call buttons per sheet ═══
+                      if (_isFreeUser)
+                        AdBannerPair(
+                          onRemoveAds: () => widget.onTabChange?.call(2),
+                          bannerImageUrl: _bannerAdImage,
+                          bannerClickUrl: _bannerAdUrl,
+                        ),
+
                       Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(
                         gradient: LinearGradient(colors: [_accent.withValues(alpha: 0.05), _accent.withValues(alpha: 0.5), _accent.withValues(alpha: 0.5), _accent.withValues(alpha: 0.05)]),
                       )),
@@ -585,8 +587,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         height: _isFreeUser ? h * 0.08 : h * 0.10,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 3, right: 3),
+                          // Bottom nav is PEOPLE | SETUP only (2 items) per the appfaces sheet —
+                          // the home/knob screen itself is the "LIFE KNOB" tab, no self-link.
                           child: Row(children: [
-                            _navZoneLogo('LIFE KNOB', 0, h),
                             _navZone(Icons.people, 'PEOPLE', 1, h),
                             _navZone(Icons.tune, 'SETUP', 2, h),
                           ]),
@@ -605,20 +608,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         BumperAdOverlay(onDismiss: () => setState(() => _showBumperAd = false), imageUrl: _bumperAdImage, clickUrl: _bumperAdUrl),
       ]),
     );
-  }
-
-  Widget _navZoneLogo(String label, int index, double h) {
-    return Expanded(child: GestureDetector(
-      onTap: () => widget.onTabChange?.call(index),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        SizedBox(
-          width: h * 0.04, height: h * 0.04,
-          child: SvgPicture.asset('assets/images/lifeknob_logo.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.7)), textAlign: TextAlign.center),
-      ]),
-    ));
   }
 
   Widget _navZone(IconData icon, String label, int index, double h) {
