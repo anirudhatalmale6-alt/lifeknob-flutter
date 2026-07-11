@@ -119,7 +119,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(32),
-          decoration: LKTheme.glassCard(borderColor: color.withValues(alpha: 0.3)),
+          decoration: LKTheme.dialogFrame(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -161,7 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(32),
-          decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.3)),
+          decoration: LKTheme.dialogFrame(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -202,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(24),
-          decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.2)),
+          decoration: LKTheme.dialogFrame(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -236,7 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(32),
-          decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.2)),
+          decoration: LKTheme.dialogFrame(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

@@ -139,7 +139,7 @@ class HistoryScreenState extends State<HistoryScreen> {
       backgroundColor: Colors.transparent,
       child: Container(
         padding: const EdgeInsets.all(28),
-        decoration: LKTheme.glassCard(borderColor: LKTheme.red.withValues(alpha: 0.2)),
+        decoration: LKTheme.dialogFrame(),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Container(
             padding: const EdgeInsets.all(14),
@@ -182,7 +182,7 @@ class HistoryScreenState extends State<HistoryScreen> {
       backgroundColor: Colors.transparent,
       child: Container(
         padding: const EdgeInsets.all(28),
-        decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.2)),
+        decoration: LKTheme.dialogFrame(),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           const Text('Edit name', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
           const SizedBox(height: 16),
@@ -224,7 +224,7 @@ class HistoryScreenState extends State<HistoryScreen> {
       backgroundColor: Colors.transparent,
       child: Container(
         padding: const EdgeInsets.all(28),
-        decoration: LKTheme.glassCard(borderColor: accent.withValues(alpha: 0.2)),
+        decoration: LKTheme.dialogFrame(),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Container(
             padding: const EdgeInsets.all(12),

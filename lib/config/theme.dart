@@ -87,6 +87,14 @@ class LKTheme {
     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8))],
   );
 
+  // Popup/dialog frame — solid gold border on every dialog (per client design).
+  static BoxDecoration dialogFrame({double radius = 24}) => BoxDecoration(
+    color: const Color(0xFF0C1120),
+    borderRadius: BorderRadius.circular(radius),
+    border: Border.all(color: gold, width: 2),
+    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 24, offset: const Offset(0, 10))],
+  );
+
   static BoxDecoration get goldBorderCard => BoxDecoration(
     gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF111827), Color(0xFF0C1120)]),
     borderRadius: BorderRadius.circular(14),

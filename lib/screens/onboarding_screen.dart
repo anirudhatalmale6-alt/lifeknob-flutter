@@ -332,7 +332,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   void _showMessage(String msg) {
     showDialog(context: context, builder: (ctx) => Dialog(
       backgroundColor: LKTheme.bgCard,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: const BorderSide(color: LKTheme.gold, width: 2)),
       child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
         const Icon(Icons.info_rounded, size: 56, color: LKTheme.gold),
         const SizedBox(height: 16),
