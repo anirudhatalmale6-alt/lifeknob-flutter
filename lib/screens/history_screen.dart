@@ -390,7 +390,8 @@ class HistoryScreenState extends State<HistoryScreen> {
       statusText = 'Disconnected';
       statusIcon = Icons.link_off_rounded;
     } else if (isPending) {
-      statusColor = _accent;
+      // Sheet + connect-state spec: a code entered but not yet reciprocated shows RED.
+      statusColor = LKTheme.red;
       statusText = 'Waiting...';
       statusIcon = Icons.hourglass_top_rounded;
     } else if (isOverdue) {
