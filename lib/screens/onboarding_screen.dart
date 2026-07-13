@@ -377,7 +377,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                 child: SizedBox(width: double.infinity, height: 52, child: OutlinedButton(
                   onPressed: () => Navigator.pop(ctx),
                   style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5), width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  child: Text(_t('back'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                  child: Text(_t('back'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: 1)),
                 )),
               ),
             ]),
@@ -518,7 +518,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                 if (_page > 0) Expanded(flex: 1, child: SizedBox(height: 52, child: OutlinedButton(
                   onPressed: _back,
                   style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5), width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  child: Text(_t('back'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                  child: Text(_t('back'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: 1)),
                 ))),
                 if (_page > 0) const SizedBox(width: 12),
                 Expanded(flex: _page > 0 ? 1 : 1, child: SizedBox(height: 52, child: Container(
@@ -530,7 +530,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
                         : Text(
                             _page == _totalPages - 1 ? _t('finish') : _t('next'),
-                            style: const TextStyle(fontFamily: 'OpenSans', fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF5A3D10), letterSpacing: 1),
+                            style: const TextStyle(fontFamily: 'OpenSans', fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFF5A3D10), letterSpacing: 1),
                           ),
                   ),
                 ))),
@@ -556,7 +556,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           const SizedBox(height: 12),
           Container(width: 40, height: 4, decoration: BoxDecoration(color: LKTheme.gold.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 16),
-          Text(_t('select_language'), style: const TextStyle(fontFamily: 'Dosis', fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 1.5)),
+          Text(_t('select_language'), style: const TextStyle(fontFamily: 'Dosis', fontSize: 26, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 1.5)),
           const SizedBox(height: 8),
           ..._languageNames.map((lang) => Material(
             color: Colors.transparent,
@@ -625,7 +625,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
             duration: const Duration(milliseconds: 600),
             curve: Curves.easeIn,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(_t('select_language').toUpperCase(), style: const TextStyle(fontFamily: 'Dosis', fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 1.5)),
+              Text(_t('select_language').toUpperCase(), style: const TextStyle(fontFamily: 'Dosis', fontSize: 30, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 1.5)),
               const SizedBox(height: 23),
               Container(
                 decoration: BoxDecoration(
