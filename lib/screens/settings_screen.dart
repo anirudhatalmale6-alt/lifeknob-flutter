@@ -206,7 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Select Language', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
+              Text('Select Language', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
               const SizedBox(height: 16),
               ...languages.map((lang) => ListTile(
                 leading: Icon(lang == _language ? Icons.radio_button_checked : Icons.radio_button_off, color: lang == _language ? accent : LKTheme.textMuted),
@@ -246,7 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Icon(Icons.refresh_rounded, size: 48, color: accent),
               ),
               const SizedBox(height: 20),
-              const Text('Start Again?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
+              Text('Start Again?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
               const SizedBox(height: 8),
               const Text('Go through the setup steps\nagain to review or update\nyour details.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
               const SizedBox(height: 24),
@@ -321,7 +321,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           const SizedBox(width: 14),
                           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(_userName ?? '-', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                            Text(_userName ?? '-', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
                             const SizedBox(height: 2),
                             Text(_userEmail ?? '-', style: const TextStyle(fontSize: 13, color: LKTheme.textSecondary)),
                           ])),
@@ -367,10 +367,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.red.withValues(alpha: 0.1)),
-                            child: const Icon(Icons.local_hospital_rounded, color: LKTheme.red, size: 22),
+                            child: Icon(Icons.local_hospital_rounded, color: LKTheme.red, size: 22),
                           ),
                           const SizedBox(width: 12),
-                          const Text('Ambulance Number', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                          Text('Ambulance Number', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
                         ]),
                         const SizedBox(height: 14),
                         _inputField(controller: _ambulanceController, hint: 'e.g. 000, 911, 112', icon: Icons.phone_rounded, iconColor: LKTheme.red, maxLength: 20, keyboard: TextInputType.phone),
@@ -391,7 +391,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: const Icon(Icons.phone_in_talk_rounded, color: LKTheme.blue, size: 22),
                           ),
                           const SizedBox(width: 12),
-                          const Text('Emergency Contact', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                          Text('Emergency Contact', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
                         ]),
                         const SizedBox(height: 14),
                         _inputField(controller: _sosNameController, hint: 'Contact name', icon: Icons.person_rounded, iconColor: LKTheme.blue, maxLength: 50),
@@ -414,7 +414,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: Row(children: [
                               Icon(Icons.language_rounded, color: _accent.withValues(alpha: 0.7), size: 22),
                               const SizedBox(width: 14),
-                              const Expanded(child: Text('Language', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary))),
+                              Expanded(child: Text('Language', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary))),
                               Text(_language, style: TextStyle(fontSize: 15, color: _accent.withValues(alpha: 0.7), fontWeight: FontWeight.w600)),
                               const SizedBox(width: 4),
                               const Icon(Icons.chevron_right_rounded, color: LKTheme.textMuted, size: 22),
@@ -485,7 +485,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       controller: controller,
       maxLength: maxLength,
       keyboardType: keyboard,
-      style: const TextStyle(fontSize: 17, color: LKTheme.textPrimary),
+      style: TextStyle(fontSize: 17, color: LKTheme.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
         counterText: '',
@@ -504,7 +504,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Row(children: [
         Icon(icon, size: 18, color: LKTheme.textMuted),
         const SizedBox(width: 14),
-        Expanded(child: Text(label, style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary))),
+        Expanded(child: Text(label, style: TextStyle(fontSize: 16, color: LKTheme.textPrimary))),
         const Icon(Icons.chevron_right_rounded, color: LKTheme.textMuted, size: 22),
       ]),
     );
@@ -530,10 +530,10 @@ class _LegalPage extends StatelessWidget {
               child: Row(children: [
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: LKTheme.bgCard, border: Border.all(color: LKTheme.border)), child: const Icon(Icons.arrow_back_rounded, size: 22, color: LKTheme.textPrimary)),
+                  child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: LKTheme.bgCard, border: Border.all(color: LKTheme.border)), child: Icon(Icons.arrow_back_rounded, size: 22, color: LKTheme.textPrimary)),
                 ),
                 const SizedBox(width: 12),
-                Expanded(child: Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
+                Expanded(child: Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
               ]),
             ),
             Expanded(child: SingleChildScrollView(padding: const EdgeInsets.all(20), child: Text(content, style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.6)))),

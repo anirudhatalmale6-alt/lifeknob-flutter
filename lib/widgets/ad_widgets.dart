@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../config/theme.dart';
 
 class AdBannerPair extends StatelessWidget {
   final VoidCallback? onRemoveAds;
   final String? bannerImageUrl;
   final String? bannerClickUrl;
 
-  static const Color navy = Color(0xFF003049);
+  static Color get navy => LKTheme.navy;
   static const Color gold = Color(0xFFDDA15E);
   static const Color red = Color(0xFFC1121F);
 
@@ -96,7 +97,7 @@ class _BumperAdOverlayState extends State<BumperAdOverlay> with SingleTickerProv
   late AnimationController _countdownCtrl;
   int _remaining = 0;
 
-  static const Color navy = Color(0xFF003049);
+  static Color get navy => LKTheme.navy;
   static const Color gold = Color(0xFFDDA15E);
   static const Color red = Color(0xFFC1121F);
 

@@ -57,12 +57,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF003049),
+      backgroundColor: LKTheme.navy,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF003049),
+        backgroundColor: LKTheme.navy,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: LKTheme.textPrimary, size: 28),
+          icon: Icon(Icons.arrow_back, color: LKTheme.textPrimary, size: 28),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -75,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 10),
-                const Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: LKTheme.gold), textAlign: TextAlign.center),
+                Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: LKTheme.gold), textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 const Text('Join LifeKnob to stay connected', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary), textAlign: TextAlign.center),
                 const SizedBox(height: 32),
@@ -89,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: LKTheme.red.withValues(alpha: 0.3)),
                     ),
-                    child: Text(_errorMessage!, style: const TextStyle(color: LKTheme.red, fontSize: 14), textAlign: TextAlign.center),
+                    child: Text(_errorMessage!, style: TextStyle(color: LKTheme.red, fontSize: 14), textAlign: TextAlign.center),
                   ),
 
                 _buildField(controller: _nameController, label: 'Name', icon: Icons.person_outlined, maxLength: 50,
@@ -108,10 +108,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   maxLength: 50,
-                  style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+                  style: TextStyle(fontSize: 18, color: LKTheme.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'Password', counterText: '',
-                    prefixIcon: const Icon(Icons.lock_outlined, size: 24, color: LKTheme.gold),
+                    prefixIcon: Icon(Icons.lock_outlined, size: 24, color: LKTheme.gold),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 24, color: LKTheme.textMuted),
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -140,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: RichText(
-                      text: const TextSpan(
+                      text: TextSpan(
                         style: TextStyle(fontSize: 16, color: LKTheme.textSecondary),
                         children: [
                           TextSpan(text: 'Already have an account? '),
@@ -173,7 +173,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       keyboardType: keyboardType,
       obscureText: obscureText,
       maxLength: maxLength,
-      style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+      style: TextStyle(fontSize: 18, color: LKTheme.textPrimary),
       decoration: InputDecoration(labelText: label, counterText: '', prefixIcon: Icon(icon, size: 24, color: LKTheme.gold)),
       validator: validator,
     );

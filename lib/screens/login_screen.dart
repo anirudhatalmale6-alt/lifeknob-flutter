@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF003049),
+      backgroundColor: LKTheme.navy,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -74,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Center(child: Text('LifeKnob', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: LKTheme.gold))),
+                Center(child: Text('LifeKnob', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: LKTheme.gold))),
                 const SizedBox(height: 8),
                 const Center(child: Text('Welcome back', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary))),
                 const SizedBox(height: 48),
@@ -88,15 +88,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: LKTheme.red.withValues(alpha: 0.3)),
                     ),
-                    child: Text(_errorMessage!, style: const TextStyle(color: LKTheme.red, fontSize: 14), textAlign: TextAlign.center),
+                    child: Text(_errorMessage!, style: TextStyle(color: LKTheme.red, fontSize: 14), textAlign: TextAlign.center),
                   ),
 
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   maxLength: 100,
-                  style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
-                  decoration: const InputDecoration(labelText: 'Email', counterText: '', prefixIcon: Icon(Icons.email_outlined, size: 24, color: LKTheme.gold)),
+                  style: TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+                  decoration: InputDecoration(labelText: 'Email', counterText: '', prefixIcon: Icon(Icons.email_outlined, size: 24, color: LKTheme.gold)),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Please enter your email';
                     if (!v.contains('@')) return 'Please enter a valid email';
@@ -109,11 +109,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   maxLength: 50,
-                  style: const TextStyle(fontSize: 18, color: LKTheme.textPrimary),
+                  style: TextStyle(fontSize: 18, color: LKTheme.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'Password',
                     counterText: '',
-                    prefixIcon: const Icon(Icons.lock_outlined, size: 24, color: LKTheme.gold),
+                    prefixIcon: Icon(Icons.lock_outlined, size: 24, color: LKTheme.gold),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 24, color: LKTheme.textMuted),
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -141,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextButton(
                     onPressed: () => Navigator.pushNamed(context, '/register'),
                     child: RichText(
-                      text: const TextSpan(
+                      text: TextSpan(
                         style: TextStyle(fontSize: 16, color: LKTheme.textSecondary),
                         children: [
                           TextSpan(text: "Don't have an account? "),

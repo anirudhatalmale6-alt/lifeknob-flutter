@@ -15,9 +15,9 @@ class SubscriptionScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Row(children: [
-                const Icon(Icons.star_rounded, color: LKTheme.gold, size: 28),
+                Icon(Icons.star_rounded, color: LKTheme.gold, size: 28),
                 const SizedBox(width: 10),
-                const Expanded(child: Text('Membership', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
+                Expanded(child: Text('Membership', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
                 if (onGoHome != null)
                   GestureDetector(
                     onTap: onGoHome,
@@ -48,7 +48,7 @@ class SubscriptionScreen extends StatelessWidget {
                         border: Border.all(color: LKTheme.gold, width: 2),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Column(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('YOUR CURRENT PLAN', style: TextStyle(fontSize: 12, color: LKTheme.gold, fontWeight: FontWeight.w700, letterSpacing: 1)),
@@ -86,9 +86,9 @@ class SubscriptionScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Premium', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                              Text('Premium', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
                               const SizedBox(height: 6),
-                              const Row(
+                              Row(
                                 crossAxisAlignment: CrossAxisAlignment.baseline,
                                 textBaseline: TextBaseline.alphabetic,
                                 children: [
@@ -134,9 +134,9 @@ class SubscriptionScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Premium Plus', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+                          Text('Premium Plus', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
                           const SizedBox(height: 6),
-                          const Row(
+                          Row(
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             textBaseline: TextBaseline.alphabetic,
                             children: [
@@ -157,7 +157,7 @@ class SubscriptionScreen extends StatelessWidget {
                             width: double.infinity, height: 54,
                             child: ElevatedButton(
                               onPressed: () {},
-                              style: ElevatedButton.styleFrom(backgroundColor: LKTheme.bgCardLight, foregroundColor: LKTheme.gold, side: const BorderSide(color: LKTheme.gold), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                              style: ElevatedButton.styleFrom(backgroundColor: LKTheme.bgCardLight, foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                               child: const Text('Subscribe Now', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                             ),
                           ),
@@ -197,9 +197,9 @@ class SubscriptionScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(children: [
-        const Icon(Icons.check_rounded, size: 20, color: LKTheme.gold),
+        Icon(Icons.check_rounded, size: 20, color: LKTheme.gold),
         const SizedBox(width: 10),
-        Text(text, style: const TextStyle(fontSize: 16, color: LKTheme.textPrimary)),
+        Text(text, style: TextStyle(fontSize: 16, color: LKTheme.textPrimary)),
       ]),
     );
   }

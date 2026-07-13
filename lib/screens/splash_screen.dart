@@ -102,9 +102,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF003049),
-      body: SizedBox.shrink(),
+    return Scaffold(
+      backgroundColor: LKTheme.navy,
+      body: const SizedBox.shrink(),
     );
   }
 }

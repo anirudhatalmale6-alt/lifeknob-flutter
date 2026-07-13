@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   double _springStart = 0;
   bool _hintPlayed = false;
 
-  static const Color navy = Color(0xFF003049);
+  static Color get navy => LKTheme.navy;
   static const Color navyMid = Color(0xFF08394F);
   static const Color gold = Color(0xFFDDA15E);
   static const Color silver = Color(0xFFADB5C0);
