@@ -149,7 +149,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           const SizedBox(height: 16),
           Text('Remove ${conn.name}?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary), textAlign: TextAlign.center),
           const SizedBox(height: 8),
-          const Text('They will see you as disconnected', style: TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
+          Text('They will see you as disconnected', style: TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
           const SizedBox(height: 24),
           Row(children: [
             Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx, false),
@@ -363,7 +363,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                           child: Icon(Icons.people_outline_rounded, size: 56, color: _accent.withValues(alpha: 0.4)),
                         ),
                         const SizedBox(height: 20),
-                        const Text('No connections yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: LKTheme.textSecondary)),
+                        Text('No connections yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: LKTheme.textSecondary)),
                         const SizedBox(height: 8),
                         const Text('Add someone\'s code below\nto connect with them', style: TextStyle(fontSize: 14, color: LKTheme.textMuted, height: 1.4), textAlign: TextAlign.center),
                       ]),

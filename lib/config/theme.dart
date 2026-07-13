@@ -12,13 +12,15 @@ class LKTheme {
   static const Color _textDefault = Color(0xFFE8DCC8);
   static const Color _redDefault  = Color(0xFFE74C3C);
   static const Color _okDefault   = Color(0xFF27AE60);
+  static const Color _textSecDefault = Color(0xFF8A7E6A); // 2nd text colour (secondary)
 
   static Color bg = _bgDefault;
   static Color navy = _onbgDefault; // the visible blue screen background (home/onboarding/login/…)
   static Color gold = _goldDefault;
   static Color red = _redDefault;
   static Color green = _okDefault;
-  static Color textPrimary = _textDefault;
+  static Color textPrimary = _textDefault;   // "Text 1" — main letters (color_text)
+  static Color textSecondary = _textSecDefault; // "Text 2" — secondary letters (color_text2)
   // --------------------------------------------------------------------------
 
   static const Color bgCard = Color(0xFF0C1120);
@@ -34,7 +36,6 @@ class LKTheme {
   static const Color tealDark = Color(0xFF2B9E96);
   static const Color redDark = Color(0xFFC0392B);
   static const Color blue = Color(0xFF3498DB);
-  static const Color textSecondary = Color(0xFF8A7E6A);
   static const Color textMuted = Color(0xFF4A4A5A);
   static const Color border = Color(0xFF1E293B);
   static const Color borderGold = Color(0xFF2A2218);
@@ -57,10 +58,11 @@ class LKTheme {
     // navy = brand blue); when set, both follow the chosen colour.
     bg   = _parseHex(s['color_bg'], _bgDefault);
     navy = s['color_bg'] != null ? _parseHex(s['color_bg'], _onbgDefault) : _onbgDefault;
-    gold        = _parseHex(s['color_accent'], _goldDefault);
-    textPrimary = _parseHex(s['color_text'],   _textDefault);
-    red         = _parseHex(s['color_alert'],  _redDefault);
-    green       = _parseHex(s['color_ok'],     _okDefault);
+    gold          = _parseHex(s['color_accent'], _goldDefault);
+    textPrimary   = _parseHex(s['color_text'],   _textDefault);
+    textSecondary = _parseHex(s['color_text2'],  _textSecDefault);
+    red           = _parseHex(s['color_alert'],  _redDefault);
+    green         = _parseHex(s['color_ok'],     _okDefault);
   }
 
   static TextStyle heading({double size = 20, FontWeight weight = FontWeight.w700, Color color = _textDefault}) {

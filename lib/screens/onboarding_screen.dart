@@ -92,8 +92,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   Widget _logoWidget({double? width, double? height, String logoKey = 'registration'}) {
     final url = _ts.logoUrl(logoKey);
     if (url != null) {
-      final cacheBust = DateTime.now().millisecondsSinceEpoch ~/ 60000;
+      // Per-day cache key (not per-minute): the browser keeps the logo cached
+      // across app restarts, so it appears instantly instead of re-downloading.
+      final cacheBust = DateTime.now().millisecondsSinceEpoch ~/ 86400000;
       return Image.network('$url?v=$cacheBust', width: width, height: height, fit: BoxFit.contain,
+        gaplessPlayback: true,
         errorBuilder: (_, __, ___) => SizedBox(width: width, height: height));
     }
     return SizedBox(width: width, height: height);
@@ -336,9 +339,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
         Icon(Icons.info_rounded, size: 56, color: LKTheme.gold),
         const SizedBox(height: 16),
-        Text(msg, style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary), textAlign: TextAlign.center),
+        // Bright, bold message on the dark popup so it's easy to read.
+        Text(msg, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 19, fontWeight: FontWeight.w600, color: Colors.white), textAlign: TextAlign.center),
         const SizedBox(height: 24),
         SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: LKTheme.gold, foregroundColor: LKTheme.navy),
           onPressed: () => Navigator.pop(ctx),
           child: const Text('OK', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         )),
@@ -426,22 +431,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     }
   }
 
-  // Fixed H1 title widget. The welcome step (page 1) is two-tone to match the
-  // design — "WELCOME TO" in gold, the brand word "LIFEKNOB" in white. All
-  // other titles are single gold.
+  // Fixed H1 title widget. All Dosis. The welcome step (page 1) reads
+  // "WELCOME TO LifeKnob" — everything bold except the "Life" part of the brand
+  // (per client). "WELCOME TO" accent (gold), the brand word in the Text colour. Other titles: gold.
   Widget _buildTitle() {
     const base = TextStyle(fontFamily: 'Dosis', fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: 2);
-    final t = _pageTitle().toUpperCase();
     if (_page == 1) {
-      final idx = t.lastIndexOf(' ');
-      if (idx > 0) {
+      final raw = _pageTitle(); // e.g. "Welcome to LifeKnob"
+      final bi = raw.toLowerCase().indexOf('lifeknob');
+      if (bi >= 0) {
+        final prefix = raw.substring(0, bi).toUpperCase(); // "WELCOME TO "
         return Text.rich(TextSpan(children: [
-          TextSpan(text: t.substring(0, idx + 1), style: base.copyWith(color: LKTheme.gold)),
-          TextSpan(text: t.substring(idx + 1), style: base.copyWith(color: Colors.white)),
+          TextSpan(text: prefix, style: base.copyWith(color: LKTheme.gold, fontWeight: FontWeight.w700)),
+          TextSpan(text: 'Life', style: base.copyWith(color: LKTheme.textPrimary, fontWeight: FontWeight.w400)),
+          TextSpan(text: 'Knob', style: base.copyWith(color: LKTheme.textPrimary, fontWeight: FontWeight.w700)),
         ]));
       }
     }
-    return Text(t, style: base.copyWith(color: LKTheme.gold));
+    return Text(_pageTitle().toUpperCase(), style: base.copyWith(color: LKTheme.gold));
   }
 
   @override
@@ -463,11 +470,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                       child: Builder(builder: (_) {
                         final logoUrl = _ts.logoUrl('header');
                         if (logoUrl != null) {
-                          final cb = DateTime.now().millisecondsSinceEpoch ~/ 60000;
+                          final cb = DateTime.now().millisecondsSinceEpoch ~/ 86400000;
                           return Image.network('$logoUrl?v=$cb', fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => SvgPicture.asset('assets/images/lifeknob_logo_header.svg', fit: BoxFit.contain));
+                            gaplessPlayback: true,
+                            errorBuilder: (_, __, ___) => const SizedBox.shrink());
                         }
-                        return SvgPicture.asset('assets/images/lifeknob_logo_header.svg', fit: BoxFit.contain);
+                        // No admin logo set → empty header, not a built-in default.
+                        return const SizedBox.shrink();
                       }),
                     )),
                   ]),
@@ -614,11 +623,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               child: SizedBox(height: 180, child: Builder(builder: (_) {
                 final url = _ts.logoUrl('registration');
                 if (url != null) {
-                  final cb = DateTime.now().millisecondsSinceEpoch ~/ 60000;
+                  final cb = DateTime.now().millisecondsSinceEpoch ~/ 86400000;
                   return Image.network('$url?v=$cb', fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => SvgPicture.asset('assets/images/lifeknoblogo_wordmark.svg', fit: BoxFit.contain));
+                    gaplessPlayback: true,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink());
                 }
-                return SvgPicture.asset('assets/images/lifeknoblogo_wordmark.svg', fit: BoxFit.contain);
+                // No admin logo set → show nothing (empty), not a built-in default.
+                return const SizedBox.shrink();
               })),
             ),
           )),
@@ -716,7 +727,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         child: Icon(icon, size: 26, color: LKTheme.gold)),
       const SizedBox(width: 13),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: TextStyle(fontFamily: 'OpenSans', fontSize: 24, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+        Text(title, style: TextStyle(fontFamily: 'OpenSans', fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.gold)),
         const SizedBox(height: 4),
         Text(desc, style: TextStyle(fontFamily: 'OpenSans', fontSize: 19, color: LKTheme.gold, height: 1.3, fontWeight: FontWeight.w400)),
         if (isTcsLink) ...[
@@ -775,7 +786,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w700, height: 1.4)),
         const SizedBox(height: 8),
         Text(_t('share_code_msg'), textAlign: TextAlign.center,
-          style: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textSecondary, height: 1.5)),
+          style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textSecondary, height: 1.5)),
         const SizedBox(height: 21),
         GestureDetector(
           onTap: () { if (_userCode != null) { Clipboard.setData(ClipboardData(text: _userCode!)); _showMessage(_t('code_copied')); } },
@@ -834,7 +845,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         ),
         const SizedBox(height: 13),
         Text(_t('plan_desc'), textAlign: TextAlign.center,
-          style: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
+          style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
         const SizedBox(height: 21),
         Align(alignment: Alignment.centerLeft, child: Text(_t('select_your_plan_label'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w600, letterSpacing: 1))),
         const SizedBox(height: 13),
@@ -890,7 +901,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                 if (yearly != null) Text('or $yearly', style: const TextStyle(fontFamily: 'OpenSans', fontSize: 13, color: LKTheme.teal, fontWeight: FontWeight.w600)),
               ])
             else
-              const Text('FREE', style: TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w500, color: LKTheme.textSecondary, letterSpacing: 2)),
+              Text('FREE', style: TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w500, color: LKTheme.textSecondary, letterSpacing: 2)),
           ]),
           const SizedBox(height: 8),
           ...features.map((f) => Padding(
@@ -960,7 +971,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                       style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary))),
                     Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                       Text(_t('last_verified'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 11, fontWeight: FontWeight.w700, color: LKTheme.green)),
-                      Text(p['last'] ?? _t('just_now'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 12, color: LKTheme.textSecondary)),
+                      Text(p['last'] ?? _t('just_now'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 12, color: LKTheme.textSecondary)),
                     ]),
                   ]),
                 ),
@@ -1014,7 +1025,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary, height: 1.5)),
         const SizedBox(height: 16),
         Text(_t('all_done_msg2'), textAlign: TextAlign.center,
-          style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.textSecondary, height: 1.5)),
+          style: TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.textSecondary, height: 1.5)),
         const Spacer(flex: 4),
         SizedBox(width: double.infinity, height: 54, child: Container(
           decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14), boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))]),
@@ -1036,7 +1047,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   InputDecoration _inputDeco(String hint, IconData icon, Color iconColor, String fieldKey) {
     final hasError = _errorFields.contains(fieldKey);
     return InputDecoration(hintText: hint, counterText: '',
-      hintStyle: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textSecondary.withValues(alpha: 0.7), fontWeight: FontWeight.w400),
+      hintStyle: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary.withValues(alpha: 0.6), fontWeight: FontWeight.w400),
       prefixIcon: Icon(icon, color: hasError ? LKTheme.red : iconColor),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: hasError ? LKTheme.red : LKTheme.gold.withValues(alpha: 0.25), width: hasError ? 2 : 1)),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: hasError ? LKTheme.red : LKTheme.gold, width: 2)),

@@ -33,7 +33,7 @@ void main() async {
 }
 
 const _kColourCacheKey = 'lk_theme_colours';
-const _kColourKeys = ['color_bg', 'color_accent', 'color_text', 'color_alert', 'color_ok'];
+const _kColourKeys = ['color_bg', 'color_accent', 'color_text', 'color_text2', 'color_alert', 'color_ok'];
 
 Future<void> _loadRemoteColours() async {
   SharedPreferences? prefs;
@@ -102,7 +102,7 @@ class LifeKnobApp extends StatelessWidget {
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: LKTheme.gold.withValues(alpha: 0.15))),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: LKTheme.gold, width: 1.5)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          labelStyle: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textSecondary),
+          labelStyle: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textSecondary),
           hintStyle: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textMuted),
         ),
         useMaterial3: true,

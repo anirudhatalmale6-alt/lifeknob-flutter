@@ -77,7 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 10),
                 Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: LKTheme.gold), textAlign: TextAlign.center),
                 const SizedBox(height: 8),
-                const Text('Join LifeKnob to stay connected', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary), textAlign: TextAlign.center),
+                Text('Join LifeKnob to stay connected', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary), textAlign: TextAlign.center),
                 const SizedBox(height: 32),
 
                 if (_errorMessage != null)

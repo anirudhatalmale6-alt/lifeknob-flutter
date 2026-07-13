@@ -130,7 +130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 20),
               Text(title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color), textAlign: TextAlign.center),
-              if (message.isNotEmpty) ...[const SizedBox(height: 8), Text(message, style: const TextStyle(fontSize: 16, color: LKTheme.textSecondary), textAlign: TextAlign.center)],
+              if (message.isNotEmpty) ...[const SizedBox(height: 8), Text(message, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary), textAlign: TextAlign.center)],
               const SizedBox(height: 28),
               SizedBox(width: double.infinity, height: 52, child: Container(
                 decoration: BoxDecoration(
@@ -165,7 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('YOUR CODE', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, fontWeight: FontWeight.w500, letterSpacing: 1)),
+              Text('YOUR CODE', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, fontWeight: FontWeight.w500, letterSpacing: 1)),
               const SizedBox(height: 16),
               Text(_userCode!, style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: accent, letterSpacing: 6)),
               const SizedBox(height: 20),
@@ -248,7 +248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 20),
               Text('Start Again?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: LKTheme.textPrimary)),
               const SizedBox(height: 8),
-              const Text('Go through the setup steps\nagain to review or update\nyour details.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
+              Text('Go through the setup steps\nagain to review or update\nyour details.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: LKTheme.textSecondary, height: 1.4)),
               const SizedBox(height: 24),
               SizedBox(width: double.infinity, height: 52, child: Container(
                 decoration: BoxDecoration(gradient: accentGrad, borderRadius: BorderRadius.circular(14)),
@@ -323,7 +323,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text(_userName ?? '-', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
                             const SizedBox(height: 2),
-                            Text(_userEmail ?? '-', style: const TextStyle(fontSize: 13, color: LKTheme.textSecondary)),
+                            Text(_userEmail ?? '-', style: TextStyle(fontSize: 13, color: LKTheme.textSecondary)),
                           ])),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
@@ -473,7 +473,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Row(children: [
       Icon(icon, size: 18, color: isCode ? _accent : LKTheme.textMuted),
       const SizedBox(width: 10),
-      Text(label, style: const TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
+      Text(label, style: TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
       const Spacer(),
       Text(value, style: TextStyle(fontSize: 14, fontWeight: isCode ? FontWeight.w800 : FontWeight.w500, color: isCode ? _accent : LKTheme.textPrimary, letterSpacing: isCode ? 2 : 0)),
       if (isCode) ...[const SizedBox(width: 4), Icon(Icons.zoom_in_rounded, size: 14, color: LKTheme.textMuted.withValues(alpha: 0.6))],
@@ -536,7 +536,7 @@ class _LegalPage extends StatelessWidget {
                 Expanded(child: Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.textPrimary))),
               ]),
             ),
-            Expanded(child: SingleChildScrollView(padding: const EdgeInsets.all(20), child: Text(content, style: const TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.6)))),
+            Expanded(child: SingleChildScrollView(padding: const EdgeInsets.all(20), child: Text(content, style: TextStyle(fontSize: 15, color: LKTheme.textSecondary, height: 1.6)))),
             Padding(
               padding: const EdgeInsets.fromLTRB(32, 8, 32, 16),
               child: SizedBox(width: double.infinity, height: 52, child: OutlinedButton(

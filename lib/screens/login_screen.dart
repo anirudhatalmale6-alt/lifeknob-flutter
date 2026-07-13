@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 Center(child: Text('LifeKnob', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: LKTheme.gold))),
                 const SizedBox(height: 8),
-                const Center(child: Text('Welcome back', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary))),
+                Center(child: Text('Welcome back', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary))),
                 const SizedBox(height: 48),
 
                 if (_errorMessage != null)
