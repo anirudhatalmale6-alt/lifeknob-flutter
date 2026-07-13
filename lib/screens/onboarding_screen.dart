@@ -522,15 +522,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                 ))),
                 if (_page > 0) const SizedBox(width: 12),
                 Expanded(flex: _page > 0 ? 1 : 1, child: SizedBox(height: 52, child: Container(
-                  decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(14), boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))]),
+                  // Flat solid accent fill (no gradient/glow), letters in the
+                  // Background colour — per client.
+                  decoration: BoxDecoration(color: LKTheme.gold, borderRadius: BorderRadius.circular(14)),
                   child: ElevatedButton(
                     onPressed: _isSaving ? null : _next,
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                     child: _isSaving
-                        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 3))
+                        ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: LKTheme.navy, strokeWidth: 3))
                         : Text(
                             _page == _totalPages - 1 ? _t('finish') : _t('next'),
-                            style: const TextStyle(fontFamily: 'OpenSans', fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFF5A3D10), letterSpacing: 1),
+                            style: TextStyle(fontFamily: 'OpenSans', fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.navy, letterSpacing: 1),
                           ),
                   ),
                 ))),
@@ -692,29 +694,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
 
   // Page 1: Welcome
   Widget _buildWelcome() {
-    return Padding(key: const ValueKey('welcome'), padding: const EdgeInsets.symmetric(horizontal: 20),
+    // Tight, scrollable list (no big even gaps between blocks). If the content is
+    // taller than the screen it scrolls instead of squeezing.
+    return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.fromLTRB(20, 6, 20, 6),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(height: 4),
-        Expanded(child: _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc'), false)),
-        Expanded(child: _welcomeItem(Icons.people_rounded, _t('welcome_connect_title'), _t('welcome_connect_desc'), false)),
-        Expanded(child: _welcomeItem(Icons.adjust_rounded, _t('welcome_turn_title'), _t('welcome_turn_desc'), false)),
-        Expanded(child: _welcomeItem(Icons.star_rounded, _t('membership_title'), _t('membership_desc'), false)),
-        Expanded(child: _welcomeItem(Icons.shield_rounded, _t('privacy_title'), _t('privacy_desc'), true)),
+        _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc'), false),
+        const SizedBox(height: 16),
+        _welcomeItem(Icons.people_rounded, _t('welcome_connect_title'), _t('welcome_connect_desc'), false),
+        const SizedBox(height: 16),
+        _welcomeItem(Icons.adjust_rounded, _t('welcome_turn_title'), _t('welcome_turn_desc'), false),
+        const SizedBox(height: 16),
+        _welcomeItem(Icons.star_rounded, _t('membership_title'), _t('membership_desc'), false),
+        const SizedBox(height: 16),
+        _welcomeItem(Icons.shield_rounded, _t('privacy_title'), _t('privacy_desc'), true),
       ]));
   }
 
   Widget _welcomeItem(IconData icon, String title, String desc, bool isTcsLink) {
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
-        child: Icon(icon, size: 24, color: LKTheme.gold)),
+      Container(width: 46, height: 46, decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold.withValues(alpha: 0.15)),
+        child: Icon(icon, size: 26, color: LKTheme.gold)),
       const SizedBox(width: 13),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
-        const SizedBox(height: 6),
-        Text(desc, style: TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.gold, height: 1.4, fontWeight: FontWeight.w400)),
+        Text(title, style: TextStyle(fontFamily: 'OpenSans', fontSize: 24, fontWeight: FontWeight.w700, color: LKTheme.textPrimary)),
+        const SizedBox(height: 4),
+        Text(desc, style: TextStyle(fontFamily: 'OpenSans', fontSize: 19, color: LKTheme.gold, height: 1.3, fontWeight: FontWeight.w400)),
         if (isTcsLink) ...[
-          const SizedBox(height: 6),
-          GestureDetector(onTap: _showTerms, child: Text(_t('read_terms'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: LKTheme.gold, decoration: TextDecoration.underline, decorationColor: LKTheme.gold))),
+          const SizedBox(height: 4),
+          GestureDetector(onTap: _showTerms, child: Text(_t('read_terms'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 19, color: LKTheme.gold, decoration: TextDecoration.underline, decorationColor: LKTheme.gold))),
         ],
       ])),
     ]);
