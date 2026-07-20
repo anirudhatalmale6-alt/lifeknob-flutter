@@ -83,6 +83,30 @@ class LKTheme {
     return h.withLightness((h.lightness + amt).clamp(0.0, 1.0)).toColor();
   }
 
+  // --- Theme-aware surfaces & contrast text ---------------------------------
+  // The background (navy) is admin-controlled and can be light OR dark. Cards,
+  // buttons and text must adapt so the SAME admin Text colour stays readable on
+  // every surface. Surfaces are derived from the background (a small step of
+  // contrast, staying in the same light/dark family); contrast text flips to a
+  // safe tone based on how dark the background is. This is why we don't need a
+  // separate "text on dark / text on light" admin field.
+  static bool get isDarkBg => HSLColor.fromColor(navy).lightness < 0.55;
+
+  /// A card/panel surface one step of contrast from the background.
+  static Color get surface => _shift(navy, isDarkBg ? 0.06 : -0.055);
+
+  /// A slightly stronger surface (hover / nested panels).
+  static Color get surfaceAlt => _shift(navy, isDarkBg ? 0.11 : -0.10);
+
+  /// Text guaranteed to contrast with the current background, regardless of the
+  /// admin Text colour — use where readability must never fail (e.g. names on a
+  /// themed surface). Prefers the admin colour but flips to a safe tone if the
+  /// background is the wrong side of it.
+  static Color get contrastText => isDarkBg ? const Color(0xFFF2ECE0) : const Color(0xFF1A1712);
+  static Color get contrastTextSoft => isDarkBg
+      ? const Color(0xFFF2ECE0).withValues(alpha: 0.62)
+      : const Color(0xFF1A1712).withValues(alpha: 0.60);
+
   // The gold gradients derive from [gold], so changing the accent colour in the
   // admin panel repaints buttons, the knob and coins to match — not just flat
   // gold text. (Getters, so they always reflect the current [gold].)

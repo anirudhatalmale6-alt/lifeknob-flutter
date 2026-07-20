@@ -309,9 +309,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.042, 24), fontWeight: FontWeight.w700, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.042, 24), fontWeight: FontWeight.w700, color: LKTheme.contrastText), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   const SizedBox(height: 1),
-                                  Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.018, 12.0), fontWeight: FontWeight.w300, color: Colors.white.withValues(alpha: 0.5)), maxLines: 1),
+                                  Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.018, 12.0), fontWeight: FontWeight.w300, color: LKTheme.contrastTextSoft), maxLines: 1),
                                   Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: max(h * 0.024, 15.0), fontWeight: FontWeight.w700, color: verifiedColor), maxLines: 1),
                                 ],
                               ),
@@ -410,7 +410,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     angle: _rotation,
                                     child: CustomPaint(
                                       size: Size(dialSize, dialSize),
-                                      painter: _DialPainter(navy: navy, tickColor: cream.withValues(alpha: 0.8), progress: progress, trackColor: _accent.withValues(alpha: 0.25)),
+                                      // Dial stays a fixed dark navy (a physical knob) so it reads
+                                      // correctly whether the app theme is light or dark.
+                                      painter: _DialPainter(navy: const Color(0xFF06263A), tickColor: cream.withValues(alpha: 0.8), progress: progress, trackColor: _accent.withValues(alpha: 0.25)),
                                     ),
                                   ),
                                   Container(
@@ -576,7 +578,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(icon, color: _accent, size: h * 0.045),
         const SizedBox(height: 4),
-        Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.7)), textAlign: TextAlign.center),
+        Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: LKTheme.contrastText.withValues(alpha: 0.75)), textAlign: TextAlign.center),
       ]),
     ));
   }

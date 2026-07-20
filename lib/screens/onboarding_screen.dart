@@ -884,7 +884,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         duration: const Duration(milliseconds: 180),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: selected ? LKTheme.gold.withValues(alpha: 0.08) : const Color(0xFF002035),
+          color: selected ? LKTheme.gold.withValues(alpha: 0.12) : LKTheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: selected ? LKTheme.gold : LKTheme.gold.withValues(alpha: 0.22), width: selected ? 2 : 1),
         ),
@@ -898,7 +898,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               const SizedBox(width: 12),
               Text(name.toUpperCase(), style: TextStyle(fontFamily: 'OpenSans', fontSize: 19,
                 fontWeight: FontWeight.w700, letterSpacing: 1.2,
-                color: selected ? LKTheme.gold : LKTheme.textPrimary)),
+                color: selected ? LKTheme.gold : LKTheme.contrastText)),
               const Spacer(),
               if (price != null)
                 Text(price, style: TextStyle(fontFamily: 'OpenSans', fontSize: 15, fontWeight: FontWeight.w700, color: LKTheme.gold)),
@@ -920,7 +920,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                       child: Row(children: [
                         Container(width: 5, height: 5, margin: const EdgeInsets.only(left: 4, right: 12),
                           decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold)),
-                        Expanded(child: Text(f, style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textPrimary))),
+                        Expanded(child: Text(f, style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.contrastText))),
                         Icon(Icons.check_rounded, size: 17, color: LKTheme.gold),
                       ]),
                     )).toList(),
