@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../config/theme.dart';
+import '../models/connection_model.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../services/translation_service.dart';
@@ -120,13 +121,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (mounted) {
         if (data.isNotEmpty) {
           final dt = DateTime.parse(data.first['created_at']);
-          final diff = DateTime.now().difference(dt);
           setState(() {
             _lastSuccessTime = dt; _dataLoaded = true;
-            if (diff.inMinutes < 1) _lastCheckIn = 'Just now';
-            else if (diff.inMinutes < 60) _lastCheckIn = '${diff.inMinutes}m ago';
-            else if (diff.inHours < 24) _lastCheckIn = '${diff.inHours}h ago';
-            else _lastCheckIn = '${diff.inDays}d ago';
+            _lastCheckIn = Connection.relativeVerified(dt);
           });
         } else {
           setState(() => _dataLoaded = true);

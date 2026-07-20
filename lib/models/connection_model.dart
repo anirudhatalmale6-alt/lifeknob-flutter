@@ -36,12 +36,17 @@ class Connection {
 
   String get lastCheckInText {
     if (lastCheckIn == null) return 'Waiting for first check-in';
-    final diff = DateTime.now().difference(lastCheckIn!);
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${lastCheckIn!.day}/${lastCheckIn!.month}/${lastCheckIn!.year}';
+    return relativeVerified(lastCheckIn!);
+  }
+
+  // Spec-exact "Last verified" format (fonts.docx R7):
+  //   0-1h -> "0 hour ago", 1-2h -> "1 hour ago", ... 24-48h -> "1 day ago",
+  //   48-72h -> "2 day ago". Floor-based, singular "hour"/"day".
+  static String relativeVerified(DateTime when) {
+    final diff = DateTime.now().difference(when);
+    final hours = diff.inHours;
+    if (hours < 24) return '${hours < 0 ? 0 : hours} hour ago';
+    return '${diff.inDays} day ago';
   }
 
   bool get isPending => status == 'pending';
