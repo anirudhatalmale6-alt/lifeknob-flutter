@@ -259,6 +259,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final contactLabel = (_sosName != null && _sosName!.isNotEmpty) ? _sosName!.toUpperCase() : '';
     final displayName = (_userName != null && _userName!.isNotEmpty) ? _userName!.toUpperCase() : 'USER';
     final lastVerified = _lastCheckIn ?? 'Not yet';
+    // Blueprint (0042): last-verified is green when recent, red when overdue.
+    final verifiedColor = _isRecentSuccess ? green : (_isOverdue ? red : _accent);
 
     return Scaffold(
       backgroundColor: navy,
@@ -279,50 +281,59 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       // ═══ HEADER — avatar + name | logo ═══
                       SizedBox(
-                        height: _isFreeUser ? h * 0.10 : h * 0.13,
+                        height: _isFreeUser ? h * 0.12 : h * 0.14,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 6, right: 2),
                           child: Row(children: [
                             GestureDetector(
                               onTap: _showCodePopup,
                               child: Container(
-                                width: h * 0.085, height: h * 0.085,
+                                width: h * 0.095, height: h * 0.095,
+                                padding: const EdgeInsets.all(5),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(color: _accent, width: 2.5),
-                                  color: _accent.withValues(alpha: 0.1),
+                                  color: Colors.white,
                                 ),
-                                child: Icon(Icons.qr_code_2, color: Colors.white, size: h * 0.05),
+                                child: ClipOval(
+                                  child: (_userCode != null && _userCode!.isNotEmpty)
+                                    ? QrImageView(data: _userCode!, version: QrVersions.auto, padding: EdgeInsets.zero, backgroundColor: Colors.white)
+                                    : Icon(Icons.qr_code_2, color: navy, size: h * 0.05),
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 12),
                             Expanded(child: GestureDetector(
                               onTap: _showCodePopup,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.032, 20), fontWeight: FontWeight.w600, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                  Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: min(h * 0.016, 12.0), fontWeight: FontWeight.w300, color: Colors.white.withValues(alpha: 0.45)), maxLines: 1),
-                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: min(h * 0.02, 16.0), fontWeight: FontWeight.w600, color: _accent), maxLines: 1),
+                                  Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.042, 24), fontWeight: FontWeight.w700, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  const SizedBox(height: 1),
+                                  Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.018, 12.0), fontWeight: FontWeight.w300, color: Colors.white.withValues(alpha: 0.5)), maxLines: 1),
+                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: max(h * 0.024, 15.0), fontWeight: FontWeight.w700, color: verifiedColor), maxLines: 1),
                                 ],
                               ),
                             )),
-                            Expanded(child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: GestureDetector(
-                                onTap: _showCodePopup,
-                                child: Builder(builder: (_) {
-                                  final url = TranslationService().logoUrl('header');
-                                  if (url != null) {
-                                    final cb = DateTime.now().millisecondsSinceEpoch ~/ 60000;
-                                    return Image.network('$url?v=$cb', fit: BoxFit.contain,
-                                      errorBuilder: (_, __, ___) => SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain));
-                                  }
-                                  return SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain);
-                                }),
+                            SizedBox(
+                              width: h * 0.16,
+                              child: Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: GestureDetector(
+                                  onTap: _showCodePopup,
+                                  child: Builder(builder: (_) {
+                                    final url = TranslationService().logoUrl('header');
+                                    if (url != null) {
+                                      final cb = DateTime.now().millisecondsSinceEpoch ~/ 60000;
+                                      return Image.network('$url?v=$cb', fit: BoxFit.contain,
+                                        errorBuilder: (_, __, ___) => SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain));
+                                    }
+                                    return SvgPicture.asset('assets/images/lifeknob_logo_header.svg', colorFilter: ColorFilter.mode(_accent, BlendMode.srcIn), fit: BoxFit.contain);
+                                  }),
+                                ),
                               ),
-                            )),
+                            ),
                           ]),
                         ),
                       ),
@@ -333,23 +344,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // ═══ TURN THE KNOB ═══
                       SizedBox(
-                        height: _isFreeUser ? max(h * 0.045, 34) : max(h * 0.065, 48),
+                        height: _isFreeUser ? max(h * 0.052, 38) : max(h * 0.065, 48),
                         child: Padding(
                           padding: const EdgeInsets.only(left: 6, right: 6),
                           child: Center(
-                            child: FittedBox(fit: BoxFit.scaleDown, child: Text('TURN THE KNOB', style: GoogleFonts.dosis(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w700, color: _accent, letterSpacing: 1))),
+                            child: FittedBox(fit: BoxFit.scaleDown, child: Text('TURN THE KNOB', style: GoogleFonts.dosis(fontSize: max(h * 0.05, 30), fontWeight: FontWeight.w700, color: _accent, letterSpacing: 1))),
                           ),
                         ),
                       ),
 
-                      // ═══ KNOB — own section ═══
-                      SizedBox(
-                        height: _isFreeUser ? h * 0.28 : h * 0.36,
+                      // ═══ KNOB — fills the middle (Expanded) so it is large on
+                      // tall screens and shrinks gracefully on short ones ═══
+                      Expanded(
                         child: LayoutBuilder(builder: (context, kc) {
                           final areaW = kc.maxWidth;
                           final areaH = kc.maxHeight;
                           final center = Offset(areaW / 2, areaH / 2);
-                          final knobSize = min(areaW * 0.92, areaH * 0.98);
+                          final knobSize = min(areaW * 0.99, areaH * 0.96);
                           final goldRingW = knobSize * 0.058;
                           final dialSize = knobSize - goldRingW * 2;
                           final faceSize = knobSize * 0.75;
@@ -438,9 +449,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         }),
                       ),
 
-                      // Push the call/ad/nav block to the bottom (knob sits in the upper area,
-                      // per the sheet) so there's no empty gap under the nav on free plans.
-                      if (_isFreeUser) const Spacer(),
+                      // (knob is Expanded above and fills the middle — no spacer needed)
 
                       // ═══ OR CALL FOR HELP | EKG ═══
                       SizedBox(
@@ -450,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              FittedBox(fit: BoxFit.scaleDown, child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.036, 22), fontWeight: FontWeight.w500, color: _accent))),
+                              FittedBox(fit: BoxFit.scaleDown, child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.045, 26), fontWeight: FontWeight.w600, color: _accent))),
                               Expanded(child: Padding(
                                 padding: const EdgeInsets.only(left: 12, right: 4),
                                 child: SizedBox(
@@ -466,106 +475,60 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
 
-                      // ═══ Call buttons ═══
-                      _isFreeUser
-                        ? Padding(
-                            padding: const EdgeInsets.only(left: 3, right: 3, bottom: 3),
-                            child: Row(children: [
-                              Expanded(child: GestureDetector(
-                                onTap: _callContact,
-                                child: Container(
-                                  height: h * 0.06,
-                                  margin: const EdgeInsets.only(right: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF1A5276),
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 2))],
-                                  ),
-                                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                    Icon(Icons.phone, color: _accent, size: 22),
-                                    const SizedBox(width: 8),
-                                    Flexible(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                      Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
-                                      if (contactLabel.isNotEmpty)
-                                        Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: 13, color: _accentSub), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                    ])),
-                                  ]),
+                      // ═══ Call buttons — big stacked (icon / label / contact),
+                      // same layout for free and paid per the appfaces sheet ═══
+                      SizedBox(
+                        height: _isFreeUser ? max(h * 0.15, 92) : h * 0.20,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 3, right: 3, bottom: 3),
+                          child: Row(children: [
+                            Expanded(child: GestureDetector(
+                              onTap: _callContact,
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1A5276),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                                    BoxShadow(color: const Color(0xFF1A5276).withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
+                                  ],
                                 ),
-                              )),
-                              Expanded(child: GestureDetector(
-                                onTap: _callAmbulance,
-                                child: Container(
-                                  height: h * 0.06,
-                                  margin: const EdgeInsets.only(left: 2),
-                                  decoration: BoxDecoration(
-                                    color: red,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 2))],
-                                  ),
-                                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                    Icon(Icons.health_and_safety, color: _accent, size: 22),
-                                    const SizedBox(width: 8),
-                                    Flexible(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                      Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
-                                      Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: 13, color: _accentSub), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                    ])),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                    Icon(Icons.phone, color: gold, size: max(h * 0.045, 30)),
+                                    SizedBox(height: h * 0.008),
+                                    FittedBox(fit: BoxFit.scaleDown, child: Text('CALL', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.032, 21), fontWeight: FontWeight.w700, color: Colors.white))),
+                                    SizedBox(height: h * 0.004),
+                                    contactLabel.isNotEmpty
+                                      ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.028, 17), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
+                                      : Text('........', style: TextStyle(fontSize: h * 0.024, color: const Color(0xFFE8BE80).withValues(alpha: 0.5), letterSpacing: 5)),
                                   ]),
+                              ),
+                            )),
+                            Expanded(child: GestureDetector(
+                              onTap: _callAmbulance,
+                              child: Container(
+                                margin: const EdgeInsets.only(left: 2),
+                                decoration: BoxDecoration(
+                                  color: red,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                                    BoxShadow(color: red.withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
+                                  ],
                                 ),
-                              )),
-                            ]),
-                          )
-                        : SizedBox(
-                            height: h * 0.20,
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 3, right: 3, bottom: 3),
-                              child: Row(children: [
-                                Expanded(child: GestureDetector(
-                                  onTap: _callContact,
-                                  child: Container(
-                                    margin: const EdgeInsets.only(right: 2),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF1A5276),
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
-                                        BoxShadow(color: const Color(0xFF1A5276).withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
-                                      ],
-                                    ),
-                                    child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                        Icon(Icons.phone, color: gold, size: h * 0.05),
-                                        SizedBox(height: h * 0.01),
-                                        FittedBox(fit: BoxFit.scaleDown, child: Text('DIRECT LINE', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
-                                        SizedBox(height: h * 0.006),
-                                        contactLabel.isNotEmpty
-                                          ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.026, 16), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
-                                          : Text('........', style: TextStyle(fontSize: h * 0.024, color: const Color(0xFFE8BE80).withValues(alpha: 0.5), letterSpacing: 5)),
-                                      ]),
-                                  ),
-                                )),
-                                Expanded(child: GestureDetector(
-                                  onTap: _callAmbulance,
-                                  child: Container(
-                                    margin: const EdgeInsets.only(left: 2),
-                                    decoration: BoxDecoration(
-                                      color: red,
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
-                                        BoxShadow(color: red.withValues(alpha: 0.3), blurRadius: 6, spreadRadius: 1),
-                                      ],
-                                    ),
-                                    child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                        Icon(Icons.health_and_safety, color: gold, size: h * 0.05),
-                                        SizedBox(height: h * 0.01),
-                                        FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.026, 17), fontWeight: FontWeight.w700, color: Colors.white))),
-                                        SizedBox(height: h * 0.006),
-                                        Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.026, 16), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
-                                      ]),
-                                  ),
-                                )),
-                              ]),
-                            ),
-                          ),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                    Icon(Icons.health_and_safety, color: gold, size: max(h * 0.045, 30)),
+                                    SizedBox(height: h * 0.008),
+                                    FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.032, 21), fontWeight: FontWeight.w700, color: Colors.white))),
+                                    SizedBox(height: h * 0.004),
+                                    Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.028, 17), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                                  ]),
+                              ),
+                            )),
+                          ]),
+                        ),
+                      ),
 
                       // ═══ AD (free users) — single 3:1 banner below the call buttons per sheet ═══
                       if (_isFreeUser)
