@@ -443,8 +443,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         final prefix = raw.substring(0, bi).toUpperCase(); // "WELCOME TO "
         return Text.rich(TextSpan(children: [
           TextSpan(text: prefix, style: base.copyWith(color: LKTheme.gold, fontWeight: FontWeight.w700)),
-          TextSpan(text: 'Life', style: base.copyWith(color: LKTheme.textPrimary, fontWeight: FontWeight.w400)),
-          TextSpan(text: 'Knob', style: base.copyWith(color: LKTheme.textPrimary, fontWeight: FontWeight.w700)),
+          TextSpan(text: 'Life', style: base.copyWith(color: LKTheme.gold, fontWeight: FontWeight.w400)),
+          TextSpan(text: 'Knob', style: base.copyWith(color: LKTheme.gold, fontWeight: FontWeight.w700)),
         ]));
       }
     }
@@ -469,14 +469,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                       padding: const EdgeInsets.all(4),
                       child: Builder(builder: (_) {
                         final logoUrl = _ts.logoUrl('header');
+                        // Always show a header logo (admin override, else the bundled
+                        // brand SVG tinted gold so it reads on any theme).
+                        final fallback = SvgPicture.asset('assets/images/lifeknob_logo_header.svg',
+                          colorFilter: ColorFilter.mode(LKTheme.gold, BlendMode.srcIn), fit: BoxFit.contain);
                         if (logoUrl != null) {
                           final cb = DateTime.now().millisecondsSinceEpoch ~/ 86400000;
                           return Image.network('$logoUrl?v=$cb', fit: BoxFit.contain,
                             gaplessPlayback: true,
-                            errorBuilder: (_, __, ___) => const SizedBox.shrink());
+                            errorBuilder: (_, __, ___) => fallback);
                         }
-                        // No admin logo set → empty header, not a built-in default.
-                        return const SizedBox.shrink();
+                        return fallback;
                       }),
                     )),
                   ]),
@@ -642,7 +645,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               const SizedBox(height: 23),
               Container(
                 decoration: BoxDecoration(
-                  color: LKTheme.bgCard,
+                  color: LKTheme.surface,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: LKTheme.gold.withValues(alpha: 0.6), width: 1.5),
                   boxShadow: _langPickerOpen ? [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))] : [],
@@ -655,7 +658,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                       child: Row(children: [
                         Text(_langFlags[_language] ?? '🌐', style: const TextStyle(fontSize: 22)),
                         const SizedBox(width: 12),
-                        Expanded(child: Text(_language, style: TextStyle(fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600))),
+                        Expanded(child: Text(_language, style: TextStyle(fontSize: 20, color: LKTheme.contrastText, fontWeight: FontWeight.w600))),
                         Icon(_langPickerOpen ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, color: LKTheme.gold, size: 28),
                       ]),
                     ),
@@ -685,7 +688,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                               child: Row(children: [
                                 Text(_langFlags[lang] ?? '🌐', style: const TextStyle(fontSize: 20)),
                                 const SizedBox(width: 12),
-                                Expanded(child: Text(lang, style: TextStyle(fontSize: 18, fontWeight: selected ? FontWeight.w700 : FontWeight.w500, color: selected ? LKTheme.gold : LKTheme.textPrimary))),
+                                Expanded(child: Text(lang, style: TextStyle(fontSize: 18, fontWeight: selected ? FontWeight.w700 : FontWeight.w500, color: selected ? LKTheme.gold : LKTheme.contrastText))),
                                 if (selected) Icon(Icons.check_rounded, color: LKTheme.gold, size: 20),
                               ]),
                             ),
@@ -707,16 +710,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   Widget _buildWelcome() {
     // Tight, scrollable list (no big even gaps between blocks). If the content is
     // taller than the screen it scrolls instead of squeezing.
-    return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.fromLTRB(20, 6, 20, 6),
+    return SingleChildScrollView(key: const ValueKey('welcome'), padding: const EdgeInsets.fromLTRB(22, 14, 22, 14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         _welcomeItem(Icons.favorite_rounded, _t('what_is_title'), _t('what_is_desc'), false),
-        const SizedBox(height: 16),
+        const SizedBox(height: 26),
         _welcomeItem(Icons.people_rounded, _t('welcome_connect_title'), _t('welcome_connect_desc'), false),
-        const SizedBox(height: 16),
+        const SizedBox(height: 26),
         _welcomeItem(Icons.adjust_rounded, _t('welcome_turn_title'), _t('welcome_turn_desc'), false),
-        const SizedBox(height: 16),
+        const SizedBox(height: 26),
         _welcomeItem(Icons.star_rounded, _t('membership_title'), _t('membership_desc'), false),
-        const SizedBox(height: 16),
+        const SizedBox(height: 26),
         _welcomeItem(Icons.shield_rounded, _t('privacy_title'), _t('privacy_desc'), true),
       ]));
   }
