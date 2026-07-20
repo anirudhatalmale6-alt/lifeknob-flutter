@@ -66,7 +66,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     'share_code_msg': 'Share this code with your family so they can connect to you.',
     'copy_code': 'Copy Code', 'code_copied': 'Code copied!',
     'connect_title': 'Connect to People', 'connect_button': 'CONNECT PEOPLE',
-    'plan_desc': 'Choose how many people you want to watch over. More connections means more family members can see when you press OK.',
+    'plan_desc': 'Choose a plan how many people you want to connect, or get alert messages in case of emergency.',
     'change_plan_hint': 'You can change your plan anytime in Set Up.',
     'upgrade_plan': 'Upgrade plan for more connections',
     'all_done_title': "You're All Done!",
@@ -849,69 +849,85 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         const SizedBox(height: 21),
         Align(alignment: Alignment.centerLeft, child: Text(_t('select_your_plan_label'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w600, letterSpacing: 1))),
         const SizedBox(height: 13),
-        _planCard('free', 'Free', [
-          'Watch over 1 person',
+        // Accordion of plans (per appfaces R5): each plan is a collapsible row
+        // showing name + inline price + chevron; the SELECTED plan expands to
+        // reveal its features (• label … ✓), the others collapse to one row.
+        _planRow('free', 'Free', const [
+          'Surveillance of 1 person',
           'No alert messages',
           'With advertising',
-        ], null, null),
-        const SizedBox(height: 13),
-        _planCard('plan5', 'Basic', [
-          'Watch over up to 3 people',
+        ], null),
+        const SizedBox(height: 12),
+        _planRow('plan5', 'Basic', const [
+          'Surveillance of 3 persons',
           'Alert messages',
           'No advertising',
-          'Cancel anytime',
-        ], '\$5', '\$50/year'),
-        const SizedBox(height: 13),
-        _planCard('plan8', 'Premium', [
-          'Watch over up to 10 people',
+        ], '\$5 / month'),
+        const SizedBox(height: 12),
+        _planRow('plan8', 'Premium', const [
+          'Surveillance of 10 persons',
           'Alert messages',
           'No advertising',
-          'Best for large families',
-          'Cancel anytime',
-        ], '\$8', '\$80/year'),
-        const SizedBox(height: 13),
-        Text(_t('change_plan_hint'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 14, color: LKTheme.textMuted)),
-        const SizedBox(height: 13),
+        ], '\$8 / month'),
+        const SizedBox(height: 16),
       ]));
   }
 
-  Widget _planCard(String planKey, String name, List<String> features, String? monthly, String? yearly) {
+  Widget _planRow(String planKey, String name, List<String> features, String? price) {
     final selected = _selectedPlan == planKey;
     return GestureDetector(
       onTap: () => setState(() {
         _selectedPlan = planKey;
         _maxSlots = planKey == 'free' ? 1 : planKey == 'plan5' ? 3 : 10;
       }),
-      child: Container(
-        width: double.infinity, padding: const EdgeInsets.all(13),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: double.infinity,
         decoration: BoxDecoration(
           color: selected ? LKTheme.gold.withValues(alpha: 0.08) : const Color(0xFF002035),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: selected ? LKTheme.gold : LKTheme.gold.withValues(alpha: 0.2), width: selected ? 2 : 1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: selected ? LKTheme.gold : LKTheme.gold.withValues(alpha: 0.22), width: selected ? 2 : 1),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off, color: selected ? LKTheme.gold : LKTheme.textMuted, size: 24),
-            const SizedBox(width: 13),
-            Expanded(child: Text(name, style: TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w500, color: selected ? LKTheme.gold : LKTheme.textPrimary, letterSpacing: 1))),
-            if (monthly != null)
-              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text(monthly, style: TextStyle(fontFamily: 'OpenSans', fontSize: 22, fontWeight: FontWeight.w500, color: LKTheme.gold)),
-                Text('/month', style: TextStyle(fontFamily: 'OpenSans', fontSize: 12, color: LKTheme.textMuted)),
-                if (yearly != null) Text('or $yearly', style: const TextStyle(fontFamily: 'OpenSans', fontSize: 13, color: LKTheme.teal, fontWeight: FontWeight.w600)),
-              ])
-            else
-              Text('FREE', style: TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w500, color: LKTheme.textSecondary, letterSpacing: 2)),
-          ]),
-          const SizedBox(height: 8),
-          ...features.map((f) => Padding(
-            padding: const EdgeInsets.only(left: 37, bottom: 5),
+          // Header row — always visible (name + inline price + chevron)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             child: Row(children: [
-              Icon(Icons.check_rounded, size: 16, color: selected ? LKTheme.gold : LKTheme.textMuted),
+              Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                color: selected ? LKTheme.gold : LKTheme.textMuted, size: 22),
+              const SizedBox(width: 12),
+              Text(name.toUpperCase(), style: TextStyle(fontFamily: 'OpenSans', fontSize: 19,
+                fontWeight: FontWeight.w700, letterSpacing: 1.2,
+                color: selected ? LKTheme.gold : LKTheme.textPrimary)),
+              const Spacer(),
+              if (price != null)
+                Text(price, style: TextStyle(fontFamily: 'OpenSans', fontSize: 15, fontWeight: FontWeight.w700, color: LKTheme.gold)),
               const SizedBox(width: 8),
-              Expanded(child: Text(f, style: TextStyle(fontFamily: 'OpenSans', fontSize: 17, color: selected ? LKTheme.textPrimary : LKTheme.textSecondary))),
+              Icon(selected ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                color: selected ? LKTheme.gold : LKTheme.textMuted, size: 24),
             ]),
-          )),
+          ),
+          // Feature list — only for the selected (expanded) plan
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeInOut,
+            child: selected
+              ? Padding(
+                  padding: const EdgeInsets.only(left: 14, right: 14, bottom: 13),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    children: features.map((f) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(children: [
+                        Container(width: 5, height: 5, margin: const EdgeInsets.only(left: 4, right: 12),
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: LKTheme.gold)),
+                        Expanded(child: Text(f, style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.textPrimary))),
+                        Icon(Icons.check_rounded, size: 17, color: LKTheme.gold),
+                      ]),
+                    )).toList(),
+                  ),
+                )
+              : const SizedBox.shrink(),
+          ),
         ]),
       ),
     );
