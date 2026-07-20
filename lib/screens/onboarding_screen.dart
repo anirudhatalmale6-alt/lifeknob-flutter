@@ -382,7 +382,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                 child: SizedBox(width: double.infinity, height: 52, child: OutlinedButton(
                   onPressed: () => Navigator.pop(ctx),
                   style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5), width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  child: Text(_t('back'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: 1)),
+                  child: Text(_t('back'), style: LKTheme.h1(size: 22)),
                 )),
               ),
             ]),
@@ -530,7 +530,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                 if (_page > 0) Expanded(flex: 1, child: SizedBox(height: 52, child: OutlinedButton(
                   onPressed: _back,
                   style: OutlinedButton.styleFrom(foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold.withValues(alpha: 0.5), width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  child: Text(_t('back'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: 1)),
+                  child: Text(_t('back'), style: LKTheme.h1(size: 22)),
                 ))),
                 if (_page > 0) const SizedBox(width: 12),
                 Expanded(flex: _page > 0 ? 1 : 1, child: SizedBox(height: 52, child: Container(
@@ -544,7 +544,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                         ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: LKTheme.navy, strokeWidth: 3))
                         : Text(
                             _page == _totalPages - 1 ? _t('finish') : _t('next'),
-                            style: TextStyle(fontFamily: 'OpenSans', fontSize: 22, fontWeight: FontWeight.w700, color: LKTheme.navy, letterSpacing: 1),
+                            style: LKTheme.h1(size: 22, color: LKTheme.navy),
                           ),
                   ),
                 ))),
@@ -730,9 +730,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         child: Icon(icon, size: 26, color: LKTheme.gold)),
       const SizedBox(width: 13),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: TextStyle(fontFamily: 'OpenSans', fontSize: 24, fontWeight: FontWeight.w800, color: LKTheme.gold)),
+        Text(title, style: LKTheme.h2(color: LKTheme.gold)),
         const SizedBox(height: 4),
-        Text(desc, style: TextStyle(fontFamily: 'OpenSans', fontSize: 19, color: LKTheme.gold, height: 1.3, fontWeight: FontWeight.w400)),
+        Text(desc, style: LKTheme.txt(color: LKTheme.gold)),
         if (isTcsLink) ...[
           const SizedBox(height: 4),
           GestureDetector(onTap: _showTerms, child: Text(_t('read_terms'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 19, color: LKTheme.gold, decoration: TextDecoration.underline, decorationColor: LKTheme.gold))),
@@ -746,7 +746,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     return SingleChildScrollView(key: const ValueKey('profile'), padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(children: [
         const SizedBox(height: 10),
-        Text(_t('no_auth_required'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.gold.withValues(alpha: 0.7))),
+        Text(_t('no_auth_required'), style: LKTheme.txt(color: LKTheme.gold.withValues(alpha: 0.7))),
         const SizedBox(height: 21),
         Container(
           width: 55, height: 55,
@@ -755,17 +755,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         ),
         const SizedBox(height: 21),
         _label(_t('your_name')), const SizedBox(height: 8),
-        TextField(controller: _nameController, maxLength: 20, style: TextStyle(fontFamily: 'OpenSans', fontSize: 20, color: LKTheme.textPrimary, fontWeight: FontWeight.w600),
+        TextField(controller: _nameController, maxLength: 20, style: LKTheme.txt(color: LKTheme.contrastText),
           onChanged: (_) { if (_errorFields.contains('name')) setState(() => _errorFields.remove('name')); },
           decoration: _inputDeco(_t('name_placeholder'), Icons.person_rounded, LKTheme.gold, 'name')),
         const SizedBox(height: 21),
         _label(_t('your_email')), const SizedBox(height: 8),
-        TextField(controller: _emailController, maxLength: 100, keyboardType: TextInputType.emailAddress, style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary),
+        TextField(controller: _emailController, maxLength: 100, keyboardType: TextInputType.emailAddress, style: LKTheme.txt(color: LKTheme.contrastText),
           onChanged: (_) { if (_errorFields.contains('email')) setState(() => _errorFields.remove('email')); },
           decoration: _inputDeco(_t('email_placeholder'), Icons.email_rounded, LKTheme.gold, 'email')),
         const SizedBox(height: 21),
         _label(_t('your_phone')), const SizedBox(height: 8),
-        TextField(controller: _phoneController, maxLength: 20, keyboardType: TextInputType.phone, style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary),
+        TextField(controller: _phoneController, maxLength: 20, keyboardType: TextInputType.phone, style: LKTheme.txt(color: LKTheme.contrastText),
           onChanged: (_) { if (_errorFields.contains('phone')) setState(() => _errorFields.remove('phone')); },
           decoration: _inputDeco(_t('phone_placeholder'), Icons.phone_rounded, LKTheme.gold, 'phone')),
         const SizedBox(height: 21),
@@ -814,22 +814,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           child: Icon(Icons.local_hospital_rounded, size: 28, color: LKTheme.red),
         ),
         const SizedBox(height: 8),
-        Text(_t('emergency_subtitle'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, color: LKTheme.gold.withValues(alpha: 0.7)), textAlign: TextAlign.center),
+        Text(_t('emergency_subtitle'), style: LKTheme.txt(color: LKTheme.gold.withValues(alpha: 0.7)), textAlign: TextAlign.center),
         const SizedBox(height: 21),
         _label(_t('sos_name')), const SizedBox(height: 8),
-        TextField(controller: _sosNameController, maxLength: 20, style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary),
+        TextField(controller: _sosNameController, maxLength: 20, style: LKTheme.txt(color: LKTheme.contrastText),
           onChanged: (_) { if (_errorFields.contains('sosName')) setState(() => _errorFields.remove('sosName')); },
           decoration: _inputDeco(_t('sos_name_placeholder'), Icons.person_rounded, LKTheme.gold, 'sosName')),
         const SizedBox(height: 21),
         _label(_t('phone_number')), const SizedBox(height: 8),
-        TextField(controller: _sosPhoneController, maxLength: 20, keyboardType: TextInputType.phone, style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary),
+        TextField(controller: _sosPhoneController, maxLength: 20, keyboardType: TextInputType.phone, style: LKTheme.txt(color: LKTheme.contrastText),
           onChanged: (_) { if (_errorFields.contains('sosPhone')) setState(() => _errorFields.remove('sosPhone')); },
           decoration: _inputDeco(_t('sos_phone_placeholder'), Icons.phone_rounded, LKTheme.gold, 'sosPhone')),
         const SizedBox(height: 34),
-        Text(_t('ambulance').toUpperCase(), style: TextStyle(fontFamily: 'OpenSans', fontSize: 20, fontWeight: FontWeight.w500, color: LKTheme.gold, letterSpacing: 1)),
+        Text(_t('ambulance').toUpperCase(), style: LKTheme.h2(color: LKTheme.gold)),
         const SizedBox(height: 13),
         _label(_t('phone_number')), const SizedBox(height: 8),
-        TextField(controller: _ambulanceController, maxLength: 20, keyboardType: TextInputType.phone, style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary),
+        TextField(controller: _ambulanceController, maxLength: 20, keyboardType: TextInputType.phone, style: LKTheme.txt(color: LKTheme.contrastText),
           onChanged: (_) { if (_errorFields.contains('ambulance')) setState(() => _errorFields.remove('ambulance')); },
           decoration: _inputDeco(_t('ambulance_placeholder'), Icons.local_hospital_rounded, LKTheme.red, 'ambulance')),
         const SizedBox(height: 21),
@@ -1005,7 +1005,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         if (remaining > 0) ...[
           const SizedBox(height: 8),
           TextField(controller: _connectNameController, maxLength: 50,
-            style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary),
+            style: LKTheme.txt(color: LKTheme.contrastText),
             onChanged: (_) { if (_errorFields.contains('connectName')) setState(() => _errorFields.remove('connectName')); },
             decoration: _inputDeco(_t('connect_name_placeholder'), Icons.person_rounded, LKTheme.gold, 'connectName')),
           const SizedBox(height: 13),
@@ -1060,16 +1060,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
 
   Widget _label(String text) {
     return Align(alignment: Alignment.centerLeft,
-      child: Text(text, style: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.gold, fontWeight: FontWeight.w600, letterSpacing: 1)));
+      child: Text(text, style: LKTheme.txt(bold: true, color: LKTheme.gold, letterSpacing: 1)));
   }
 
   InputDecoration _inputDeco(String hint, IconData icon, Color iconColor, String fieldKey) {
     final hasError = _errorFields.contains(fieldKey);
     return InputDecoration(hintText: hint, counterText: '',
-      hintStyle: TextStyle(fontFamily: 'OpenSans', fontSize: 18, color: LKTheme.textPrimary.withValues(alpha: 0.6), fontWeight: FontWeight.w400),
+      hintStyle: LKTheme.txt(color: LKTheme.contrastTextSoft),
       prefixIcon: Icon(icon, color: hasError ? LKTheme.red : iconColor),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: hasError ? LKTheme.red : LKTheme.gold.withValues(alpha: 0.25), width: hasError ? 2 : 1)),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: hasError ? LKTheme.red : LKTheme.gold, width: 2)),
-      filled: true, fillColor: LKTheme.bgCardLight);
+      filled: true, fillColor: LKTheme.surface);
   }
 }

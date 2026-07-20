@@ -90,6 +90,20 @@ class LKTheme {
   // contrast, staying in the same light/dark family); contrast text flips to a
   // safe tone based on how dark the background is. This is why we don't need a
   // separate "text on dark / text on light" admin field.
+  // --- Canonical typography (client spec, LK Task 0046) ---------------------
+  // The WHOLE app must use ONLY 3 text roles, nothing else:
+  //   h1  = Dosis bold      → page main titles + button labels (size may vary)
+  //   h2  = Open Sans bold  → sub-titles / new-paragraph titles / popup titles
+  //   txt = Open Sans       → everything else; ALWAYS the same size (weight and
+  //         opacity may vary, never the size).
+  static const double txtSize = 17;
+  static TextStyle h1({double size = 28, Color? color, double letterSpacing = 1}) =>
+      TextStyle(fontFamily: 'Dosis', fontSize: size, fontWeight: FontWeight.w700, letterSpacing: letterSpacing, color: color);
+  static TextStyle h2({double size = 21, Color? color, double letterSpacing = 0.5}) =>
+      TextStyle(fontFamily: 'OpenSans', fontSize: size, fontWeight: FontWeight.w700, letterSpacing: letterSpacing, color: color);
+  static TextStyle txt({bool bold = false, Color? color, double height = 1.35, double letterSpacing = 0}) =>
+      TextStyle(fontFamily: 'OpenSans', fontSize: txtSize, fontWeight: bold ? FontWeight.w700 : FontWeight.w400, color: color, height: height, letterSpacing: letterSpacing);
+
   static bool get isDarkBg => HSLColor.fromColor(navy).lightness < 0.55;
 
   /// A card/panel surface one step of contrast from the background.
