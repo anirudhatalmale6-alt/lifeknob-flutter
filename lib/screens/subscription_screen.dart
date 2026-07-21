@@ -24,10 +24,10 @@ class SubscriptionScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(20)),
-                      child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(Icons.home_rounded, size: 18, color: Color(0xFF5A3D10)),
-                        SizedBox(width: 6),
-                        Text('Home', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF5A3D10))),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(Icons.home_rounded, size: 18, color: LKTheme.onAccent),
+                        const SizedBox(width: 6),
+                        Text('Home', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: LKTheme.onAccent)),
                       ]),
                     ),
                   ),
@@ -68,7 +68,7 @@ class SubscriptionScreen extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: LKTheme.bgCard,
+                        color: LKTheme.surface,
                         border: Border.all(color: LKTheme.gold, width: 1.5),
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -80,7 +80,7 @@ class SubscriptionScreen extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(10)),
-                              child: const Text('MOST POPULAR', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF5A3D10))),
+                              child: Text('MOST POPULAR', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: LKTheme.onAccent)),
                             ),
                           ),
                           Column(
@@ -127,8 +127,8 @@ class SubscriptionScreen extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: LKTheme.bgCard,
-                        border: Border.all(color: LKTheme.border, width: 1.5),
+                        color: LKTheme.surface,
+                        border: Border.all(color: LKTheme.isDarkBg ? LKTheme.border : LKTheme.contrastText.withValues(alpha: 0.12), width: 1.5),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
@@ -157,7 +157,7 @@ class SubscriptionScreen extends StatelessWidget {
                             width: double.infinity, height: 54,
                             child: ElevatedButton(
                               onPressed: () {},
-                              style: ElevatedButton.styleFrom(backgroundColor: LKTheme.bgCardLight, foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                              style: ElevatedButton.styleFrom(backgroundColor: LKTheme.surfaceAlt, foregroundColor: LKTheme.gold, side: BorderSide(color: LKTheme.gold), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                               child: const Text('Subscribe Now', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                             ),
                           ),
@@ -176,8 +176,8 @@ class SubscriptionScreen extends StatelessWidget {
                           decoration: BoxDecoration(gradient: LKTheme.goldGradient, borderRadius: BorderRadius.circular(28), boxShadow: [BoxShadow(color: LKTheme.gold.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))]),
                           child: ElevatedButton.icon(
                             onPressed: onGoHome,
-                            icon: const Icon(Icons.home_rounded, size: 24, color: Color(0xFF5A3D10)),
-                            label: const Text('Home', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF5A3D10))),
+                            icon: Icon(Icons.home_rounded, size: 24, color: LKTheme.onAccent),
+                            label: Text('Home', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: LKTheme.onAccent)),
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28))),
                           ),
                         ),

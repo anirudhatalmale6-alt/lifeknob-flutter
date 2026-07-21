@@ -334,16 +334,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
 
   void _showMessage(String msg) {
     showDialog(context: context, builder: (ctx) => Dialog(
-      backgroundColor: LKTheme.bgCard,
+      backgroundColor: LKTheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: BorderSide(color: LKTheme.gold, width: 2)),
       child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
         Icon(Icons.info_rounded, size: 56, color: LKTheme.gold),
         const SizedBox(height: 16),
-        // Bright, bold message on the dark popup so it's easy to read.
-        Text(msg, style: const TextStyle(fontFamily: 'OpenSans', fontSize: 19, fontWeight: FontWeight.w600, color: Colors.white), textAlign: TextAlign.center),
+        // Message uses contrast text so it reads on a light OR dark popup.
+        Text(msg, style: TextStyle(fontFamily: 'OpenSans', fontSize: 19, fontWeight: FontWeight.w600, color: LKTheme.contrastText), textAlign: TextAlign.center),
         const SizedBox(height: 24),
         SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: LKTheme.gold, foregroundColor: LKTheme.navy),
+          style: ElevatedButton.styleFrom(backgroundColor: LKTheme.gold, foregroundColor: LKTheme.onAccent),
           onPressed: () => Navigator.pop(ctx),
           child: const Text('OK', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         )),
@@ -981,7 +981,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                   decoration: BoxDecoration(
-                    color: LKTheme.bgCardLight,
+                    color: LKTheme.surfaceAlt,
                     borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
                     border: Border.all(color: stateColor.withValues(alpha: 0.4)),
                   ),
@@ -1021,7 +1021,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
               child: _isSaving
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A3D10), strokeWidth: 2))
-                : Text(_t('connect_button'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF5A3D10), letterSpacing: 1)),
+                : Text(_t('connect_button'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.onAccent, letterSpacing: 1)),
             ),
           )),
         ],
@@ -1051,7 +1051,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           child: ElevatedButton(
             onPressed: _goToApp,
             style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-            child: Text(_t('go_to_knob'), style: const TextStyle(fontFamily: 'OpenSans', fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF5A3D10), letterSpacing: 1)),
+            child: Text(_t('go_to_knob'), style: TextStyle(fontFamily: 'OpenSans', fontSize: 17, fontWeight: FontWeight.w700, color: LKTheme.onAccent, letterSpacing: 1)),
           ),
         )),
         const Spacer(flex: 2),
