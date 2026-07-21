@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../config/theme.dart';
@@ -211,27 +210,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final accent = _accent;
     showDialog(context: context, builder: (ctx) => Dialog(
       backgroundColor: Colors.transparent,
+      // Theme-safe surface + contrast text so the code stays readable on a
+      // light (cream) OR dark palette — previously the navy bg + cream text
+      // vanished against a light admin background.
       child: Container(
         padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(color: navy, borderRadius: BorderRadius.circular(20), border: Border.all(color: accent, width: 2)),
+        decoration: LKTheme.dialogFrame(radius: 20),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text('YOUR CODE', style: GoogleFonts.barlowCondensed(fontSize: 14, color: accent, fontWeight: FontWeight.w600, letterSpacing: 3)),
+          Text('YOUR CODE', style: LKTheme.h2(size: 14, color: accent, letterSpacing: 3)),
           const SizedBox(height: 16),
-          Text(_userCode!, style: GoogleFonts.barlowCondensed(fontSize: 48, fontWeight: FontWeight.w900, color: cream, letterSpacing: 6)),
+          Text(_userCode!, style: LKTheme.h1(size: 48, color: LKTheme.contrastText, letterSpacing: 6)),
           const SizedBox(height: 12),
-          Text('Share this code with your family', style: GoogleFonts.barlowCondensed(fontSize: 16, color: cream.withValues(alpha: 0.7), fontStyle: FontStyle.italic), textAlign: TextAlign.center),
+          Text('Share this code with your family', style: LKTheme.txt(color: LKTheme.contrastTextSoft).copyWith(fontStyle: FontStyle.italic), textAlign: TextAlign.center),
           const SizedBox(height: 24),
           Row(children: [
             Expanded(child: OutlinedButton(
               onPressed: () { Clipboard.setData(ClipboardData(text: _userCode!)); Navigator.pop(ctx); },
               style: OutlinedButton.styleFrom(foregroundColor: accent, side: BorderSide(color: accent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-              child: Text('COPY', style: GoogleFonts.barlowCondensed(fontSize: 14, fontWeight: FontWeight.w700)),
+              child: Text('COPY', style: LKTheme.h1(size: 16, color: accent)),
             )),
             const SizedBox(width: 12),
             Expanded(child: ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
               style: ElevatedButton.styleFrom(backgroundColor: accent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
-              child: Text('OK', style: GoogleFonts.barlowCondensed(fontSize: 16, fontWeight: FontWeight.w800, color: navy)),
+              child: Text('OK', style: LKTheme.h1(size: 17, color: LKTheme.goldShadow)),
             )),
           ]),
         ]),
@@ -309,10 +311,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(displayName, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.042, 24), fontWeight: FontWeight.w700, color: LKTheme.contrastText), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  Text(displayName, style: LKTheme.h1(size: max(h * 0.042, 24), color: LKTheme.contrastText), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   const SizedBox(height: 1),
-                                  Text('Last verified:', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.018, 12.0), fontWeight: FontWeight.w300, color: LKTheme.contrastTextSoft), maxLines: 1),
-                                  Text(lastVerified, style: GoogleFonts.robotoSlab(fontSize: max(h * 0.024, 15.0), fontWeight: FontWeight.w700, color: verifiedColor), maxLines: 1),
+                                  Text('Last verified:', style: TextStyle(fontFamily: 'OpenSans', fontSize: max(h * 0.018, 12.0), fontWeight: FontWeight.w400, color: LKTheme.contrastTextSoft), maxLines: 1),
+                                  Text(lastVerified, style: TextStyle(fontFamily: 'OpenSans', fontSize: max(h * 0.024, 15.0), fontWeight: FontWeight.w700, color: verifiedColor), maxLines: 1),
                                 ],
                               ),
                             )),
@@ -348,7 +350,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 6, right: 6),
                           child: Center(
-                            child: FittedBox(fit: BoxFit.scaleDown, child: Text('TURN THE KNOB', style: GoogleFonts.dosis(fontSize: max(h * 0.05, 30), fontWeight: FontWeight.w700, color: _accent, letterSpacing: 1))),
+                            child: FittedBox(fit: BoxFit.scaleDown, child: Text('TURN THE KNOB', style: LKTheme.h1(size: max(h * 0.05, 30), color: _accent, letterSpacing: 1))),
                           ),
                         ),
                       ),
@@ -429,11 +431,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   SizedBox(
                                     width: faceSize * 0.65, height: faceSize * 0.65,
                                     child: _showFailed
-                                      ? Center(child: Text('TRY\nAGAIN', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.14, fontWeight: FontWeight.w700, color: cream), textAlign: TextAlign.center))
+                                      ? Center(child: Text('TRY\nAGAIN', style: LKTheme.h1(size: faceSize * 0.14, color: cream), textAlign: TextAlign.center))
                                       : _showSuccess
-                                      ? Center(child: Text('THANK\nYOU', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.14, fontWeight: FontWeight.w700, color: cream), textAlign: TextAlign.center))
+                                      ? Center(child: Text('THANK\nYOU', style: LKTheme.h1(size: faceSize * 0.14, color: cream), textAlign: TextAlign.center))
                                       : (_isDragging || progress > 0.01)
-                                      ? Center(child: Text('${(progress * 100).round()}%', style: GoogleFonts.barlowCondensed(fontSize: faceSize * 0.25, fontWeight: FontWeight.w700, color: progress >= 1.0 ? green : Color.lerp(red, _accent, progress)!)))
+                                      ? Center(child: Text('${(progress * 100).round()}%', style: LKTheme.h1(size: faceSize * 0.25, color: progress >= 1.0 ? green : Color.lerp(red, _accent, progress)!)))
                                       : ClipRect(child: ShaderMask(
                                       // Resting knob face is a plain grey monochrome logo per the
                                       // appfaces sheet (M1/M2 stay grey even when overdue). Green/red
@@ -461,7 +463,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              FittedBox(fit: BoxFit.scaleDown, child: Text('OR CALL FOR HELP', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.045, 26), fontWeight: FontWeight.w600, color: _accent))),
+                              FittedBox(fit: BoxFit.scaleDown, child: Text('OR CALL FOR HELP', style: LKTheme.h1(size: max(h * 0.045, 26), color: _accent))),
                               Expanded(child: Padding(
                                 padding: const EdgeInsets.only(left: 12, right: 4),
                                 child: SizedBox(
@@ -499,10 +501,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
                                     Icon(Icons.phone, color: gold, size: max(h * 0.045, 30)),
                                     SizedBox(height: h * 0.008),
-                                    FittedBox(fit: BoxFit.scaleDown, child: Text('CALL', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.032, 21), fontWeight: FontWeight.w700, color: Colors.white))),
+                                    FittedBox(fit: BoxFit.scaleDown, child: Text('CALL', style: LKTheme.h1(size: max(h * 0.032, 21), color: Colors.white))),
                                     SizedBox(height: h * 0.004),
                                     contactLabel.isNotEmpty
-                                      ? Text(contactLabel, style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.028, 17), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
+                                      ? Text(contactLabel, style: TextStyle(fontFamily: 'OpenSans', fontSize: max(h * 0.028, 17), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)
                                       : Text('........', style: TextStyle(fontSize: h * 0.024, color: const Color(0xFFE8BE80).withValues(alpha: 0.5), letterSpacing: 5)),
                                   ]),
                               ),
@@ -522,9 +524,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
                                     Icon(Icons.health_and_safety, color: gold, size: max(h * 0.045, 30)),
                                     SizedBox(height: h * 0.008),
-                                    FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: GoogleFonts.robotoSlab(fontSize: max(h * 0.032, 21), fontWeight: FontWeight.w700, color: Colors.white))),
+                                    FittedBox(fit: BoxFit.scaleDown, child: Text('EMERGENCY', style: LKTheme.h1(size: max(h * 0.032, 21), color: Colors.white))),
                                     SizedBox(height: h * 0.004),
-                                    Text(_ambulanceNumber ?? 'AMBULANCE', style: GoogleFonts.barlowCondensed(fontSize: max(h * 0.028, 17), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                                    Text(_ambulanceNumber ?? 'AMBULANCE', style: TextStyle(fontFamily: 'OpenSans', fontSize: max(h * 0.028, 17), fontWeight: FontWeight.w400, color: const Color(0xFFE8BE80)), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
                                   ]),
                               ),
                             )),
@@ -578,7 +580,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(icon, color: _accent, size: h * 0.045),
         const SizedBox(height: 4),
-        Text(label, style: GoogleFonts.robotoSlab(fontSize: h * 0.02, fontWeight: FontWeight.w400, color: LKTheme.contrastText.withValues(alpha: 0.75)), textAlign: TextAlign.center),
+        Text(label, style: TextStyle(fontFamily: 'OpenSans', fontSize: h * 0.02, fontWeight: FontWeight.w400, color: LKTheme.contrastText.withValues(alpha: 0.75)), textAlign: TextAlign.center),
       ]),
     ));
   }

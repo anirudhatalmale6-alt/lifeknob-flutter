@@ -168,19 +168,26 @@ class LKTheme {
     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
   );
 
+  // Theme-aware: derives from the admin background so popups stay readable in a
+  // light (cream) OR dark (navy) palette. Border also flips to a subtle tone
+  // that suits the current background.
   static BoxDecoration glassCard({double radius = 20, Color? borderColor}) => BoxDecoration(
-    color: const Color(0xFF0C1120).withValues(alpha: 0.92),
+    color: surface,
     borderRadius: BorderRadius.circular(radius),
-    border: Border.all(color: borderColor ?? const Color(0xFF1A1A28), width: 0.5),
-    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8))],
+    border: Border.all(
+      color: borderColor ?? (isDarkBg ? const Color(0xFF1A1A28) : contrastText.withValues(alpha: 0.10)),
+      width: 0.5,
+    ),
+    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDarkBg ? 0.3 : 0.12), blurRadius: 20, offset: const Offset(0, 8))],
   );
 
   // Popup/dialog frame — solid gold border on every dialog (per client design).
+  // Fill follows the admin background so dialog text stays readable in any theme.
   static BoxDecoration dialogFrame({double radius = 24}) => BoxDecoration(
-    color: const Color(0xFF0C1120),
+    color: surface,
     borderRadius: BorderRadius.circular(radius),
     border: Border.all(color: gold, width: 2),
-    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 24, offset: const Offset(0, 10))],
+    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDarkBg ? 0.4 : 0.15), blurRadius: 24, offset: const Offset(0, 10))],
   );
 
   static BoxDecoration get goldBorderCard => BoxDecoration(
