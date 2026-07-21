@@ -144,7 +144,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: TextStyle(fontSize: 16, color: LKTheme.textSecondary),
                         children: [
                           TextSpan(text: 'Already have an account? '),
-                          TextSpan(text: 'Sign In', style: TextStyle(color: LKTheme.gold, fontWeight: FontWeight.w600)),
+                          TextSpan(text: 'Sign In', style: TextStyle(color: LKTheme.gold2, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),

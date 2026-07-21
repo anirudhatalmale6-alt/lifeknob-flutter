@@ -51,11 +51,11 @@ class SubscriptionScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('YOUR CURRENT PLAN', style: TextStyle(fontSize: 12, color: LKTheme.gold, fontWeight: FontWeight.w700, letterSpacing: 1)),
+                          Text('YOUR CURRENT PLAN', style: TextStyle(fontSize: 12, color: LKTheme.gold2, fontWeight: FontWeight.w700, letterSpacing: 1)),
                           SizedBox(height: 4),
                           Text('Free', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: LKTheme.textPrimary)),
                           SizedBox(height: 4),
-                          Text('1 connection', style: TextStyle(fontSize: 16, color: LKTheme.gold, fontWeight: FontWeight.w600)),
+                          Text('1 connection', style: TextStyle(fontSize: 16, color: LKTheme.gold2, fontWeight: FontWeight.w600)),
                           SizedBox(height: 2),
                           Text('3-day switch cooldown', style: TextStyle(fontSize: 14, color: LKTheme.textSecondary)),
                         ],
@@ -96,7 +96,7 @@ class SubscriptionScreen extends StatelessWidget {
                                   SizedBox(width: 4),
                                   Text('/ month', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary)),
                                   SizedBox(width: 12),
-                                  Text('or \$50/year', style: TextStyle(fontSize: 15, color: LKTheme.teal, fontWeight: FontWeight.w600)),
+                                  Text('or \$50/year', style: TextStyle(fontSize: 15, color: LKTheme.secondaryOr(LKTheme.teal), fontWeight: FontWeight.w600)),
                                 ],
                               ),
                               const SizedBox(height: 12),
@@ -144,7 +144,7 @@ class SubscriptionScreen extends StatelessWidget {
                               SizedBox(width: 4),
                               Text('/ month', style: TextStyle(fontSize: 16, color: LKTheme.textSecondary)),
                               SizedBox(width: 12),
-                              Text('or \$80/year', style: TextStyle(fontSize: 15, color: LKTheme.teal, fontWeight: FontWeight.w600)),
+                              Text('or \$80/year', style: TextStyle(fontSize: 15, color: LKTheme.secondaryOr(LKTheme.teal), fontWeight: FontWeight.w600)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -197,7 +197,7 @@ class SubscriptionScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(children: [
-        Icon(Icons.check_rounded, size: 20, color: LKTheme.gold),
+        Icon(Icons.check_rounded, size: 20, color: LKTheme.gold2),
         const SizedBox(width: 10),
         Text(text, style: TextStyle(fontSize: 16, color: LKTheme.textPrimary)),
       ]),

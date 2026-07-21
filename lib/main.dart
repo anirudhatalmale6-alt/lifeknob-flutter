@@ -33,7 +33,7 @@ void main() async {
 }
 
 const _kColourCacheKey = 'lk_theme_colours';
-const _kColourKeys = ['color_bg', 'color_accent', 'color_text', 'color_text2', 'color_alert', 'color_ok'];
+const _kColourKeys = ['color_bg', 'color_accent', 'color_accent2', 'color_text', 'color_text2', 'color_alert', 'color_ok'];
 
 Future<void> _loadRemoteColours() async {
   SharedPreferences? prefs;

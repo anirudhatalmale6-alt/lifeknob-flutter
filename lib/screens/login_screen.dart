@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(fontSize: 16, color: LKTheme.textSecondary),
                         children: [
                           TextSpan(text: "Don't have an account? "),
-                          TextSpan(text: 'Sign Up', style: TextStyle(color: LKTheme.gold, fontWeight: FontWeight.w600)),
+                          TextSpan(text: 'Sign Up', style: TextStyle(color: LKTheme.gold2, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),

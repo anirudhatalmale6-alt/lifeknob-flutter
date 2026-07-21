@@ -17,6 +17,13 @@ class LKTheme {
   static Color bg = _bgDefault;
   static Color navy = _onbgDefault; // the visible blue screen background (home/onboarding/login/…)
   static Color gold = _goldDefault;
+  // Secondary accent ("Main colour 2", color_accent2). Optional: when the admin
+  // hasn't set it, [hasAccent2] stays false and [gold2] mirrors the primary
+  // [gold], so the UI looks identical to a single-accent theme. When set, the
+  // curated "pop" spots (section headings, highlights, links, badges) switch to
+  // it — see [secondaryOr].
+  static Color gold2 = _goldDefault;
+  static bool hasAccent2 = false;
   static Color red = _redDefault;
   static Color green = _okDefault;
   static Color textPrimary = _textDefault;   // "Text 1" — main letters (color_text)
@@ -63,7 +70,17 @@ class LKTheme {
     textSecondary = _parseHex(s['color_text2'],  _textSecDefault);
     red           = _parseHex(s['color_alert'],  _redDefault);
     green         = _parseHex(s['color_ok'],     _okDefault);
+    // Secondary accent is optional. Only treat it as "set" when it's a valid
+    // hex; otherwise mirror the primary accent so nothing visibly changes.
+    final a2 = s['color_accent2'];
+    hasAccent2 = a2 is String && RegExp(r'^#?[0-9A-Fa-f]{6}$').hasMatch(a2.trim());
+    gold2 = hasAccent2 ? _parseHex(a2, gold) : gold;
   }
+
+  /// Returns the secondary accent when the admin has set one, otherwise the
+  /// element's own [fallback] colour — so repurposing a spot for the second
+  /// colour never changes its look until a second colour actually exists.
+  static Color secondaryOr(Color fallback) => hasAccent2 ? gold2 : fallback;
 
   static TextStyle heading({double size = 20, FontWeight weight = FontWeight.w700, Color color = _textDefault}) {
     return TextStyle(fontFamily: 'Cinzel', fontSize: size, fontWeight: weight, color: color, letterSpacing: 3);
