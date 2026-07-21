@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../config/theme.dart';
 import '../models/connection_model.dart';
 import '../services/api_service.dart';
@@ -21,7 +20,6 @@ class HistoryScreenState extends State<HistoryScreen> {
   bool _isLoading = true;
   String? _error;
   int _maxConnections = 1;
-  final _nameCtrl = TextEditingController();
   final _codeCtrl = TextEditingController();
   bool _isAdding = false;
   bool _isFreeUser = true;
@@ -53,7 +51,6 @@ class HistoryScreenState extends State<HistoryScreen> {
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
     _codeCtrl.dispose();
     super.dispose();
   }
@@ -96,24 +93,27 @@ class HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _connectPeople() async {
-    final name = _nameCtrl.text.trim();
+    // Code only — the name comes from the database. The person is identified by
+    // their 6-letter personal code; we never ask the user to type a name.
     final code = _codeCtrl.text.trim().toUpperCase();
-    if (name.isEmpty || code.isEmpty) {
-      _showMsg('Please enter both name and code');
+    if (code.isEmpty) {
+      _showMsg('Please enter their code');
       return;
     }
     setState(() => _isAdding = true);
     try {
       final result = await ApiService().connect(code);
-      _nameCtrl.clear();
       _codeCtrl.clear();
       if (mounted) {
         setState(() => _isAdding = false);
-        final status = result['data']?['connection_status'] ?? 'pending';
+        final data = result['data'] ?? {};
+        final status = data['connection_status'] ?? 'pending';
+        // Name resolved from the database for the entered code.
+        final theirName = data['connected_to']?['name'] ?? 'them';
         if (status == 'accepted') {
-          _showMsg('Connected with $name!\nYou can now see each other\'s check-ins.');
+          _showMsg('Connected with $theirName!\nYou can now see each other\'s check-ins.');
         } else {
-          _showMsg('Connection request sent!\nWaiting for $name to add your code.');
+          _showMsg('Request sent to $theirName.\nYou\'ll connect once they add your code too.');
         }
         _loadData();
       }
@@ -292,7 +292,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                       children: [
                         Icon(Icons.people_rounded, color: _accent, size: 28),
                         const SizedBox(width: 12),
-                        Expanded(child: Text('PEOPLE', style: GoogleFonts.dosis(fontSize: 24, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2))),
+                        Expanded(child: Text('CONNECT TO PEOPLE', style: LKTheme.h1(size: 22, color: LKTheme.gold, letterSpacing: 1.5))),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
@@ -403,8 +403,8 @@ class HistoryScreenState extends State<HistoryScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        gradient: isInactive ? null : const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF111827), Color(0xFF0C1120)]),
-        color: isInactive ? LKTheme.bgCard.withValues(alpha: 0.4) : null,
+        gradient: isInactive ? null : LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [LKTheme.surfaceAlt, LKTheme.surface]),
+        color: isInactive ? LKTheme.surface.withValues(alpha: 0.4) : null,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isOverdue ? LKTheme.red.withValues(alpha: 0.4) : LKTheme.border.withValues(alpha: 0.5),
@@ -439,11 +439,11 @@ class HistoryScreenState extends State<HistoryScreen> {
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(conn.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700,
-                      color: isInactive ? LKTheme.textMuted : LKTheme.textPrimary)),
+                    Text(conn.name, style: LKTheme.h2(size: 17,
+                      color: isInactive ? LKTheme.textMuted : LKTheme.contrastText)),
                     const SizedBox(height: 2),
-                    Text(conn.userCode, style: TextStyle(fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.w600,
-                      color: isInactive ? LKTheme.textMuted.withValues(alpha: 0.6) : _accent.withValues(alpha: 0.6))),
+                    Text(conn.userCode, style: TextStyle(fontFamily: 'Dosis', fontSize: 13, letterSpacing: 3, fontWeight: FontWeight.w700,
+                      color: isInactive ? LKTheme.textMuted.withValues(alpha: 0.6) : _accent.withValues(alpha: 0.7))),
                   ],
                 )),
                 // Status badge
@@ -489,7 +489,12 @@ class HistoryScreenState extends State<HistoryScreen> {
 
             if (isPending) ...[
               const SizedBox(height: 8),
-              Text('Waiting for the other side to add your code...', style: TextStyle(fontSize: 13, color: LKTheme.textMuted.withValues(alpha: 0.7), fontStyle: FontStyle.italic)),
+              Row(children: [
+                Icon(Icons.hourglass_top_rounded, size: 15, color: LKTheme.red.withValues(alpha: 0.8)),
+                const SizedBox(width: 6),
+                Expanded(child: Text('Added — waiting for them to add your code too.',
+                  style: TextStyle(fontSize: 13, color: LKTheme.contrastTextSoft, fontStyle: FontStyle.italic))),
+              ]),
             ],
 
             const SizedBox(height: 12),
@@ -536,45 +541,45 @@ class HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  InputDecoration _fieldDeco(String hint, IconData icon) {
-    return InputDecoration(hintText: hint, counterText: '',
-      prefixIcon: Icon(icon, color: _accent),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: LKTheme.border)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _accent, width: 2)),
-      filled: true, fillColor: LKTheme.bgCardLight);
-  }
-
   Widget _buildAddSection() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: LKTheme.glassCard(borderColor: _accent.withValues(alpha: 0.1)),
+      decoration: BoxDecoration(
+        color: LKTheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _accent.withValues(alpha: 0.15), width: 0.8),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 16, offset: const Offset(0, 6))],
+      ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(
           children: [
             Icon(Icons.person_add_rounded, size: 20, color: _accent.withValues(alpha: 0.7)),
             const SizedBox(width: 8),
-            Text("Add a connection", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: LKTheme.textPrimary)),
+            Text("Add a connection", style: LKTheme.h2(size: 17, color: LKTheme.contrastText)),
           ],
         ),
-        const SizedBox(height: 4),
-        const Text("Enter the other person's details:", style: TextStyle(fontSize: 13, color: LKTheme.textMuted)),
+        const SizedBox(height: 6),
+        // Code only — the name is pulled from the database automatically.
+        Text("Enter their 6-letter code. We'll get their name from the system for you.",
+          style: LKTheme.txt(color: LKTheme.contrastTextSoft, height: 1.35)),
         const SizedBox(height: 14),
-        TextField(controller: _nameCtrl, maxLength: 50,
-          style: TextStyle(fontSize: 16, color: LKTheme.textPrimary),
-          decoration: _fieldDeco('Their name (e.g. My Son)', Icons.person_rounded)),
-        const SizedBox(height: 10),
-        TextField(controller: _codeCtrl, maxLength: 8, textCapitalization: TextCapitalization.characters,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: _accent, letterSpacing: 4),
-          decoration: _fieldDeco('Their code', Icons.link_rounded)),
+        TextField(controller: _codeCtrl, maxLength: 6, textCapitalization: TextCapitalization.characters,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontFamily: 'Dosis', fontSize: 26, fontWeight: FontWeight.w700, color: _accent, letterSpacing: 8),
+          decoration: InputDecoration(hintText: 'CODE', counterText: '',
+            hintStyle: TextStyle(fontFamily: 'Dosis', fontSize: 26, fontWeight: FontWeight.w700, color: LKTheme.contrastTextSoft, letterSpacing: 8),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: LKTheme.border)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _accent, width: 2)),
+            filled: true, fillColor: LKTheme.surfaceAlt)),
         const SizedBox(height: 14),
-        SizedBox(width: double.infinity, height: 50, child: Container(
+        SizedBox(width: double.infinity, height: 52, child: Container(
           decoration: BoxDecoration(gradient: _accentGradient, borderRadius: BorderRadius.circular(14)),
           child: ElevatedButton.icon(
             onPressed: _isAdding ? null : _connectPeople,
             icon: _isAdding ? null : Icon(Icons.add_rounded, size: 22, color: _accentDark),
             label: _isAdding
               ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: _accentDark, strokeWidth: 2))
-              : Text('CONNECT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _accentDark)),
+              : Text('CONNECT', style: LKTheme.h1(size: 18, color: _accentDark)),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
           ),
         )),
