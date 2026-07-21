@@ -106,6 +106,13 @@ class LKTheme {
 
   static bool get isDarkBg => HSLColor.fromColor(navy).lightness < 0.55;
 
+  /// Text/icon colour that contrasts with the accent — for labels sitting on a
+  /// gold/accent-filled button. Flips to a light tone when the admin accent is
+  /// dark (e.g. a deep blue) and a dark tone when it's light (e.g. gold), so
+  /// button labels never go muddy whatever accent the admin picks.
+  static Color get onAccent =>
+      HSLColor.fromColor(gold).lightness < 0.5 ? const Color(0xFFF7F2E8) : const Color(0xFF5A3D10);
+
   /// A card/panel surface one step of contrast from the background.
   static Color get surface => _shift(navy, isDarkBg ? 0.06 : -0.055);
 

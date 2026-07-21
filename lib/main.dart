@@ -89,7 +89,7 @@ class LifeKnobApp extends StatelessWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: LKTheme.gold,
-            foregroundColor: const Color(0xFF5A3D10),
+            foregroundColor: LKTheme.onAccent,
             textStyle: const TextStyle(fontFamily: 'OpenSans', fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             minimumSize: const Size(double.infinity, 52),
@@ -97,8 +97,10 @@ class LifeKnobApp extends StatelessWidget {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: LKTheme.bgCardLight,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: LKTheme.border)),
+          // theme-aware: light fill on a light palette, dark on a dark one, so
+          // input text (textPrimary) stays readable in either
+          fillColor: LKTheme.surfaceAlt,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: LKTheme.isDarkBg ? LKTheme.border : LKTheme.contrastText.withValues(alpha: 0.12))),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: LKTheme.gold.withValues(alpha: 0.15))),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: LKTheme.gold, width: 1.5)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
