@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
@@ -292,7 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Row(children: [
                 Icon(Icons.tune_rounded, color: _accent, size: 28),
                 const SizedBox(width: 12),
-                Expanded(child: Text('SETUP', style: GoogleFonts.dosis(fontSize: 24, fontWeight: FontWeight.w700, color: LKTheme.gold, letterSpacing: 2))),
+                Expanded(child: Text('SETUP', style: LKTheme.h1(size: 24, color: LKTheme.gold, letterSpacing: 2))),
               ]),
             ),
 
@@ -339,7 +338,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: LKTheme.bgCardLight.withValues(alpha: 0.5),
+                            color: LKTheme.surfaceAlt.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(children: [
@@ -493,7 +492,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: LKTheme.border)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: iconColor, width: 2)),
         filled: true,
-        fillColor: LKTheme.bgCardLight,
+        fillColor: LKTheme.surfaceAlt,
       ),
     );
   }

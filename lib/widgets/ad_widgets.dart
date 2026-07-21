@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/theme.dart';
 
@@ -42,7 +41,7 @@ class AdBannerPair extends StatelessWidget {
   Widget _placeholder() {
     return CustomPaint(
       painter: _AdPlaceholderPainter(lineColor: red.withValues(alpha: 0.25)),
-      child: Center(child: Text('AD', style: GoogleFonts.barlowCondensed(fontSize: 16, color: red.withValues(alpha: 0.35)))),
+      child: Center(child: Text('AD', style: LKTheme.h1(size: 16, color: red.withValues(alpha: 0.35)))),
     );
   }
 
@@ -57,7 +56,7 @@ class AdBannerPair extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 3, right: 2),
             child: GestureDetector(
               onTap: onRemoveAds,
-              child: Text('Remove ads', style: GoogleFonts.robotoSlab(fontSize: 11, color: gold, fontStyle: FontStyle.italic)),
+              child: Text('Remove ads', style: LKTheme.txt(color: gold).copyWith(fontSize: 11, fontStyle: FontStyle.italic)),
             ),
           ),
         _buildBanner(hasImage: hasImage),
@@ -164,14 +163,14 @@ class _BumperAdOverlayState extends State<BumperAdOverlay> with SingleTickerProv
                 ),
                 const SizedBox(height: 24),
                 if (_remaining > 0)
-                  Text('$_remaining', style: GoogleFonts.barlowCondensed(fontSize: 28, fontWeight: FontWeight.w600, color: gold))
+                  Text('$_remaining', style: LKTheme.h1(size: 28, color: gold))
                 else
                   GestureDetector(
                     onTap: widget.onDismiss,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                       decoration: BoxDecoration(color: gold, borderRadius: BorderRadius.circular(12)),
-                      child: Text('CONTINUE', style: GoogleFonts.barlowCondensed(fontSize: 18, fontWeight: FontWeight.w700, color: navy)),
+                      child: Text('CONTINUE', style: LKTheme.h1(size: 18, color: LKTheme.goldShadow)),
                     ),
                   ),
               ],
@@ -185,7 +184,7 @@ class _BumperAdOverlayState extends State<BumperAdOverlay> with SingleTickerProv
   Widget _bumperPlaceholder() {
     return CustomPaint(
       painter: _AdPlaceholderPainter(lineColor: red.withValues(alpha: 0.2)),
-      child: Center(child: Text('AD', style: GoogleFonts.barlowCondensed(fontSize: 32, color: red.withValues(alpha: 0.3)))),
+      child: Center(child: Text('AD', style: LKTheme.h1(size: 32, color: red.withValues(alpha: 0.3)))),
     );
   }
 }

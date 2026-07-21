@@ -161,11 +161,14 @@ class LKTheme {
     colors: [Color(0xFF0C1120), Color(0xFF080B14)],
   );
 
+  // Theme-aware card: fill derives from the admin background so panels stay a
+  // light off-cream in a light theme (dark navy in a dark theme) and any
+  // contrastText sitting on them stays readable.
   static BoxDecoration get premiumCard => BoxDecoration(
-    gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF111827), Color(0xFF0C1120)]),
+    gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [surfaceAlt, surface]),
     borderRadius: BorderRadius.circular(14),
-    border: Border.all(color: const Color(0xFF1A1A28), width: 0.5),
-    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
+    border: Border.all(color: isDarkBg ? const Color(0xFF1A1A28) : contrastText.withValues(alpha: 0.08), width: isDarkBg ? 0.5 : 1),
+    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDarkBg ? 0.3 : 0.10), blurRadius: 12, offset: const Offset(0, 4))],
   );
 
   // Theme-aware: derives from the admin background so popups stay readable in a
